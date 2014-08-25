@@ -139,15 +139,19 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       break;
     }
     case GLFW_KEY_S: {
+      /* @todo = cleanup 
       if (0 != feat_ptr->cpu_analyzer.saveDescriptors()) {
         RX_ERROR("Cannot save the descriptors.");
       }
+      */
       break;
     }
     case GLFW_KEY_L: {
+      /* @todo = cleanup 
       if (0 != feat_ptr->cpu_analyzer.loadDescriptors()) {
         RX_ERROR("Cannot load the descriptors.");
       }
+      */
       break;
     }
     case GLFW_KEY_T: {

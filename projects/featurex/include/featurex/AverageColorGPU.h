@@ -28,6 +28,8 @@
 #define ROXLU_USE_FONT
 #include <tinylib.h>
 
+#include <gfx/AsyncDownload.h>
+
 static const char* AVG_COL_VS = ""
   "#version 330\n"
   ""
@@ -71,26 +73,29 @@ static const char* AVG_COL_FS = ""
   "}"
   "";
 
-class AverageColor {
+class AverageColorGPU {
  public:
-  AverageColor();
-  ~AverageColor();
+  AverageColorGPU();
+  ~AverageColorGPU();
 
-  int init();
+  int init(GLuint inputTex);
   int reinit();
   void calculate();
-
+  int shutdown();
 
  public:
   GLuint frag;
   GLuint vert;
   GLuint prog;
   GLuint vao;
-  GLuint input_texid;
+  GLuint input_tex;
 
   GLuint fbo;
-  GLuint output_texid;
+  GLuint output_tex;
   unsigned char* colors;
+  GLint viewport[4];                     /* we read the viewport so we can reset it after calculating the average colors. */
+
+  gfx::AsyncDownload async_download;     /* used to transfer the calculated average colors back to the cpu. */ 
 };
 
 #endif

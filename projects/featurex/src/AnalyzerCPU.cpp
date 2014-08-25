@@ -390,7 +390,6 @@ namespace fex {
         RX_VERBOSE("And free'd again.");
       }
       todo.clear();
-
     }
 
     ana->is_running = false;

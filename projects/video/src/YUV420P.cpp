@@ -104,6 +104,8 @@ namespace vid {
     glBindTexture(GL_TEXTURE_2D, tex_v);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, vs);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, hw, hh, GL_RED, GL_UNSIGNED_BYTE, v);
+
+    return 0;
   }
 
   void YUV420P::draw() {

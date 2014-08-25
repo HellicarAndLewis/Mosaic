@@ -1,26 +1,40 @@
 #include <featurex/Config.h>
-#include <featurex/AverageColor.h>
+#include <featurex/AverageColorGPU.h>
 
-AverageColor::AverageColor() 
+AverageColorGPU::AverageColorGPU() 
   :frag(0)
   ,vert(0)
   ,prog(0)
   ,vao(0)
-  ,input_texid(0)
+  ,input_tex(0)
   ,fbo(0)
-  ,output_texid(0)
+  ,output_tex(0)
 {
+  viewport[0] = viewport[1] = viewport[2] = viewport[3] = 0;
 }
 
-AverageColor::~AverageColor() {
+AverageColorGPU::~AverageColorGPU() {
+  viewport[0] = viewport[1] = viewport[2] = viewport[3] = 0;
 }
 
-int AverageColor::init() {
+int AverageColorGPU::init(GLuint inputTex) {
 
+  /* validate state */
   if (0 != frag) {
     RX_ERROR("Already create the average color shader.");
     return -1;
   }
+
+  if (false == fex::config.validateTileSettings()) {
+    return -2;
+  }
+
+  if (0 == inputTex) {
+    RX_ERROR("Invalid input texture id");
+    return -3;
+  }
+
+  input_tex = inputTex;
 
   /* create texture shader. */
   vert = rx_create_shader(GL_VERTEX_SHADER, AVG_COL_VS);
@@ -29,7 +43,7 @@ int AverageColor::init() {
 
   /* set the input texture ID */
   glUseProgram(prog);
-  glUniform1i(glGetUniformLocation(prog, "input_texid"), 0);
+  glUniform1i(glGetUniformLocation(prog, "u_tex"), 0);
   glUniform1i(glGetUniformLocation(prog, "u_cols"), fex::config.cols);
   glUniform1i(glGetUniformLocation(prog, "u_rows"), fex::config.rows);
 
@@ -38,40 +52,46 @@ int AverageColor::init() {
 
   /* create the FBO + texture */
   if (0 != reinit()) {
-    return -2;
+    return -4;
   }
+
+  /* initialize our helper that retrieves the data from the gpu. */
+  /*
+  if (0 != async_download.init(fex::config.cols, fex::config.rows, GL_RGBA8)) {
+    return -5;
+  }
+  */
+
+  glGetIntegerv(GL_VIEWPORT, viewport);
 
   return 0;
 }
 
-int AverageColor::reinit() {
+int AverageColorGPU::reinit() {
 
-  /* when already created, delete first */
-  if (0 != fbo) {
-    glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &output_texid);
-    fbo = 0;
-    output_texid = 0;
-  }
+  /* shutdown will destroy any initialized members/GL objects. */
+  shutdown();
 
   /* create the output buffer that will contains the average colors */
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
+  RX_WARNING("We should use a texture with a multiple of 32 bits else padding occurs!");
+
   /* create the texture that holds the 'general color' */
-  glGenTextures(1, &output_texid);
-  glBindTexture(GL_TEXTURE_2D, output_texid);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, fex::config.cols, fex::config.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glGenTextures(1, &output_tex);
+  glBindTexture(GL_TEXTURE_2D, output_tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fex::config.cols, fex::config.rows, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, output_texid, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, output_tex, 0);
   
   /* make sure the fbo is valid. */
   if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
-    RX_ERROR("Framebuffer not complete in AverageColor");
+    RX_ERROR("Framebuffer not complete in AverageColorGPU");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return -2;
   }
@@ -88,7 +108,22 @@ int AverageColor::reinit() {
   return 0;
 }
 
-void AverageColor::calculate() {
+int AverageColorGPU::shutdown() {
+
+  if (0 != fbo) {
+    glDeleteFramebuffers(1, &fbo);
+    glDeleteTextures(1, &output_tex);
+    fbo = 0;
+    output_tex = 0;
+  }
+
+  return 0;
+}
+
+void AverageColorGPU::calculate() {
+  if (0 == viewport[2] || 0 == viewport[3]) {
+    RX_ERROR("Invalid viewport values");
+  }
 
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -97,9 +132,15 @@ void AverageColor::calculate() {
   glBindVertexArray(vao);
   glUseProgram(prog);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, input_texid);
+  glBindTexture(GL_TEXTURE_2D, input_tex);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  glViewport(0, 0, 1280, 720);
+  /*
+  async_download.download();
+  */
+
+  glViewport(0, 0, viewport[2], viewport[3]);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  
 }

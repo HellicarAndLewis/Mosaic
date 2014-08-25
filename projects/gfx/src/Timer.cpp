@@ -170,7 +170,7 @@ namespace gfx {
       y += 25;
 
       /* write max value */
-      sprintf(buf, "%03.04f ms.", max_tq_val);
+      sprintf(buf, "%03.06f ms.", max_tq_val);
       font.color(1,1,1,1);
       font.write(5, y - 22, buf);
 

@@ -35,6 +35,7 @@ namespace gfx {
     GLuint addTexture(GLenum format, int w, int h, GLenum internalFormat, GLenum type, GLenum attachment);
     int isComplete();
     void setDrawBuffer(GLenum attach);
+    void blit(GLenum attachment, int x, int y, int w, int h);  /* use the given attachment as as read buffer and blit it into the current draw framebuffer, so make sure you've set your draw framebuffer. */
 
   public:
     GLuint fbo;

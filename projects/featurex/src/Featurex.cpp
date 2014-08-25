@@ -12,11 +12,12 @@ namespace fex {
   /* ---------------------------------------------------------------------------------- */
 
   Featurex::Featurex() 
-    :has_new_analyzed_image(false)
+  //    :has_new_analyzed_image(false)
   {
+#if 0
     /* create texture for the input image. */
     input_image.createTexture();
-
+#endif
 
   }
 
@@ -24,7 +25,7 @@ namespace fex {
   }
 
   int Featurex::init() {
-
+#if 0
     if (0 != avg_color.init()) {
       return -1;
     }
@@ -44,20 +45,22 @@ namespace fex {
 
     cpu_analyzer.on_analyzed = on_analyzed;
     cpu_analyzer.user = this;
-
+#endif
     return 0;
   }
 
   int Featurex::analyzeImageFile(std::string filepath) {
-    return cpu_analyzer.analyze(filepath);
+    return 0;
+    //return cpu_analyzer.analyze(filepath);
   }
 
   int Featurex::reinit() {
-    return avg_color.reinit();
+    return 0;
+    //    return avg_color.reinit();
   }
 
   void Featurex::update() {
-
+#if 0
     /* Update the analyzed texture data */
     if (has_new_analyzed_image) {
       if (0 != analyzed_image.updateTexture()) {
@@ -65,10 +68,11 @@ namespace fex {
       }
       has_new_analyzed_image = false;
     }
+#endif
   }
 
   void Featurex::draw() {
-
+#if 0
     painter_bg.clear();
     painter_bg.nofill();
     painter_bg.texture(input_image.texid, 10, 10, input_image.width, input_image.height);
@@ -123,10 +127,11 @@ namespace fex {
 #endif
 
     glViewport(0, 0, 1280, 720);
+#endif
   }
 
   int Featurex::loadInputImage(std::string filepath) {
-
+#if 0
     /* Load the image */
     int r = input_image.load(filepath);
     if (r != 0) {
@@ -134,12 +139,12 @@ namespace fex {
     }
 
     input_image.updateTexture();
-  
+#endif
     return 0;
   }
 
   static void on_analyzed(Descriptor& desc, void* user) {
-
+#if 0
     /* get our featurex instance */
     Featurex* feat = static_cast<Featurex*>(user);
     if (NULL == feat) {
@@ -155,6 +160,7 @@ namespace fex {
 
     feat->has_new_analyzed_image = true;
     feat->analyzed_desc = desc;
+#endif
   }
 
   

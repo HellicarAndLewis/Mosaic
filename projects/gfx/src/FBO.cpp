@@ -14,6 +14,9 @@ namespace gfx {
 
   int FBO::init(int w, int h) {
 
+    width = w;
+    height = h;
+
     /* validate */
     if (0 == w) { 
       RX_ERROR("Invalid width");
@@ -101,6 +104,19 @@ namespace gfx {
 
     GLenum drawbufs[] = { attach };
     glDrawBuffers(1, drawbufs);
+  }
+
+  void FBO::blit(GLenum attachment, int x, int y, int w, int h) {
+    /* make sure we've been setup correctly */
+    if (w == 0) { RX_ERROR("Cannot blit when the given width is 0"); return;  }
+    else if (h == 0) { RX_ERROR("Cannot blit when the given height is 0");  return;  }
+    else if (0 == fbo) { RX_ERROR("Cannot blit, fbo is 0"); return; }
+    else if (width == 0) { RX_ERROR("Cannot blit FBO.width is 0"); return; }
+    else if (height == 0) { RX_ERROR("Cannot blit FBO.height is 0"); return;  }
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glReadBuffer(attachment);
+    glBlitFramebuffer(0, 0, width, height, x, y, w, h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
   }
 
 } /* namespace gfx */

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(USE_OPENGL OFF)
+include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
@@ -59,10 +61,11 @@ endif()
 
 set(fex_lib_sources
   ${fex_sd}/Featurex.cpp
-  ${fex_sd}/AverageColor.cpp
+  ${fex_sd}/AverageColorGPU.cpp
   ${fex_sd}/Config.cpp
   ${fex_sd}/Descriptor.cpp
   ${fex_sd}/AnalyzerCPU.cpp
+  ${fex_sd}/AnalyzerGPU.cpp
 )
 
 set(gfx_lib_sources
@@ -71,6 +74,7 @@ set(gfx_lib_sources
   ${gfx_sd}/FBO.cpp
   ${gfx_sd}/BlurFBO.cpp
   ${gfx_sd}/Timer.cpp
+  ${gfx_sd}/AsyncDownload.cpp
 )
 
 set(vid_lib_sources
@@ -82,8 +86,8 @@ set(vid_lib_sources
 
 macro(create_test name)
   add_executable(test_${name} ${bd}/projects/tests/test_${name}.cpp ${extern_source_dir}/glad.c)
-  target_link_libraries(test_${name} ${app_libs} gfx fex vid)
-  add_dependencies(test_${name} gfx fex vid)
+  target_link_libraries(test_${name} ${app_libs} gfx fex vid videocapture)
+  add_dependencies(test_${name} gfx fex vid videocapture)
   install(TARGETS test_${name} DESTINATION bin)
 endmacro()
 
@@ -99,11 +103,13 @@ install(TARGETS fex ARCHIVE DESTINATION lib)
 add_library(vid ${vid_lib_sources})
 install(TARGETS vid ARCHIVE DESTINATION lib)
 
+# The tests used during development
 create_test(fex_load_image)
 create_test(libav_rtmp)
 create_test(video_stream_player)
 create_test(fex)
 create_test(offline_analyzer)
+create_test(online_analyzer)
 
 
 

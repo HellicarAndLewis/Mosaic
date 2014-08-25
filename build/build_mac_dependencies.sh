@@ -144,6 +144,13 @@ if [ ! -d ${d}/../extern/tinylib ] ; then
     git clone git@github.com:roxlu/tinylib.git .
 fi
 
+# Downoad video capture library
+if [ ! -d ${d}/../extern/video_capture ] ; then
+    mkdir ${d}/../extern/video_capture
+    cd ${d}/../extern/video_capture
+    git clone git@github.com:roxlu/video_capture.git .
+fi
+
 # Download ImageMagick
 if [ ! -d ${sd}/imagemagick ] ; then
     cd ${sd}
@@ -317,7 +324,7 @@ if [ ! -f ${bd}/bin/yasm ] ; then
 fi
 
 # Compile libav 
-if [ ! -f ${bd}/lib/libav.a ] ; then
+if [ ! -f ${bd}/lib/libavcodec.a ] ; then
     cd ${sd}/libav
     ./configure --prefix=${bd} --enable-gpl 
     make
