@@ -309,10 +309,24 @@ fi
 # Compile glfw
 if [ ! -f ${bd}/lib/libglfw3.a ] ; then
     cd ${sd}/glfw
-    mkdir build
+    if [ -d build ] ; then 
+        rm -r build
+    fi
+    if [ ! -d build ] ; then
+        mkdir build
+    fi
+
+    cfcopy=${CFLAGS}
+    ldcopy=${LDFLAGS}
+    export CFLAGS=""
+    export LDFLAGS=""
+
     cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${bd} ../
+    cmake -DCMAKE_INSTALL_PREFIX=${bd} ..
     cmake --build . --target install
+
+    export CFLAGS=${cfcopy}
+    export LDFLAGS=${ldcopy}
 fi
 
 # Compile yasm
