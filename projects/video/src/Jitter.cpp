@@ -7,7 +7,9 @@ namespace vid {
 
   Jitter::Jitter()
     :first_pts(0)
-    ,buffer_size_ns(1000llu * 1000llu * 1000llu * 3)  /* we need at least 3 seconds before we start player. */
+     /* @todo - increase the jitter buffer time, we're just testing now ...  */
+     //,buffer_size_ns(1000llu * 1000llu * 1000llu * 3)  /* we need at least 3 seconds before we start player. */
+    ,buffer_size_ns(1000llu * 1000llu * 500llu)  /* we need at least 3 seconds before we start player. */
     ,curr_buffer_ns(0)
     ,time_base(0)
     ,curr_pts(0)
@@ -79,6 +81,8 @@ namespace vid {
     frames.push_back(frame);
   }
 
+  /* @todo - check if the jitter buffer keeps filling up when the timestamps of the incoming frames are incorrect and the number of frames keeps groing and groing ... */
+
   int Jitter::update() {
 
     if (NULL == on_frame) {
@@ -108,11 +112,12 @@ namespace vid {
 
     /* find the frame that we need to show. */
     std::deque<AVFrame*>::iterator it = frames.begin();
+    int64_t pts;
     while (it != frames.end()) {
 
       /* get the current frame */
       AVFrame* f = *it;
-      int64_t pts = ((f->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu) - first_pts;
+      pts = ((f->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu) - first_pts;
       if (pts > curr_pts) {
         break;
       }
@@ -126,9 +131,19 @@ namespace vid {
     }
 
     if (0 == frames.size() && on_event && state == JITTER_STATE_PLAYING) {
+      RX_WARNING("No frames in the buffer anymore after playback started... do we need to stop? curr_pts: %llu, pts: %llu", curr_pts, pts);
+      RX_WARNING("We actually need to have a check if EOF has been found; if so we can assume we're ready, else the buffer is just empty!");
+      RX_WARNING("Current buffer ns: %llu, buffer_size_ns: %llu", curr_buffer_ns, buffer_size_ns);
+
+      /* this will make sure we will buffer more frames. */
+      first_pts = pts;
+
+#if 0
       on_event(VID_EVENT_STOP_PLAYBACK, user);
       state = JITTER_STATE_READY;
+#endif
     }
+
 
     return 0;
   }

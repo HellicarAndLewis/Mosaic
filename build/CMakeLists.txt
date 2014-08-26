@@ -69,6 +69,7 @@ set(fex_lib_sources
   ${fex_sd}/Comparator.cpp
   ${fex_sd}/AnalyzerCPU.cpp
   ${fex_sd}/AnalyzerGPU.cpp
+  ${fex_sd}/TilesPool.cpp
 )
 
 # OpenGL wrapper/utilss.
@@ -123,7 +124,7 @@ install(TARGETS mosaic ARCHIVE DESTINATION lib)
 create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
-#create_test(video_stream_player)
+create_test(video_stream_player)
 #create_test(offline_analyzer)
 #create_test(online_analyzer)
 

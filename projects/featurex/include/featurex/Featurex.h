@@ -31,6 +31,8 @@
 #include <string>
 #include <featurex/AnalyzerCPU.h>
 #include <featurex/AnalyzerGPU.h>
+#include <featurex/Comparator.h>
+#include <featurex/TilesPool.h>
 
 namespace fex {
 
@@ -46,10 +48,13 @@ namespace fex {
 
     int analyzeCPU(std::string filepath);
     int analyzeGPU();
+    void match();                             /* when called, we use the current set of cpu/gpu descriptors to find the best matches. make sure to only call this when you actually updated the input. */
     
   public:
     AnalyzerCPU analyzer_cpu;
     AnalyzerGPU analyzer_gpu;
+    Comparator comp;
+    TilesPool tiles;
   };
 
 } /* namespace fex */

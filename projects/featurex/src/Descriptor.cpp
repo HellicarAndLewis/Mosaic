@@ -7,10 +7,11 @@
 
 namespace fex {
 
-
   /* ---------------------------------------------------------------------------------- */
 
-  Descriptor::Descriptor() {
+  Descriptor::Descriptor() 
+    :id(0)
+  {
     reset();
   }
 
@@ -37,7 +38,7 @@ namespace fex {
     
     for (size_t i = 0; i < descriptors.size(); ++i) {
       Descriptor& desc = descriptors[i];
-      ofs << desc.filename 
+      ofs << desc.getFilename()
           << " " << desc.average_color[0]
           << " " << desc.average_color[1]
           << " " << desc.average_color[2]
@@ -60,14 +61,18 @@ namespace fex {
 
     Descriptor desc;
     std::string line;
+    std::string fname;
 
     while(std::getline(ifs, line)) {
-      printf(">> %s\n", line.c_str());
+
       std::stringstream ss(line);
-      ss >> desc.filename 
+
+      ss >> fname 
          >> desc.average_color[0]
          >> desc.average_color[1]
          >> desc.average_color[2];
+
+      desc.setFilename(fname);
 
       descriptors.push_back(desc);
     }

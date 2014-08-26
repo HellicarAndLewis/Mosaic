@@ -323,7 +323,7 @@ namespace fex {
     b /= elements;
 
     Descriptor desc;
-    desc.filename = filename;
+    desc.setFilename(filename);
     desc.average_color[0] = r;
     desc.average_color[1] = g;
     desc.average_color[2] = b;

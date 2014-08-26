@@ -118,6 +118,7 @@ namespace vid {
   
   int Stream::update() {
 
+    static char serr[1024] = { 0 };
     AVFrame* frame;
     AVPacket pkt;
     int len;
@@ -152,7 +153,13 @@ namespace vid {
       return 0;
     }
     else if (0 != r) {
-      RX_ERROR("Error: something went wrong with reading a packet.");
+      /* try to get a descriptive error. */
+      r = av_strerror(r, serr, sizeof(serr));
+      if (0 != r) {
+        RX_ERROR("Cannot get a string representation of the error :$. %d", r);
+      }
+
+      RX_ERROR("Error: something went wrong with reading a packet: %d, %s", r, serr);
       av_free_packet(&pkt);
       return -7;
     }
@@ -174,7 +181,7 @@ namespace vid {
     /* decode the video frame. */
     len = avcodec_decode_video2(codec_ctx, frame, &got_picture, &pkt);
     if (len < 0) {
-      RX_ERROR("Error: cannot decode the packet.");
+      RX_ERROR("Error: cannot decode the packet: %d", len);
       av_free_packet(&pkt);
       return -8;
     }

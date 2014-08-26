@@ -6,7 +6,10 @@ if [ ! -d build.release ] ; then
     mkdir build.release
 fi
 
-
+# Make sure the tinylib.h files are in sync.
+if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
+    cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
+fi
 
 cd build.release
 cmake -DCMAKE_BUILD_TYPE=Release ../ 
@@ -35,6 +38,7 @@ if [ "$(uname)" == "Darwin" ] ; then
 else
     cd ./../../install/linux-gcc-x86_64/bin/
 fi
+
 
 #./test_fex_load_image
 #./test_libav_rtmp

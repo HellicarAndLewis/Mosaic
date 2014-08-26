@@ -8,22 +8,28 @@ namespace fex {
   Config config;
 
   Config::Config() 
-    :tile_size(0)
+    :input_tile_size(0)
     ,input_image_width(0)
     ,input_image_height(0)
     ,cols(0)
     ,rows(0)
     ,show_timer(0)
+    ,tile_width(0)
+    ,tile_height(0)
+    ,tile_pool_size(0)
   {
   }
 
   Config::~Config() {
-    tile_size = 0;
+    input_tile_size = 0;
     input_image_width = 0;
     input_image_height = 0;
     cols = 0;
     rows = 0;
-    show_timer= 0;
+    show_timer = 0;
+    tile_width = 0;
+    tile_height = 0;
+    tile_pool_size = 0;
   }
 
   bool Config::validateTileSettings() {
@@ -48,8 +54,37 @@ namespace fex {
       return false;
     }
 
-    if (0 == tile_size) {
-      RX_ERROR("fex::config.tile_size == 0. invalid");
+    if (0 == input_tile_size) {
+      RX_ERROR("fex::config.input_tile_size == 0. invalid");
+      return false;
+    }
+
+    return true;
+  }
+
+  bool Config::validateTilePoolSettings() {
+
+    if (0 == tile_width) {
+      RX_ERROR("fex::config.tile_width = 0. invalid");
+      return false;
+    }
+
+    if (0 == tile_height) {
+      RX_ERROR("fex::config.tile_height = 0. invalid");
+      return false;
+    }
+
+    if (0 == tile_pool_size) {
+      RX_ERROR("fex::config.tile_pool_size = 0. invalid");
+      return false;
+    }
+
+    uint64_t megs = 1 + ((uint64_t)tile_width * (uint64_t)tile_height * (uint64_t)tile_pool_size * 4llu) / (1024llu * 1024llu);
+    RX_VERBOSE("The tile pool size needs %llu megabytes of ram", megs);
+
+    /* just a safety check so we're not doing stuff w/o testing. */
+    if (4000 < megs) {
+      RX_ERROR("It seems that you want to allocate more then 4000 megabytes; this is probably doable; but didn't test performance with this amount.");
       return false;
     }
 
@@ -74,6 +109,11 @@ namespace fex {
     }
 
     return true;
+  }
+
+  uint64_t Config::getTilePoolSizeInBytes() {
+    uint64_t nbytes = ((uint64_t)tile_width * (uint64_t)tile_height * (uint64_t)tile_pool_size * 4llu);
+    return nbytes;
   }
 
 } /* namespace fex */

@@ -99,7 +99,7 @@ int AverageColorGPU::reinit() {
   glUniform1i(glGetUniformLocation(prog, "u_rows"), fex::config.rows);
   glUniform1i(glGetUniformLocation(prog, "u_image_w"), fex::config.input_image_width);
   glUniform1i(glGetUniformLocation(prog, "u_image_h"), fex::config.input_image_height);
-  glUniform1i(glGetUniformLocation(prog, "u_tile_size"), fex::config.tile_size);
+  glUniform1i(glGetUniformLocation(prog, "u_tile_size"), fex::config.input_tile_size);
   
   return 0;
 }

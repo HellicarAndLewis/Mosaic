@@ -33,6 +33,7 @@ namespace mos {
     /* new input, update gpu analyzer. */
     if (video_input.needsUpdate()) {
       featurex.analyzeGPU();
+      featurex.match();
     }
   }
 

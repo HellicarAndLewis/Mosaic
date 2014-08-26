@@ -22,7 +22,12 @@
 #include <string>
 #include <vector>
 
+#define ROXLU_USE_LOG
+#include <tinylib.h>
+
 namespace fex { 
+
+  /* ---------------------------------------------------------------------------------- */
 
   class Descriptor;
 
@@ -31,17 +36,42 @@ namespace fex {
 
   /* ---------------------------------------------------------------------------------- */
 
+  /* @todo - 32bit align the descriptor */
   class Descriptor {
 
   public:
     Descriptor();
     ~Descriptor();
     void reset();
+    void setFilename(std::string filename);
+    std::string& getFilename();
 
   public:
-    std::string filename;
+    uint32_t id;                                     /* unique ID based on the filename */
     uint32_t average_color[3];
+
+  private:
+    std::string filename;
   };
+
+  /* ---------------------------------------------------------------------------------- */
+
+  inline void Descriptor::setFilename(std::string fname) {
+    if (0 == fname.size()) {
+       RX_ERROR("Invalid filename; empty");
+       return;
+    }
+
+    id = rx_string_id(fname);
+    filename = fname;
+    RX_VERBOSE("Descriptor: %llu", id);
+  }
+
+  inline std::string& Descriptor::getFilename() {
+    return filename;
+  }
+
+  /* ---------------------------------------------------------------------------------- */
 
 } /* namespace fex */
 #endif

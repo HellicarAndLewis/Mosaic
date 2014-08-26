@@ -46,7 +46,7 @@ namespace mos {
     int shutdown();             /* destory and free all allocated objects so init() could be called again. */
 
   public:
-    fex::Featurex featurex;          /* the feature extractor library. */
+    fex::Featurex featurex;     /* the feature extractor library. */
     VideoInput video_input;
   };
 

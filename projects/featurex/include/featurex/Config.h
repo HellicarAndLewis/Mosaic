@@ -29,14 +29,22 @@ struct Config {
   ~Config();
   bool validateTileSettings();              /* validate the mosaic tile image settings */
   bool validateAnalyzerSettings();          /* validate the settings for the offline analyzer */
+  bool validateTilePoolSettings();          /* validate the tile pool settings */
+
+  uint64_t getTilePoolSizeInBytes();        /* returns how many bytes you would need for the tile pool */
 
   /* tile settings */
-  int tile_size;
+  int input_tile_size;
   int input_image_width;
   int input_image_height;
   int cols;
   int rows;
   bool show_timer;
+
+  /* tile memory pool */
+  int tile_width;                         /* the width of the tiles that are rendered into the mosaic. */
+  int tile_height;                        /* the height of the tiles that are rendered into the mosaic. */
+  int tile_pool_size;                     /* number of tiles that we can store in RAM, we allocate a huge buffer in TilePool for this amount of images, with a size of (tile_width * tile_height) */
 
   /* analyzer settings */
   std::string raw_filepath;               /* where downloaded, raw instagram images will be stored */

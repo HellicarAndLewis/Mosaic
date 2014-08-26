@@ -19,18 +19,28 @@
 #ifndef ROXLU_COMPARATOR_H
 #define ROXLU_COMPARATOR_H
 
+#include <glad/glad.h>
+
+#define ROXLU_USE_LOG
+#define ROXLU_USE_PNG
+#define ROXLU_USE_JPG
+#define ROXLU_USE_OPENGL
+#define ROXLU_USE_MATH
+#define ROXLU_USE_FONT
+#include <tinylib.h>
+
 #include <featurex/Descriptor.h>
 
 namespace fex {
 
   class Comparator {
   public:
-    Comparator(std::vector<Descriptor>& descriptors);            /* pass in the list with descriptors; we're not taking ownership, so caller needs to clean up when ready. */
+    Comparator();      
     ~Comparator();
-    void match(Descriptor& input);
+    ssize_t match(Descriptor& input, std::vector<Descriptor>& database);
 
   public:
-    std::vector<Descriptor>& descriptors;
+
   };
 
 } /* namespace fex */

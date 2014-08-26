@@ -137,7 +137,7 @@ int main() {
   fex::config.rows = 15;
   fex::config.input_image_width = capture.width;
   fex::config.input_image_height = capture.height;
-  fex::config.tile_size = 32;
+  fex::config.input_tile_size = 32;
 
   /* create the GPU analyzer */
   fex::AnalyzerGPU analyzer;

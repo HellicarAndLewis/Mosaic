@@ -88,12 +88,15 @@ int main() {
   fex::config.raw_filepath = rx_to_data_path("input_raw/");
   fex::config.resized_filepath = rx_to_data_path("input_resized/");
   fex::config.blurred_filepath = rx_to_data_path("input_blurred/");
-  fex::config.tile_size = 32;
+  fex::config.input_tile_size = 32;
   fex::config.input_image_width = mos::config.webcam_width;
   fex::config.input_image_height = mos::config.webcam_height;
-  fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
-  fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
+  fex::config.cols = (fex::config.input_image_width / fex::config.input_tile_size);
+  fex::config.rows = (fex::config.input_image_height / fex::config.input_tile_size);
   fex::config.show_timer = false;
+  fex::config.tile_width = 64;
+  fex::config.tile_height = 64;
+  fex::config.tile_pool_size = 1000;
 
   mos::Mosaic mosaic;
   if (0 != mosaic.init()) {

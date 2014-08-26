@@ -88,7 +88,7 @@ namespace fex {
         g = colors[dx + 1];
         r = colors[dx + 2];
 
-        Descriptor& desc = descriptors[i * j];
+        Descriptor& desc = descriptors[j * fex::config.cols + i];
         desc.average_color[0] = r;
         desc.average_color[1] = g;
         desc.average_color[2] = b;
