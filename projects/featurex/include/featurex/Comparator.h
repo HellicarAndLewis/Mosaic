@@ -15,42 +15,22 @@
  
 ---------------------------------------------------------------------------------
 */
-#ifndef ROXLU_FEATUREX_H
-#define ROXLU_FEATUREX_H
 
-#include <glad/glad.h>
+#ifndef ROXLU_COMPARATOR_H
+#define ROXLU_COMPARATOR_H
 
-#define ROXLU_USE_LOG
-#define ROXLU_USE_PNG
-#define ROXLU_USE_JPG
-#define ROXLU_USE_OPENGL
-#define ROXLU_USE_MATH
-#define ROXLU_USE_FONT
-#include <tinylib.h>
-
-#include <string>
-#include <featurex/AnalyzerCPU.h>
-#include <featurex/AnalyzerGPU.h>
+#include <featurex/Descriptor.h>
 
 namespace fex {
 
-  class Featurex {
+  class Comparator {
+  public:
+    Comparator(std::vector<Descriptor>& descriptors);            /* pass in the list with descriptors; we're not taking ownership, so caller needs to clean up when ready. */
+    ~Comparator();
+    void match(Descriptor& input);
 
   public:
-    Featurex();
-    ~Featurex();
-
-    int init(GLuint inputTex);                /* initialize the analyzers; the inputTex is passed to the gpu analyzer. */
-    int shutdown(); 
-    void update();
-    void draw();
-
-    int analyzeCPU(std::string filepath);
-    int analyzeGPU();
-    
-  public:
-    AnalyzerCPU analyzer_cpu;
-    AnalyzerGPU analyzer_gpu;
+    std::vector<Descriptor>& descriptors;
   };
 
 } /* namespace fex */

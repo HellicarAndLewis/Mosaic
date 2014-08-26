@@ -28,6 +28,7 @@
 #include <tinylib.h>
 
 #include <featurex/AverageColorGPU.h>
+#include <featurex/Descriptor.h>
 
 namespace fex {
 
@@ -45,6 +46,7 @@ namespace fex {
     GLuint input_tex;
     AverageColorGPU average_color;
     Painter painter_fg;
+    std::vector<Descriptor> descriptors; /* after calling analyze this will hold all the descriptors. it will have (fex::config.cols * fex::config.rows) number of descriptors. */
   };
 
 } /* namespace fex */

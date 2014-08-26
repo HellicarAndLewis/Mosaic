@@ -69,7 +69,8 @@ static const char* AVG_COL_FS = ""
   "    }"
   "  }"
   " fragcolor /= (u_tile_size * u_tile_size ); "
-  //  "  fragcolor.rgb = texcol.rgb;"
+  //  " fragcolor = vec4(0.3, 0.6, 0.9, 1.0);"
+  //  " fragcolor.rgb = texcol.rgb;"
   "}"
   "";
 
@@ -82,6 +83,7 @@ class AverageColorGPU {
   int reinit();
   void calculate();
   int shutdown();
+  unsigned char* getAverageColorPtr();   /* returns a pointer to the async_download.buffer member that contains the average colors */
 
  public:
   GLuint frag;
@@ -92,10 +94,13 @@ class AverageColorGPU {
 
   GLuint fbo;
   GLuint output_tex;
-  unsigned char* colors;
   GLint viewport[4];                     /* we read the viewport so we can reset it after calculating the average colors. */
 
   gfx::AsyncDownload async_download;     /* used to transfer the calculated average colors back to the cpu. */ 
 };
+
+inline  unsigned char* AverageColorGPU::getAverageColorPtr() {
+  return async_download.buffer;
+}
 
 #endif

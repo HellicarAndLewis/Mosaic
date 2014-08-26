@@ -98,27 +98,23 @@ int main() {
   RX_VERBOSE("Loaded %lu test images", test_images.size());
 
   // feat.loadInputImage(rx_to_data_path("test_input0.png"));
-  //feat.loadInputImage(rx_to_data_path("test_input1.jpg"));
-  //  feat.loadInputImage(rx_to_data_path("test_input2.png"));
-  feat.loadInputImage(rx_to_data_path("test_input4.png"));
-  //feat.loadInputImage(rx_to_data_path("test_input5.png"));
+  // feat.loadInputImage(rx_to_data_path("test_input1.jpg"));
+  // feat.loadInputImage(rx_to_data_path("test_input2.png"));
+  // feat.loadInputImage(rx_to_data_path("test_input4.png"));
+  // feat.loadInputImage(rx_to_data_path("test_input5.png"));
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
     feat.update();
-
     feat.draw();
-
 
     glfwSwapBuffers(win);
     glfwPollEvents();
 
   }
- 
- 
+
   glfwTerminate();
  
   return EXIT_SUCCESS;
@@ -162,30 +158,30 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       std::string new_test_file = test_images[test_image_dx];
       RX_VERBOSE("Loading next test image: %s", new_test_file.c_str());
       ++test_image_dx %= test_images.size();
-      if (0 != feat_ptr->analyzeImageFile(new_test_file)) {
-        RX_ERROR("Cannot analyze %s", new_test_file.c_str());
-      }
       break;
     }
     case GLFW_KEY_1: {
+      /*
       fex::config.tile_size = fex::config.input_image_width;
       fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
       fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      feat_ptr->reinit();
+      */
       break;
     }
     case GLFW_KEY_2: {
+      /*
       fex::config.tile_size = 32;
       fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
       fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      feat_ptr->reinit();
+      */
       break;
     }
     case GLFW_KEY_3: {
+      /*
       fex::config.tile_size = 12;
       fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
       fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      feat_ptr->reinit();
+      */
       break;
     }
     case GLFW_KEY_ESCAPE: {

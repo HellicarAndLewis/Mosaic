@@ -14,8 +14,9 @@ namespace gfx {
   public:
     AsyncDownload();
     ~AsyncDownload();
-    int init(int w, int h, GLenum fmt);
-    int download(); /* assumes the current read buffer has been set by the called */
+    int init(int w, int h, GLenum fmt);   /* allocate memory; creates GL objects */
+    int shutdown();                       /* frees all memory; destroys GL objects */
+    int download();                       /* assumes the current read buffer has been set by the called */
 
   public:
     GLuint pbo[2];

@@ -74,11 +74,11 @@ namespace fex {
     int join();                                /* join the analyzer thread */
     int shutdown();                            /* shutdown and stop the thread */
     int analyze(std::string filepath);         /* analyze the given file. */
-    void lock();
-    void unlock();
+    void lock();                               /* lock the mutex; syncs the tasks */
+    void unlock();                             /* unlock the mutex. */
 
-    int saveDescriptors();
-    int loadDescriptors();
+    int saveDescriptors();                     /* will store the descriptors into a file in the data dir. */ 
+    int loadDescriptors();                     /* load the previously stored descriptors. */
 
     /* shouldn't be called by a user - is called by the thread */
     int executeAnalyzeTask(AnalyzerTask* task);

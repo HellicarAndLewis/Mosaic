@@ -13,26 +13,7 @@ namespace gfx {
   }
 
   AsyncDownload::~AsyncDownload() {
-
-    if (0 != pbo[0]) {
-      glDeleteBuffers(1, &pbo[0]);
-    }
-
-    if (0 != pbo[1]) {
-      glDeleteBuffers(1, &pbo[1]);
-    }
-
-    dx = 0;
-    pbo[0] = 0;
-    pbo[1] = 0;
-    width = 0;
-    height = 0;
-
-    if (NULL != buffer) {
-      delete[] buffer;
-    }
-
-    buffer = NULL;
+    shutdown();
   }
 
   int AsyncDownload::init(int w, int h, GLenum fmt) {
@@ -59,8 +40,6 @@ namespace gfx {
       read_format = GL_RGB;
       RX_WARNING("You're using GL_RGB or GL_RGB8 for the AsyncDownload format; this is a non optimal format and padding may occur that slows down the downloads.");
     }
-    
-
     else {
       RX_ERROR("Unsupported format: %d, not that we recommend you to use GL_RGBA8", fmt);
       return -4;
@@ -82,6 +61,30 @@ namespace gfx {
     glBufferData(GL_PIXEL_PACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW);
     
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    return 0;
+  }
+
+  int AsyncDownload::shutdown() {
+
+    if (0 != pbo[0]) {
+      glDeleteBuffers(1, &pbo[0]);
+    }
+
+    if (0 != pbo[1]) {
+      glDeleteBuffers(1, &pbo[1]);
+    }
+
+    dx = 0;
+    pbo[0] = 0;
+    pbo[1] = 0;
+    width = 0;
+    height = 0;
+
+    if (NULL != buffer) {
+      delete[] buffer;
+    }
+
+    buffer = NULL;
     return 0;
   }
 

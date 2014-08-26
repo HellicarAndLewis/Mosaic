@@ -55,14 +55,12 @@ int AverageColorGPU::init(GLuint inputTex) {
     return -4;
   }
 
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
   /* initialize our helper that retrieves the data from the gpu. */
-  /*
-  if (0 != async_download.init(fex::config.cols, fex::config.rows, GL_RGBA8)) {
+  if (0 != async_download.init(fex::config.cols, fex::config.rows, GL_BGRA)) {
     return -5;
   }
-  */
-
-  glGetIntegerv(GL_VIEWPORT, viewport);
 
   return 0;
 }
@@ -76,12 +74,10 @@ int AverageColorGPU::reinit() {
   glGenFramebuffers(1, &fbo);
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-  RX_WARNING("We should use a texture with a multiple of 32 bits else padding occurs!");
-
   /* create the texture that holds the 'general color' */
   glGenTextures(1, &output_tex);
   glBindTexture(GL_TEXTURE_2D, output_tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fex::config.cols, fex::config.rows, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fex::config.cols, fex::config.rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -128,6 +124,7 @@ void AverageColorGPU::calculate() {
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  /* calculate the average colors */
   glViewport(0, 0, fex::config.cols, fex::config.rows);
   glBindVertexArray(vao);
   glUseProgram(prog);
@@ -135,12 +132,22 @@ void AverageColorGPU::calculate() {
   glBindTexture(GL_TEXTURE_2D, input_tex);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  /*
+  /* download the results */
   async_download.download();
-  */
 
+#if 0
+  /* store the result in a png file */
+  static double next_sec = 0;
+  double now = (double)(rx_hrtime()) / (1000.0 * 1000.0 * 1000.0);
+  if (now >= next_sec) {
+    std::string filename = rx_to_data_path(rx_get_time_string() +".png");
+    rx_save_png(filename, async_download.buffer, async_download.width, async_download.height, 4, false);
+    next_sec = now + 1;
+  }
+#endif
+
+  /* reset fbo. */
   glViewport(0, 0, viewport[2], viewport[3]);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
   
 }

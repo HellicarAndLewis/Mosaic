@@ -28,8 +28,12 @@
 #include <gfx/Timer.h>
 #include <featurex/AnalyzerGPU.h>
 #include <featurex/Config.h>
+#include <featurex/Comparator.h>
 
-#define USE_TIMER 0
+#define USE_TIMER 1
+#if USE_TIMER
+  bool show_timer = false;
+#endif
 
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
@@ -156,15 +160,17 @@ int main() {
 #endif
 
   double next_sec = 0;
+  bool needs_update = false;
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #if USE_TIMER
-    timer.start("analyze");
+    timer.start("analyze and render");
 #endif
 
+    needs_update = capture.needs_update;
     capture.update();
 
     /* render the webcam into a texture that we feed into the GPU analyzer. */
@@ -174,19 +180,16 @@ int main() {
     }
     fbo.unbind();
     
-    if (0 != analyzer.analyze()) {
-      RX_ERROR("Failed to analyze.");
-      exit(1);
+    if (needs_update) {
+      if (0 != analyzer.analyze()) {
+        RX_ERROR("Failed to analyze.");
+        exit(1);
+      }
     }
 
     analyzer.draw();
     
     capture.draw(0, 0, w >> 2, h >> 2);
-
-#if USE_TIMER
-    timer.stop();
-    timer.start("download");
-#endif
 
 #if 0
     uint64_t n = rx_hrtime();
@@ -208,7 +211,12 @@ int main() {
 
 #if USE_TIMER
     timer.stop();
-    timer.draw();
+    if (show_timer) {
+      timer.draw();
+    }
+    else {
+      timer.reset();
+    }
 #endif
 
     glfwSwapBuffers(win);
@@ -230,6 +238,10 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
  
   switch(key) {
+    case GLFW_KEY_SPACE: {
+      show_timer = !show_timer;
+      break;
+    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;

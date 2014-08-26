@@ -63,14 +63,10 @@ namespace fex {
       shutdown();
     }
 
-    /* free mem */
-    for (size_t i = 0; i < tasks.size(); ++i) {
-      delete tasks[i];
-    }
-    tasks.clear();
-    work.clear();
-
-    RX_ERROR("Need to destroy mutex, thread, cond in AnalyzerCPU");
+    on_analyzed = NULL;
+    user = NULL;
+    must_stop = true;
+    is_running = false;
   }
 
   int AnalyzerCPU::init() {
@@ -108,6 +104,8 @@ namespace fex {
 
   int AnalyzerCPU::shutdown() {
 
+    int r;
+
     if (false == is_running) {
       RX_ERROR("Cannot shutdown the analyzer, it's not running.");
       return -1;
@@ -121,9 +119,25 @@ namespace fex {
     }
     unlock();
 
-    /* @todo - destroy mutex/cond */
-    RX_VERBOSE("Shutting down thread.. @todo - destroy mutex and condvar");
+    RX_VERBOSE("Shutting down thread.");
     pthread_join(thread, NULL);
+
+    r = pthread_mutex_destroy(&mutex);
+    if (0 != r) {
+      RX_ERROR("Cannot destroy mutex: %d", r);
+    }
+
+    r = pthread_cond_destroy(&cond);
+    if (0 != r) {
+      RX_ERROR("Cannot destory condiation variable: %d", r);
+    }
+
+    for (size_t i = 0; i < tasks.size(); ++i) {
+      delete tasks[i];
+    }
+
+    tasks.clear();
+    work.clear();
 
     return 0;
   }

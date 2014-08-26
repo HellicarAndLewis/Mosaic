@@ -59,15 +59,18 @@ elseif(UNIX)
 
 endif()
 
+# Feature Extractor and Matching library
 set(fex_lib_sources
   ${fex_sd}/Featurex.cpp
   ${fex_sd}/AverageColorGPU.cpp
   ${fex_sd}/Config.cpp
   ${fex_sd}/Descriptor.cpp
+  ${fex_sd}/Comparator.cpp
   ${fex_sd}/AnalyzerCPU.cpp
   ${fex_sd}/AnalyzerGPU.cpp
 )
 
+# OpenGL wrapper/utilss.
 set(gfx_lib_sources
   ${gfx_sd}/Image.cpp
   ${gfx_sd}/Blur.cpp
@@ -77,6 +80,7 @@ set(gfx_lib_sources
   ${gfx_sd}/AsyncDownload.cpp
 )
 
+# Video playback of RTMP
 set(vid_lib_sources
   ${vid_sd}/Stream.cpp
   ${vid_sd}/Player.cpp
@@ -104,12 +108,12 @@ add_library(vid ${vid_lib_sources})
 install(TARGETS vid ARCHIVE DESTINATION lib)
 
 # The tests used during development
-create_test(fex_load_image)
-create_test(libav_rtmp)
-create_test(video_stream_player)
 create_test(fex)
-create_test(offline_analyzer)
-create_test(online_analyzer)
+#create_test(fex_load_image)
+#create_test(libav_rtmp)
+#create_test(video_stream_player)
+#create_test(offline_analyzer)
+#create_test(online_analyzer)
 
 
 
