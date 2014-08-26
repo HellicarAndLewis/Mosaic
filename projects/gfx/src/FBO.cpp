@@ -10,6 +10,7 @@ namespace gfx {
 
   FBO::~FBO() {
     /* @todo - remove all textures + fbo */
+    RX_WARNING("We need to free the FBO + textures");
   }
 
   int FBO::init(int w, int h) {
@@ -32,6 +33,24 @@ namespace gfx {
     }
 
     glGenFramebuffers(1, &fbo);
+
+    return 0;
+  }
+
+  int FBO::shutdown() {
+
+    /* remove the fbo. */
+    if (0 != fbo) {
+      glDeleteFramebuffers(1, &fbo);
+    }
+    
+    /* and remove all texures. */
+    for (size_t i = 0; i < textures.size(); ++i) {
+      glDeleteTextures(1, &textures[i]);
+    }
+    textures.clear();
+
+    fbo = 0;
 
     return 0;
   }
@@ -106,6 +125,7 @@ namespace gfx {
     glDrawBuffers(1, drawbufs);
   }
 
+  /* make sure the GL_SAMPLES are similar! */
   void FBO::blit(GLenum attachment, int x, int y, int w, int h) {
     /* make sure we've been setup correctly */
     if (w == 0) { RX_ERROR("Cannot blit when the given width is 0"); return;  }

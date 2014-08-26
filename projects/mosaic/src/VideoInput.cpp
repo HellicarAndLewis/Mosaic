@@ -9,6 +9,8 @@ namespace mos {
 
   VideoInput::VideoInput() 
     :is_init(0)
+    ,webcam_tex(0)
+    ,needs_update(false)
   {
   }
 
@@ -16,6 +18,8 @@ namespace mos {
     if (1 == is_init) {
       shutdown();
     }
+
+    needs_update = false;
   }
 
   int VideoInput::init() {
@@ -61,6 +65,23 @@ namespace mos {
       return r;
     }
 
+    /* we render the webcam into a FBO. */
+    r = fbo.init(mos::config.webcam_width, mos::config.webcam_height);
+    if (r != 0) {
+      RX_ERROR("Cannot initialize the FBO: %d", r);
+      capture.stop();
+      capture.close();
+      return r;
+    }
+
+    webcam_tex = fbo.addTexture(GL_RGBA8, mos::config.webcam_width, mos::config.webcam_height, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
+    if (0 != fbo.isComplete()) {
+      RX_ERROR("FBO not complete");
+      capture.stop();
+      capture.close();
+      return -200;
+    }
+    
     is_init = 1;
 
     return 0;
@@ -86,6 +107,11 @@ namespace mos {
       RX_ERROR("Error while stopping the video input: %d", r);
     }
 
+    r = fbo.shutdown();
+    if (r != 0) {
+      RX_ERROR("Error while cleaning up the FBO: %d", r);
+    }
+
     is_init = 0;
 
     return 0;
@@ -93,12 +119,24 @@ namespace mos {
 
   void VideoInput::update() {
     if (0 == is_init) {  return;  }
+
+    needs_update = capture.needs_update;
+
     capture.update();
   }
 
   void VideoInput::draw() {
     if (0 == is_init) { return; }
+
+    if (needs_update) {
+      fbo.bind();
+        capture.draw();
+      fbo.unbind();
+    }
+
+    /* draw the webcam to screen */
     capture.draw();
+    capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
   }
 
 

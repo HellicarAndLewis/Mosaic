@@ -87,6 +87,7 @@ namespace vid {
       return -2;
     }
 
+    RX_VERBOSE("Stopping the player");
     must_stop = true;
 
     return 0;
@@ -225,6 +226,7 @@ namespace vid {
     }
 
     if (event == VID_EVENT_STOP_PLAYBACK) {
+      RX_VERBOSE("Received a VID_EVENT_STOP_PLAYBACK");
       p->must_stop = true;
     }
   }

@@ -42,7 +42,6 @@ namespace fex {
 
     int init(GLuint inputTex);                /* initialize the analyzers; the inputTex is passed to the gpu analyzer. */
     int shutdown(); 
-    void update();
     void draw();
 
     int analyzeCPU(std::string filepath);

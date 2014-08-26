@@ -22,11 +22,24 @@ namespace mos {
     void update();
     void draw();
     int shutdown();
+    GLuint texid();                  /* returns the texture id into which we write the webcam images. */
+    int needsUpdate();               /* returns 0 when we need to update the mosaic otherwise -1 */
      
   public:
     ca::CaptureGL capture;
+    gfx::FBO fbo;                    /* we write the decoded video to a FBO, RTT, and the texture is used by the GPU analyzer. */
+    GLuint webcam_tex;
     int is_init;
+    bool needs_update;               /* is set to true when the webcam has a new image */ 
   };
+
+  inline GLuint VideoInput::texid() {
+    return webcam_tex;
+  }
+
+  inline int VideoInput::needsUpdate() {
+    return (needs_update) ? 0 : -1;
+  }
 
 } /* namespace mos */
 

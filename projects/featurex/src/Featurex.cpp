@@ -41,6 +41,12 @@ namespace fex {
   int Featurex::shutdown() {
     int r = 0;
 
+    /* first make sure to save the current descriptors. */
+    r = analyzer_cpu.saveDescriptors();
+    if (0 != r) {
+      RX_ERROR("Cannot save the descriptors.");
+    }
+
     /* shutdown cpu analyzer */
     r = analyzer_cpu.shutdown();
     if (0 != r) {
@@ -55,10 +61,8 @@ namespace fex {
     return r;
   }
 
-  void Featurex::update() {
-  }
-
   void Featurex::draw() {
+    analyzer_gpu.draw();
   }
 
   int Featurex::analyzeCPU(std::string filepath) {

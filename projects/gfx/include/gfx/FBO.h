@@ -29,10 +29,11 @@ namespace gfx {
   public:
     FBO();
     ~FBO();
-    int init(int w, int h);
+    int init(int w, int h);   /* allocate an FBO; very basic, no special options for now :) */
+    int shutdown();           /* destroy the FBO + all created textures. */
     void bind();
     void unbind();
-    GLuint addTexture(GLenum format, int w, int h, GLenum internalFormat, GLenum type, GLenum attachment);
+    GLuint addTexture(GLenum format, int w, int h, GLenum internalFormat, GLenum type, GLenum attachment);  /* create a new texture - WE TAKE OWNERSHIP AND DESTROY THE TEXTURES IN SHUTDOWN */
     int isComplete();
     void setDrawBuffer(GLenum attach);
     void blit(GLenum attachment, int x, int y, int w, int h);  /* use the given attachment as as read buffer and blit it into the current draw framebuffer, so make sure you've set your draw framebuffer. */

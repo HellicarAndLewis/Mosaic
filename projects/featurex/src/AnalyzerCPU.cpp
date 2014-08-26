@@ -188,6 +188,8 @@ namespace fex {
       pthread_cond_signal(&cond);
     }
     unlock();
+
+    RX_VERBOSE("Added %s to the CPU analyzer thread.", filepath.c_str());
   
     return 0;
   }

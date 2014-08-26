@@ -70,18 +70,15 @@ namespace fex {
   public:
     AnalyzerCPU();
     ~AnalyzerCPU();
-    int init();                                /* initialize, start the thread */
-    int join();                                /* join the analyzer thread */
-    int shutdown();                            /* shutdown and stop the thread */
-    int analyze(std::string filepath);         /* analyze the given file. */
-    void lock();                               /* lock the mutex; syncs the tasks */
-    void unlock();                             /* unlock the mutex. */
-
-    int saveDescriptors();                     /* will store the descriptors into a file in the data dir. */ 
-    int loadDescriptors();                     /* load the previously stored descriptors. */
-
-    /* shouldn't be called by a user - is called by the thread */
-    int executeAnalyzeTask(AnalyzerTask* task);
+    int init();                                  /* initialize, start the thread */
+    int join();                                  /* join the analyzer thread */
+    int shutdown();                              /* shutdown and stop the thread */
+    int analyze(std::string filepath);           /* analyze the given file. */
+    void lock();                                 /* lock the mutex; syncs the tasks */
+    void unlock();                               /* unlock the mutex. */
+    int saveDescriptors();                       /* will store the descriptors into a file in the data dir. */ 
+    int loadDescriptors();                       /* load the previously stored descriptors. */
+    int executeAnalyzeTask(AnalyzerTask* task);  /* shouldn't be called by a user - is called by the thread */
     
   private:
     AnalyzerTask* getFreeTask();
