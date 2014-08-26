@@ -18,6 +18,10 @@ namespace vid {
     av_register_all();
     avformat_network_init();
     avcodec_register_all();
+
+#if !defined(NDEBUG)
+    av_log_set_level(AV_LOG_DEBUG);
+#endif
   }
   
   Stream::~Stream() {

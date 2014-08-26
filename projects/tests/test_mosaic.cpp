@@ -9,11 +9,8 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
-#include <featurex/Featurex.h>
-#include <featurex/Config.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <gfx/Timer.h>
 
 #define ROXLU_IMPLEMENTATION
 #define ROXLU_USE_LOG
@@ -21,18 +18,22 @@
 #define ROXLU_USE_PNG
 #define ROXLU_USE_MATH
 #define ROXLU_USE_FONT
+#define ROXLU_USE_OPENGL
 #include <tinylib.h>
+
+#define VIDEO_CAPTURE_IMPLEMENTATION
+#include <videocapture/CaptureGL.h>
  
+#include <featurex/Config.h>
+#include <mosaic/Mosaic.h>
+#include <mosaic/Config.h>
+
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
 void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods);
 void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
-
-fex::Featurex* feat_ptr = NULL;
-std::vector<std::string> test_images; /* is filled with a collection of images that are analyzed on the cpu */
-size_t test_image_dx = 0;
 
 int main() {
  
@@ -53,7 +54,7 @@ int main() {
   int w = 1280;
   int h = 720;
  
-  win = glfwCreateWindow(w, h, ">>> Tha Feature-X-Tractor <<<", NULL, NULL);
+  win = glfwCreateWindow(w, h, ">>> Mosaic Tester <<<", NULL, NULL);
   if(!win) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -77,6 +78,7 @@ int main() {
   // ----------------------------------------------------------------
   rx_log_init();
 
+  /* feature extractor settings. */
   fex::config.raw_filepath = rx_to_data_path("input_raw/");
   fex::config.resized_filepath = rx_to_data_path("input_resized/");
   fex::config.blurred_filepath = rx_to_data_path("input_blurred/");
@@ -87,33 +89,29 @@ int main() {
   fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
   fex::config.show_timer = false;
 
-  fex::Featurex feat;
-  feat_ptr = &feat;
+  /* mosaic settings. */
+  mos::config.webcam_device = 0;
+  mos::config.webcam_width = 640;
+  mos::config.webcam_height = 480;
 
-  if (0 != feat.init()) {
-    exit(1);
+  mos::Mosaic mosaic;
+  if (0 != mosaic.init()) {
+    RX_ERROR("Cannot start the mosaic, check error messages");
+    exit(EXIT_FAILURE);
   }
-
-  test_images = rx_get_files(fex::config.raw_filepath);
-  RX_VERBOSE("Loaded %lu test images", test_images.size());
-
-  // feat.loadInputImage(rx_to_data_path("test_input0.png"));
-  // feat.loadInputImage(rx_to_data_path("test_input1.jpg"));
-  // feat.loadInputImage(rx_to_data_path("test_input2.png"));
-  // feat.loadInputImage(rx_to_data_path("test_input4.png"));
-  // feat.loadInputImage(rx_to_data_path("test_input5.png"));
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    feat.update();
-    feat.draw();
+    mosaic.update();
+    mosaic.draw();
 
     glfwSwapBuffers(win);
     glfwPollEvents();
-
   }
+
+  mosaic.shutdown();
 
   glfwTerminate();
  
@@ -135,53 +133,21 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       break;
     }
     case GLFW_KEY_S: {
-      /* @todo = cleanup 
-      if (0 != feat_ptr->cpu_analyzer.saveDescriptors()) {
-        RX_ERROR("Cannot save the descriptors.");
-      }
-      */
       break;
     }
     case GLFW_KEY_L: {
-      /* @todo = cleanup 
-      if (0 != feat_ptr->cpu_analyzer.loadDescriptors()) {
-        RX_ERROR("Cannot load the descriptors.");
-      }
-      */
       break;
     }
     case GLFW_KEY_T: {
-      if (0 == test_images.size()) {
-        RX_ERROR("Trying to load test images, but none loaded!");
-        return;
-      }
-      std::string new_test_file = test_images[test_image_dx];
-      RX_VERBOSE("Loading next test image: %s", new_test_file.c_str());
-      ++test_image_dx %= test_images.size();
       break;
     }
     case GLFW_KEY_1: {
-      /*
-      fex::config.tile_size = fex::config.input_image_width;
-      fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
-      fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      */
       break;
     }
     case GLFW_KEY_2: {
-      /*
-      fex::config.tile_size = 32;
-      fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
-      fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      */
       break;
     }
     case GLFW_KEY_3: {
-      /*
-      fex::config.tile_size = 12;
-      fex::config.cols = (fex::config.input_image_width / fex::config.tile_size);
-      fex::config.rows = (fex::config.input_image_height / fex::config.tile_size);
-      */
       break;
     }
     case GLFW_KEY_ESCAPE: {

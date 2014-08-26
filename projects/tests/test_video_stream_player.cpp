@@ -102,7 +102,8 @@ int main() {
   vid::Player player;
   player_ptr = &player;
   player.on_frame = on_video_frame;
-  if (0 != player.init("rtmp://edge01.fms.dutchview.nl/botr/bunny.flv")) {
+  //if (0 != player.init("rtmp://edge01.fms.dutchview.nl/botr/bunny.flv")) {
+  if (0 != player.init("rtmp://cp123195.live.edgefcs.net/live/topshop@27056")) {
   //if (0 != player.init("rtmp://localhost")) {
     exit(0);
   }

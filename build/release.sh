@@ -39,6 +39,6 @@ fi
 #./test_fex_load_image
 #./test_libav_rtmp
 #./test_video_stream_player
-./test_fex
+./test_mosaic
 #./test_offline_analyzer
 #./test_online_analyzer

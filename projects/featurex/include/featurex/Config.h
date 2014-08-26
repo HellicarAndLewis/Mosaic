@@ -21,14 +21,6 @@
 
 #include <string>
 
-/*
-#define TILE_SIZE 32
-#define INPUT_IMAGE_WIDTH 384
-#define INPUT_IMAGE_HEIGHT 384
-#define COLS (INPUT_IMAGE_WIDTH / TILE_SIZE)
-#define ROWS (INPUT_IMAGE_HEIGHT / TILE_SIZE)
-*/
-
 namespace fex {
 
 struct Config {
@@ -47,9 +39,9 @@ struct Config {
   bool show_timer;
 
   /* analyzer settings */
-  std::string raw_filepath;    /* where downloaded, raw instagram images will be stored */
-  std::string resized_filepath;  /* will contain the resized versions of the input images */
-  std::string blurred_filepath;  /* will contains the blurred version of the input images */
+  std::string raw_filepath;               /* where downloaded, raw instagram images will be stored */
+  std::string resized_filepath;           /* will contain the resized versions of the input images */
+  std::string blurred_filepath;           /* will contains the blurred version of the input images */
 };
 
 extern Config config;
