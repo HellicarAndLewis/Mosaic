@@ -20,7 +20,7 @@ The GPU analyzer takes a openGL texture as input and outputs descriptors.
   |              |      |              |      |            |
   | Image files  |----->| AnalyzerCPU  |----->| Descriptor |
   |              |      |              |      |            |
-  +--------------+      +--------------+      +------------*  
+  +--------------+      +--------------+      +------------+  
 
 ````
 
@@ -31,7 +31,7 @@ The GPU analyzer takes a openGL texture as input and outputs descriptors.
   |              |      |              |      |            |
   | Texture ID   |----->| AnalyzerGPU  |----->| Descriptor |
   |              |      |              |      |            |
-  +--------------+      +--------------+      +------------*  
+  +--------------+      +--------------+      +------------+  
 
 ````
 

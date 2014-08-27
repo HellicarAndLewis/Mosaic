@@ -13,10 +13,7 @@ namespace fex {
   }
 
   void Tile::reset() {
-    if (NULL == pixels) {
-      delete[] pixels;
-    }
-    pixels = NULL;
+    pixels = NULL;      /* points into TilesPool.buffer which frees it */
     width = 0;
     height = 0;
     nchannels = 0;
@@ -57,6 +54,8 @@ namespace fex {
     
     RX_VERBOSE("Allocating %llu bytes for the tiles pool.", nbytes);
 
+    /* @todo - when loading the images, we need to makes that the loaded bytes is exactly the same as one tile */
+
     return 0;
   }
 
@@ -64,7 +63,7 @@ namespace fex {
 
     if (buffer) {
       RX_VERBOSE("Freeing tiles buffer");
-      delete[] buffer;
+      free(buffer);
     }
 
     buffer = NULL;
