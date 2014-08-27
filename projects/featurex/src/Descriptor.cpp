@@ -11,12 +11,16 @@ namespace fex {
 
   Descriptor::Descriptor() 
     :id(0)
+    ,row(-1)
+    ,col(-1)
   {
     reset();
   }
 
   Descriptor::~Descriptor() {
     reset();
+    row = -1;
+    col = -1;
   }
 
   void Descriptor::reset() {

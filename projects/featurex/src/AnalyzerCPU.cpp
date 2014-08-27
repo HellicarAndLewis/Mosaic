@@ -155,6 +155,8 @@ namespace fex {
 
   int AnalyzerCPU::analyze(std::string filepath) {
 
+    int r = 0;
+
     /* validate */
     if (0 == filepath.size()) {
       RX_ERROR("Invalid filepath given.");
@@ -185,7 +187,10 @@ namespace fex {
     lock();
     {
       work.push_back(task);
-      pthread_cond_signal(&cond);
+      r = pthread_cond_signal(&cond);
+      if (0 != r) {
+        RX_ERROR("Cannot signal the condition var: %d", r);
+      }
     }
     unlock();
 
@@ -263,7 +268,9 @@ namespace fex {
 
     /* first resize! */
     std::string filename = rx_strip_dir(task->filepath);
-    std::string resized_filepath = fex::config.resized_filepath +filename;
+    std::string basename = rx_strip_file_ext(filename);
+    
+    std::string resized_filepath = fex::config.resized_filepath +basename +".png";
     std::string command = "./preprocess.sh " +task->filepath ;
     if (0 == filename.size()) {
       RX_ERROR("Filename is invalid.");
@@ -282,7 +289,9 @@ namespace fex {
     /* load the image resized image */
     ext = rx_get_file_ext(resized_filepath);
     if (ext == "jpg") {
-      ret = rx_load_jpg(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
+      /* @todo - the resized filename must be PNG as we're loading 4 channel images only */
+      RX_ERROR("This is something we need to clean up. The resized images need to be all 4 channels - is necessary for the fast memcpy ");
+      //ret = rx_load_jpg(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
     }
     else if(ext == "png") {
       ret = rx_load_png(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);

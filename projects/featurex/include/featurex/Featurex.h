@@ -55,6 +55,7 @@ namespace fex {
     AnalyzerGPU analyzer_gpu;
     Comparator comp;
     TilesPool tiles;
+    unsigned char* pixels;  /* TESTING: used to write the mosaic, @todo remove */
   };
 
 } /* namespace fex */

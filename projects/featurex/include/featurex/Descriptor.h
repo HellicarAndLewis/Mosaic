@@ -49,6 +49,8 @@ namespace fex {
   public:
     uint32_t id;                                     /* unique ID based on the filename */
     uint32_t average_color[3];
+    int row;                                         /* only used when constructing a mosaic; this will be set to the row position of the tile. */
+    int col;                                         /* only used when constructing a mosaic; this will be set to the col position of the tile. */
 
   private:
     std::string filename;

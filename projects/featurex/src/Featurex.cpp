@@ -5,6 +5,7 @@
 namespace fex {
 
   Featurex::Featurex() {
+
   }
 
   Featurex::~Featurex() {
@@ -43,6 +44,21 @@ namespace fex {
       analyzer_gpu.shutdown();
       return r;
     }
+
+    /* BEGIN TESTING - LOAD FILES */                                
+    /* -------------------------------------------------------------------------- */
+    for (size_t i = 0; i < analyzer_cpu.descriptors.size(); ++i) {
+      tiles.loadDescriptorTile(analyzer_cpu.descriptors[i]);
+    }
+
+    int nbytes = 1280 * 1280 * 4; /* testing; our mosaic */
+    pixels = (unsigned char*)malloc(nbytes);
+    if (NULL == pixels) {
+      RX_ERROR("Cannot allocate the pixel buffer");
+      return -1;
+    }
+    /* -------------------------------------------------------------------------- */
+    /* END TESTING - LOAD FILES */
 
     return 0;
   }
@@ -110,6 +126,14 @@ namespace fex {
 
       Descriptor& gdesc = analyzer_gpu.descriptors[i];
       Descriptor& cdesc = analyzer_cpu.descriptors[dx];
+
+      Tile* tile = tiles.getTileForDescriptorID(cdesc.id);
+      if (NULL == tile) {
+        continue;
+      }
+
+
+      //RX_VERBOSE("Found a descriptor for row: %d and col: %d", gdesc.row, gdesc.col);
       
 #if 0
       RX_VERBOSE("Matched: (%d,%d,%d) <> (%d,%d,%d)",
