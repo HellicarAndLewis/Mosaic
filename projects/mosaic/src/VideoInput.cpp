@@ -56,6 +56,7 @@ namespace mos {
     r = capture.open(device_index, mos::config.webcam_width, mos::config.webcam_height);
     if (0 != r) {
       RX_ERROR("Error while opening webcam device: %d, err: %d", device_index, r);
+      capture.listDevices();
       return r;
     }
 
@@ -135,7 +136,7 @@ namespace mos {
     }
 
     /* draw the webcam to screen */
-    capture.draw();
+    /* capture.draw(); */
     capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
   }
 

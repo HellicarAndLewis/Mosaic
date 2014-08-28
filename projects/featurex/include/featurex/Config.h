@@ -32,6 +32,8 @@ struct Config {
   bool validateTilePoolSettings();          /* validate the tile pool settings */
 
   uint64_t getTilePoolSizeInBytes();        /* returns how many bytes you would need for the tile pool */
+  int getMosaicImageWidth();                /* get the width of the image that will be created from all the tiles. returns < 0 on error.*/
+  int getMosaicImageHeight();               /* get the height of the image that will be created from all the tiles. return < 0 on error. */
 
   /* tile settings */
   int input_tile_size;
@@ -42,9 +44,9 @@ struct Config {
   bool show_timer;
 
   /* tile memory pool */
-  int tile_width;                         /* the width of the tiles that are rendered into the mosaic. */
-  int tile_height;                        /* the height of the tiles that are rendered into the mosaic. */
-  int tile_pool_size;                     /* number of tiles that we can store in RAM, we allocate a huge buffer in TilePool for this amount of images, with a size of (tile_width * tile_height) */
+  int file_tile_width;                  /* the width of the tiles that are rendered into the mosaic. this is the width of the images in the input_resized directory. */
+  int file_tile_height;                 /* the height of the tiles that are rendered into the mosaic. this is the heigh of the images in the input_resized directory. */
+  int memory_pool_size;                 /* number of tiles that we can store in RAM, we allocate a huge buffer in TilePool for this amount of images, with a size of (tile_width * tile_height) */
 
   /* analyzer settings */
   std::string raw_filepath;               /* where downloaded, raw instagram images will be stored */

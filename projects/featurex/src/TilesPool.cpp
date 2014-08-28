@@ -97,8 +97,8 @@ namespace fex {
     }
 
     /* create the tiles */
-    bytes_per_tile = fex::config.tile_width * fex::config.tile_height * 4; 
-    for (i = 0; i < fex::config.tile_pool_size; ++i) {
+    bytes_per_tile = fex::config.file_tile_width * fex::config.file_tile_height * 4; 
+    for (i = 0; i < fex::config.memory_pool_size; ++i) {
 
       Tile* tile = new Tile();
       if (NULL == tile) {
@@ -323,11 +323,11 @@ namespace fex {
       /* wait for work */
       pool->lock();
       {
-        while (0 == todo.size() && false == pool->must_stop) {
+        while (0 == pool->work.size() && false == pool->must_stop) {
           pthread_cond_wait(&pool->cond, &pool->mutex);
-          std::copy(pool->work.begin(), pool->work.end(), std::back_inserter(todo));
-          pool->work.clear();
         }
+        std::copy(pool->work.begin(), pool->work.end(), std::back_inserter(todo));
+        pool->work.clear();
       }
       pool->unlock();
 
@@ -371,7 +371,7 @@ namespace fex {
 
         /* load the image */
         RX_VERBOSE("Filename: %s", tile_filepath.c_str());
-#if 0
+#if 1
         int curr_capacity = tile->capacity;
         int bytes_loaded = 0;
         if (ext == "jpg") {

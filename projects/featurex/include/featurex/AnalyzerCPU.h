@@ -97,6 +97,9 @@ namespace fex {
     /* callback */
     on_analyzed_callback on_analyzed;
     void* user;
+
+    /* convert from N channel pixel buffer to 4 */
+    unsigned char* rgba;
   };
 
   /* ---------------------------------------------------------------------------------- */

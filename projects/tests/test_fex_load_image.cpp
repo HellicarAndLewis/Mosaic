@@ -64,7 +64,7 @@ int main() {
 
   printf("------------------------------------------------------------------------------\n");
 
-  small_file = rx_to_data_path("test_input2.png");
+  small_file = rx_to_data_path("test_trans.png");
   if (false == rx_file_exists(small_file)) {
     printf("Error: cannot find the %s image.\n", small_file.c_str());
     exit(1);
@@ -78,7 +78,7 @@ int main() {
 
   /* re-use mem that was allocated a couple of lines above */
   nbytes = rx_load_png(small_file, &pix, width, height, channels, &allocated);
-  printf("Loaded, width: %d, height: %d, channels: %d, allocated: %d, size: %d\n", width, height, channels, allocated, nbytes);
+  printf("Loaded small file, width: %d, height: %d, channels: %d, allocated: %d, size: %d\n", width, height, channels, allocated, nbytes);
   printf("-\n");
 
   /* try w/o the allocated param - will allocated again */

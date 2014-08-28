@@ -31,6 +31,7 @@
 #include <mosaic/Config.h>
 #include <mosaic/VideoInput.h>
 #include <featurex/Featurex.h>
+#include <gfx/AsyncUpload.h>
 
 namespace mos {
 
@@ -40,14 +41,17 @@ namespace mos {
     Mosaic();
     ~Mosaic();
 
-    int init();                 /* initializes everything; starts threads, allocates GL objects (indirectly) etc.. */
-    void update();              /* call this often; will process any input/output data. */
-    void draw();                /* draw all visuals! */
-    int shutdown();             /* destory and free all allocated objects so init() could be called again. */
+    int init();                      /* initializes everything; starts threads, allocates GL objects (indirectly) etc.. */
+    void update();                   /* call this often; will process any input/output data. */
+    void draw();                     /* draw all visuals! */
+    int shutdown();                  /* destory and free all allocated objects so init() could be called again. */
 
   public:
-    fex::Featurex featurex;     /* the feature extractor library. */
-    VideoInput video_input;
+    fex::Featurex featurex;          /* the feature extractor library. */
+    VideoInput video_input;          /* the webcam or rtmp input. */
+    gfx::AsyncUpload async_upload;   /* used to upload the mosaic texture */
+    GLuint mosaic_tex;               /* the mosaic texture. */
+    Painter painter;                 /* @todo - we my replace this with a custom shader, but for testing the result of the mosaic we use this. */
   };
 
 } /* namespace mos */

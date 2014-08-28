@@ -7,9 +7,9 @@ if [ ! -d build.release ] ; then
 fi
 
 # Make sure the tinylib.h files are in sync.
-if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
-    cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
-fi
+# if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
+#     cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
+# fi
 
 cd build.release
 cmake -DCMAKE_BUILD_TYPE=Release ../ 
@@ -43,6 +43,7 @@ fi
 #./test_fex_load_image
 #./test_libav_rtmp
 #./test_video_stream_player
-#./test_mosaic
-./test_offline_analyzer
+./test_mosaic
+#./test_offline_analyzer
 #./test_online_analyzer
+#./test_async_upload

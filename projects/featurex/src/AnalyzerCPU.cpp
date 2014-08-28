@@ -7,6 +7,7 @@ namespace fex {
 
   /* ---------------------------------------------------------------------------------- */
 
+  static int convert_to_rgba_png(AnalyzerCPU* ana, AnalyzerTask* task, std::string filepath);
   static void* analyzer_cpu_thread(void* user);
 
   /* ---------------------------------------------------------------------------------- */
@@ -53,7 +54,17 @@ namespace fex {
     ,is_running(false)
     ,on_analyzed(NULL)
     ,user(NULL)
+    ,rgba(NULL)
   {
+
+    /* the mutex and cond var are kept for the whole lifetime of the analyzer */
+    if (0 !=  pthread_mutex_init(&mutex, NULL)) {
+      RX_ERROR("Cannot initialize the mutex.");
+    }
+
+    if (0 != pthread_cond_init(&cond, NULL)) {
+      RX_ERROR("Cannot initilialize the cond var.");
+    }
   }
 
   AnalyzerCPU::~AnalyzerCPU() {
@@ -67,6 +78,17 @@ namespace fex {
     user = NULL;
     must_stop = true;
     is_running = false;
+
+    /* and destory the mutex + cond var */
+    int r = pthread_mutex_destroy(&mutex);
+    if (0 != r) {
+      RX_ERROR("Cannot destroy mutex: %d", r);
+    }
+
+    r = pthread_cond_destroy(&cond);
+    if (0 != r) {
+      RX_ERROR("Cannot destory condiation variable: %d", r);
+    }
   }
 
   int AnalyzerCPU::init() {
@@ -81,15 +103,26 @@ namespace fex {
       return -2;
     }
 
-    /* @todo - destroy mutex, cond, thread. */
-    if (0 !=  pthread_mutex_init(&mutex, NULL)) {
-      RX_ERROR("Cannot initialize the mutex.");
-      return -3;
+    if (NULL != rgba) {
+      RX_ERROR("It seems that the rgba buffer is already created. Did you call shutdown?");
+      return -4;
     }
 
-    if (0 != pthread_cond_init(&cond, NULL)) {
-      RX_ERROR("Cannot initilialize the cond var.");
-      return -4;
+    /* create buffer that is used when converting input tile pixels to 4 channels */
+    if (0 == fex::config.file_tile_width) {
+      RX_ERROR("File tile width is 0");
+      return -5;
+    }
+    if (0 == fex::config.file_tile_height) {
+      RX_ERROR("File tile height is 0");
+      return -6;
+    }
+
+    int tile_bytes = fex::config.file_tile_width * fex::config.file_tile_height * 4;
+    rgba = (unsigned char*) malloc(tile_bytes);
+    if (NULL == rgba) {
+      RX_ERROR("Error while allocating the rgba buffer");
+      return -7;
     }
 
     must_stop = false;
@@ -122,18 +155,13 @@ namespace fex {
     RX_VERBOSE("Shutting down thread.");
     pthread_join(thread, NULL);
 
-    r = pthread_mutex_destroy(&mutex);
-    if (0 != r) {
-      RX_ERROR("Cannot destroy mutex: %d", r);
-    }
-
-    r = pthread_cond_destroy(&cond);
-    if (0 != r) {
-      RX_ERROR("Cannot destory condiation variable: %d", r);
-    }
-
     for (size_t i = 0; i < tasks.size(); ++i) {
       delete tasks[i];
+    }
+
+    if (NULL != rgba) {
+      free(rgba);
+      rgba = NULL;
     }
 
     tasks.clear();
@@ -211,6 +239,7 @@ namespace fex {
       for (size_t i = 0; i < tasks.size(); ++i) {
         if (tasks[i]->is_free) {
           result = tasks[i];
+          result->is_free = false;
           break;
         }
       }
@@ -227,6 +256,8 @@ namespace fex {
         return NULL;
       }
 
+      result->is_free = false;
+
       /* and append to the list */
       lock();
         tasks.push_back(result);
@@ -237,8 +268,6 @@ namespace fex {
     if (100 < num_tasks) {
       RX_WARNING("There are currently %lu tasks created; are we freeing them? Or do we get too many images?", num_tasks);
     }
-
-    result->is_free = false;
 
     return result;
   }
@@ -266,17 +295,22 @@ namespace fex {
       return -2;
     }
 
-    /* first resize! */
-    std::string filename = rx_strip_dir(task->filepath);
+    /* we're only using .png when analyzing; the preprocess.sh file converts the images to png. */
+    std::string filename = rx_strip_file_ext(rx_strip_dir(task->filepath)) +".png";
     std::string basename = rx_strip_file_ext(filename);
-    
     std::string resized_filepath = fex::config.resized_filepath +basename +".png";
     std::string command = "./preprocess.sh " +task->filepath ;
+
     if (0 == filename.size()) {
       RX_ERROR("Filename is invalid.");
       return -3;
     }
     system(command.c_str());
+
+    /* make sure the image we use has 4 channels. */
+    if (0 != convert_to_rgba_png(this, task, resized_filepath)) {
+      return -3;
+    }
 
     /* check if the resized file was created. */
     if (false == rx_file_exists(resized_filepath)) {
@@ -284,26 +318,19 @@ namespace fex {
       return -4;
     }
 
-    RX_VERBOSE("Processing %s", task->filepath.c_str());
-
-    /* load the image resized image */
+    /* make sure we have a png */
     ext = rx_get_file_ext(resized_filepath);
     if (ext == "jpg") {
-      /* @todo - the resized filename must be PNG as we're loading 4 channel images only */
       RX_ERROR("This is something we need to clean up. The resized images need to be all 4 channels - is necessary for the fast memcpy ");
-      //ret = rx_load_jpg(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
-    }
-    else if(ext == "png") {
-      ret = rx_load_png(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
-    }
-    else {
-      RX_ERROR("Unsupported file extension: %s\n", ext.c_str());
-    }
-    if (ret < 0) {
-      RX_ERROR("Something went wrong with loading %s", resized_filepath.c_str());
-      return -3;
+      return -5;
     }
 
+    /* laod the image */
+    ret = rx_load_png(resized_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
+    if (ret < 0) {
+      RX_ERROR("Something went wrong with loading %s", resized_filepath.c_str());
+      return -6;
+    }
 
     RX_VERBOSE("Loaded %s, %d x %d, channels: %d, bytes allocated %d", 
                resized_filepath.c_str(),
@@ -312,9 +339,9 @@ namespace fex {
                task->channels,
                task->capacity);
 
-    if (3 != task->channels) {
+    if (3 == task->channels) {
       RX_WARNING("We're not analyzing the image because the number of channels is not yet supported: %d", task->channels);
-      return -4;
+      return -7;
     }
 
     /* AVERAGE COLORS */
@@ -338,8 +365,6 @@ namespace fex {
     desc.average_color[2] = b;
 
     descriptors.push_back(desc);
-
-    printf("R: %llu G: %llu B: %llu\n", r,g,b);
 
     if (on_analyzed) {
       on_analyzed(desc, user);
@@ -380,16 +405,17 @@ namespace fex {
       /* wait for work to arrive */
       ana->lock();
       {
-        while (0 == todo.size() && false == ana->must_stop) {
+        while (0 == ana->work.size() && false == ana->must_stop) {
           pthread_cond_wait(&ana->cond, &ana->mutex);
-          std::copy(ana->work.begin(), ana->work.end(), std::back_inserter(todo));
-          ana->work.clear();
         }
+        std::copy(ana->work.begin(), ana->work.end(), std::back_inserter(todo));
+        ana->work.clear();
       }
       ana->unlock();
       
       /* must stop? */
       if (ana->must_stop) {
+        RX_VERBOSE("Analyzer thread was asked to stop");
         break;
       }
 
@@ -398,10 +424,16 @@ namespace fex {
         continue;
       }
 
-      RX_VERBOSE("Got %lu tasks", todo.size());
-
+      RX_VERBOSE("Processing %lu tasks", todo.size());
       for (size_t i = 0; i < todo.size(); ++i) {
         AnalyzerTask* task = todo[i];
+
+        if (ana->must_stop) {
+          RX_VERBOSE("Stopping with the analyze task");
+          break;
+        }
+
+        RX_VERBOSE("Processing task nr. %lu/%lu", i, todo.size());
 
         if (task->type == ANA_TASK_ANALYZE) {
           ana->executeAnalyzeTask(task);
@@ -409,17 +441,83 @@ namespace fex {
         else {
           RX_ERROR("Unhandled task: %d", task->type);
         }
-        /* @todo -> free the task again -- and check if we actually should add a lock here? */
-        task->reset();
-
-        RX_VERBOSE("And free'd again.");
       }
+
+      RX_VERBOSE("Ready, done %lu tasks", todo.size());
+
+      /* and reset all tasks. */
+      ana->lock();
+      {
+        for (size_t i = 0; i < todo.size(); ++i) {
+          todo[i]->reset();
+        }
+      }
+      ana->unlock();
+
       todo.clear();
     }
 
     ana->is_running = false;
 
     return NULL;
+  }
+
+  /* 
+     converts the given filepath to a 4 channel png. we use the rgba buffer of the analyzer. 
+     the input image must be a PNG file!
+   */
+  static int convert_to_rgba_png(AnalyzerCPU* ana, AnalyzerTask* task, std::string filepath) {
+    std::string input_filepath = filepath;
+    std::string ext = rx_get_file_ext(input_filepath);
+    int nbytes;
+    int i,j,k;
+    int src_dx, dest_dx;
+
+    if (NULL == task) {
+      RX_ERROR("Invalid task");
+      return -1;
+    }
+
+    /* check if the file exists .*/
+    if (false == rx_file_exists(input_filepath)) {
+      RX_ERROR("Cannot find the file that we need to convert to rgba: %s", input_filepath.c_str());
+      return -2;
+    }
+
+    /* load the image. */
+    if (ext != "png") {
+      RX_ERROR("We don't support %s files.", ext.c_str());
+      return -3;
+    }
+
+    /* load and check if the file has 4 channels, if so we're good. */
+    nbytes = rx_load_png(input_filepath, &task->pixels, task->width, task->height, task->channels, &task->capacity);
+    if (task->channels == 4) {
+      return 0;
+    }
+
+    /* convert the pixels to 4 channels */
+    for (i = 0; i < task->width; ++i) {
+      for (j = 0; j < task->height; ++j) {
+        dest_dx = j * task->width * 4 + i * 4;
+        src_dx = j * task->width * task->channels + i * task->channels;
+        for (k = 0; k < 4; ++k) {
+          if (k < task->channels) {
+            ana->rgba[dest_dx + k] = task->pixels[src_dx + k];
+          }
+          else {
+            ana->rgba[dest_dx + k] = 0xFF;
+          }
+        }
+      }
+    }
+     
+    if (false == rx_save_png(filepath, ana->rgba, task->width, task->height, 4, false)) {
+      RX_ERROR("Cannot save the PNG: %s with 4 channels", filepath.c_str());
+      return -4;
+    }
+
+    return 0;
   }
 
 } /* namespace fex */

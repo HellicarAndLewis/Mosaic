@@ -9,6 +9,7 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+ 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -21,20 +22,15 @@
 #define ROXLU_USE_OPENGL
 #include <tinylib.h>
 
-#define VIDEO_CAPTURE_IMPLEMENTATION
-#include <videocapture/CaptureGL.h>
+#include <gfx/AsyncUpload.h>
  
-#include <featurex/Config.h>
-#include <mosaic/Mosaic.h>
-#include <mosaic/Config.h>
-
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
 void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods);
 void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
-
+ 
 int main() {
  
   glfwSetErrorCallback(error_callback);
@@ -54,7 +50,7 @@ int main() {
   int w = 1280;
   int h = 720;
  
-  win = glfwCreateWindow(w, h, ">>> Mosaic Tester <<<", NULL, NULL);
+  win = glfwCreateWindow(w, h, "<< Async Buffer Transfers >>", NULL, NULL);
   if(!win) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -76,50 +72,88 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
+
   rx_log_init();
 
-  /* mosaic settings. */
-  mos::config.webcam_device = 0;
-  mos::config.webcam_width = 640;
-  mos::config.webcam_height = 480;
+  /* does the test image exist. */
+  std::string test_image = rx_to_data_path("test/test_async_upload.png");
+  if (false == rx_file_exists(test_image)) {
+    RX_ERROR("Cannot find: %s that we want to use for the async test.", test_image.c_str());
+    exit(0);
+  }
 
-  /* feature extractor settings. */
-  fex::config.raw_filepath = rx_to_data_path("input_raw/");
-  fex::config.resized_filepath = rx_to_data_path("input_resized/");
-  fex::config.blurred_filepath = rx_to_data_path("input_blurred/");
-  fex::config.input_tile_size = 16;
-  fex::config.input_image_width = mos::config.webcam_width;
-  fex::config.input_image_height = mos::config.webcam_height;
-  fex::config.cols = (fex::config.input_image_width / fex::config.input_tile_size);
-  fex::config.rows = (fex::config.input_image_height / fex::config.input_tile_size);
-  fex::config.show_timer = false;
-  fex::config.file_tile_width = 64;
-  fex::config.file_tile_height = 64;
-  fex::config.memory_pool_size = 1000;
-
-  mos::Mosaic mosaic;
-  if (0 != mosaic.init()) {
-    RX_ERROR("Cannot start the mosaic, check error messages");
+  /* load the test image. */
+  int width, height, channels, allocated = 0;
+  unsigned char* pixels = NULL;
+  int len = rx_load_png(test_image, &pixels, width, height, channels, &allocated);
+  if (0 > len) {
+    RX_ERROR("Cannot load %s, invalid image?", test_image.c_str());
+  }
+  if (0 == width || 0 == height || 0 == channels) {
+    RX_ERROR("Width, height or channels is 0.");
     exit(EXIT_FAILURE);
   }
+
+  RX_VERBOSE("Loaded: %s, width: %d, height: %d, channels: %d, bytes: %d", rx_strip_dir(test_image).c_str(), width, height, channels, allocated);
+
+  /* determine the pixel format. */
+  GLenum format = GL_RGBA8;
+  if (3 == channels) {
+    format = GL_RGB;
+  }
+  else if (4 == channels) {
+    format = GL_RGBA;
+  }
+  else {
+    RX_ERROR("Unsupported number of channels: %d", channels);
+    exit(EXIT_FAILURE);
+  }
+
+  /* create texture into which we upload */
+  GLuint tex = 0;
+  glGenTextures(1, &tex);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  gfx::AsyncUpload async_upload;
+  if (0 != async_upload.init(width, height, format)) {
+    RX_ERROR("Cannot upload the async uploader");
+    exit(EXIT_FAILURE);
+  }
+
+  Painter painter;
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     double n = rx_hrtime();
-    mosaic.update();
-    mosaic.draw();
-    double dt = double(rx_hrtime() - n) / 1e9;
-    RX_VERBOSE("FRAME: %f", dt);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    async_upload.upload(pixels);
+    double dt = ((double)(rx_hrtime()) - n) / (1000.0 * 1000.0 * 1000.0);
+    RX_VERBOSE("Took: %f", dt);
 
+    painter.clear();
+    painter.texture(tex, 0, 0, w, h);
+    painter.draw();
+ 
     glfwSwapBuffers(win);
     glfwPollEvents();
   }
-
-  mosaic.shutdown();
-
+ 
   glfwTerminate();
+
+  /* cleanup */
+  free(pixels);
+  pixels = NULL;
+  width = 0;
+  height = 0;
+  channels = 0;
+  allocated = 0;
  
   return EXIT_SUCCESS;
 }
@@ -134,28 +168,6 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
  
   switch(key) {
-    case GLFW_KEY_SPACE: {
-      fex::config.show_timer = !fex::config.show_timer;
-      break;
-    }
-    case GLFW_KEY_S: {
-      break;
-    }
-    case GLFW_KEY_L: {
-      break;
-    }
-    case GLFW_KEY_T: {
-      break;
-    }
-    case GLFW_KEY_1: {
-      break;
-    }
-    case GLFW_KEY_2: {
-      break;
-    }
-    case GLFW_KEY_3: {
-      break;
-    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;

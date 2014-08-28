@@ -46,7 +46,8 @@ int main() {
   }
 
   RX_VERBOSE("Loaded %lu files.", input_files.size());
-
+  fex::config.file_tile_width = 64;
+  fex::config.file_tile_height = 64;
   fex::config.resized_filepath = rx_to_data_path("input_resized") +"/";
   
   /* analyze the images. */

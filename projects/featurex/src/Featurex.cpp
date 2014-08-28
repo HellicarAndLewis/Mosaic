@@ -4,15 +4,23 @@
 
 namespace fex {
 
-  Featurex::Featurex() {
+  Featurex::Featurex() 
+    :mosaic_pixels(NULL)
+  {
 
   }
 
   Featurex::~Featurex() {
+    shutdown();
   }
 
   int Featurex::init(GLuint inputTex) {
     int r;
+
+    if (NULL != mosaic_pixels) {
+      RX_ERROR("Mosaic pixel buffer already allocated; didn't you call shutdown?");
+      return -1;
+    }
 
     /* start the cpu analyzer. */
     r = analyzer_cpu.init();
@@ -50,15 +58,17 @@ namespace fex {
     for (size_t i = 0; i < analyzer_cpu.descriptors.size(); ++i) {
       tiles.loadDescriptorTile(analyzer_cpu.descriptors[i]);
     }
-
-    int nbytes = 1280 * 1280 * 4; /* testing; our mosaic */
-    pixels = (unsigned char*)malloc(nbytes);
-    if (NULL == pixels) {
-      RX_ERROR("Cannot allocate the pixel buffer");
-      return -1;
-    }
     /* -------------------------------------------------------------------------- */
     /* END TESTING - LOAD FILES */
+
+    
+    /* create the surface that will hold the mosaic pixels. */
+    int nbytes = (fex::config.getMosaicImageWidth() * fex::config.getMosaicImageHeight()) * 4; 
+    mosaic_pixels = (unsigned char*)malloc(nbytes);
+    if (NULL == mosaic_pixels) {
+      RX_ERROR("Cannot allocate the pixel buffer");
+      return -2;
+    }
 
     return 0;
   }
@@ -88,6 +98,12 @@ namespace fex {
       RX_ERROR("Cannot shutdown the tiles pool");
     }
 
+    /* free the mosaic pixel buffer. */
+    if (NULL != mosaic_pixels) {
+      free(mosaic_pixels);
+    }
+    mosaic_pixels = NULL;
+
     return r;
   }
 
@@ -113,8 +129,16 @@ namespace fex {
       RX_WARNING("No descriptors found in the gpu analyzer. cannot match.");
       return;
     }
+    if (NULL == mosaic_pixels) {
+      RX_ERROR("Trying to match descriptors + create mosaic, but the pixel buffer is NULL. Forgot to cal init()?");
+      return;
+    }
 
     uint64_t n = rx_hrtime();
+
+    RX_VERBOSE("CPU descriptors: %lu, GPU descriptors: %lu", 
+               analyzer_cpu.descriptors.size(), 
+               analyzer_gpu.descriptors.size());
 
     for (size_t i = 0; i < analyzer_gpu.descriptors.size(); ++i) {
 
@@ -129,12 +153,29 @@ namespace fex {
 
       Tile* tile = tiles.getTileForDescriptorID(cdesc.id);
       if (NULL == tile) {
+        //RX_VERBOSE("Cannot file a tile for the descriptor: %u", cdesc.id);
         continue;
       }
 
+      if (4 != tile->nchannels) {
+        RX_ERROR("We have optimized the tilepool for 4 channel images");
+        continue;
+      }
 
-      //RX_VERBOSE("Found a descriptor for row: %d and col: %d", gdesc.row, gdesc.col);
-      
+#if 1
+      /* construct the mosaic. */
+      int src_stride = tile->nchannels * fex::config.file_tile_width;
+      int dest_stride = fex::config.getMosaicImageWidth() * 4; /* @todo - make dynamic */
+      int y0 = (gdesc.row * fex::config.file_tile_height) * dest_stride;
+      int x0 = (gdesc.col * fex::config.file_tile_width * 4);
+
+      for (int k = 0; k < fex::config.file_tile_height; ++k) {
+        int src_dx = k * src_stride;
+        int dest_dx = y0 + (k * dest_stride) + x0;
+        memcpy(mosaic_pixels + dest_dx, tile->pixels + src_dx, src_stride);
+      }
+#endif
+
 #if 0
       RX_VERBOSE("Matched: (%d,%d,%d) <> (%d,%d,%d)",
                  gdesc.average_color[0],
@@ -144,10 +185,21 @@ namespace fex {
                  cdesc.average_color[1],
                  cdesc.average_color[2]);
 #endif
+
     }
 
     double d = double(rx_hrtime() - n) / (1000.0 * 1000.0 * 1000.0);
-    RX_VERBOSE("Comparing took: %f", d);
+    RX_VERBOSE("Comparing + constructing the image took: ~%f", d);
+
+#if 0
+    static int frame = 1;
+    if (frame % 30 == 0) {
+      std::string fname = "mosaic_" +rx_get_time_string() +".png";
+      rx_save_png(fname, mosaic_pixels, fex::config.getMosaicImageWidth(), fex::config.getMosaicImageHeight(), 4, false);
+    }
+    frame++;
+#endif
+
     //    RX_VERBOSE("-");
   }
 

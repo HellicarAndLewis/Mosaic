@@ -33,6 +33,7 @@
 #define IMAGE_PNG 2
 
 namespace gfx {
+  
   class Image {
 
   public:
