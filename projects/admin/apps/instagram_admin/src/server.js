@@ -9,6 +9,8 @@ var Express = require('express');
 var Program = require('commander');
 var Http = require('http');
 var SocketIo = require('socket.io');
+var MongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
 
 var Console = require('./Console');
 var Instagram = require('./Instagram');
@@ -21,10 +23,19 @@ var Server = new Class({
   // Options
   ,options: {
     
-    client_id: '8357c3f32006446f9fd97d907e1a2954'
-    ,client_secret: 'd20bc262654f47c0a90ecda76af22120'
-    ,host: '77.248.89.153'
-    ,port: 3333 
+    instagram: {
+      client_id: '8357c3f32006446f9fd97d907e1a2954'
+      ,client_secret: 'd20bc262654f47c0a90ecda76af22120'
+    }
+    ,http: {
+      host: '77.248.89.153'
+      ,port: 3333
+    }
+    ,mongodb: {
+      host: 'localhost'
+      ,port: 27017
+      ,db: 'mosaic'
+    }
   }
   
   // Constructor
@@ -39,6 +50,41 @@ var Server = new Class({
       .option('-c, --clear', 'Clear all subscriptions')
       .parse(process.argv);
     
+    this.connectDb();
+  }
+  
+  // Connect to mongodb
+  // --------------------------------------------------------
+  ,connectDb: function() {
+    
+    var self = this;
+    
+    MongoClient.connect(
+      
+      'mongodb://' 
+      + this.options.mongodb.host 
+      + ':' + this.options.mongodb.port 
+      + '/' + this.options.mongodb.db
+      
+      , function(err, db) {
+
+        if(err) throw err;
+        
+        Console.info('MongoDb connected');
+        
+        self.db = db;
+        
+        self.setupServer();
+        self.setupInstagramApi();
+      }
+    
+    );
+  }
+  
+  // Setup http server and socket.io
+  // --------------------------------------------------------
+  ,setupServer: function() {
+    
     // Create expressjs app
     this.app = Express();
     
@@ -46,22 +92,34 @@ var Server = new Class({
     this.server = Http.Server(this.app);
     this.socket = new SocketIo(this.server);
     
-    // Use tag route
-    this.tagRouter = new Routes.Tag();
-    this.app.use(this.tagRouter.router);
+    // Tag subscription router
+    this.tagSubscriptionRouter = new Routes.TagSubscription(this);
+    this.app.use(this.tagSubscriptionRouter.router);
     
-    // Use admin route
-    this.adminRouter = new Routes.Admin();
+    // Admin router
+    this.adminRouter = new Routes.Admin(this);
     this.app.use(this.adminRouter.router);
     
-    // Start listening
-    this.server.listen(this.options.port);
+    // Images router
+    this.imagesRouter = new Routes.Images(this);
+    this.app.use(this.imagesRouter.router);
+    
+    // Start http server
+    this.server.listen(this.options.http.port);
+    
+    Console.info('Server started');
+    
+  }
   
+  // Setup Instagram API
+  // --------------------------------------------------------
+  ,setupInstagramApi: function() {
+    
     // Create Instagram api
     this.instagram = new Instagram({
       
-      client_id: this.options.client_id
-      ,client_secret: this.options.client_secret
+      client_id: this.options.instagram.client_id
+      ,client_secret: this.options.instagram.client_secret
     });
     
     // Clear subscriptions
@@ -71,10 +129,8 @@ var Server = new Class({
       return;
     }
 
-    Console.info('Server started');
-    
     // Get recent medua
-    this.getTagRecentMedia('test');
+    this.getTagRecentMedia('beautiful');
     
   }
   
@@ -99,43 +155,112 @@ var Server = new Class({
     
     var self = this;
         
-    // Get recent tag media
+    // Get recent media for tag callback
     var rm_callback = function(err, medias, pagination, remaining, limit) {
  
-      Console.status('Received recent media for tag ' + tag);
+      //Console.status('Received recent media for tag ' + tag);
       Console.status('  ' + remaining + ' remaining calls');
-      Console.status('  ' + medias.length + ' media found');
-    
+      //Console.status('  ' + medias.length + ' media found');
+      
+      // Retry after x seconds
+      // if media is not updated or
+      // failed to return any images
       var retry = function() {
         
         setTimeout(function() {
 
-          self.instagram.getTagRecentMedia(tag, {}, rm_callback);
-        }, 5000); 
+          self.instagram.getTagRecentMedia(tag, {min_tag_id:pagination.min_tag_id}, rm_callback);
+        }, 2000); 
       }
       
+      // Empty check
       if(medias) {
-   
-        if(medias[0].id != self.lastMediaId) {
-          
-          self.socket.emit('medias', medias);
-          medias[0].id = self.lastMediaId;
-        }
         
-        if(pagination) {
-          if(pagination.next) {
-            pagination.next(rm_callback);
-          } else {
-            retry();
+        var collection = self.db.collection('instagram');
+  
+        // Fill new array with all media
+        var new_medias = new Array();
+        
+        // Iterator
+        var next_media = function(list, callback) {
+          
+          if(list.length == 0) {
+            callback();
+            return;
           }
-        } else {
-          retry();
-        }  
+          
+          var media = list.pop();
+          
+          // Check for image type and existing id
+          if(media.type = 'image' && media.id) {
+            
+            // Check if media already exists
+            var exists = collection.find({media_id: media.id}, {_id: 1}).limit(1);
+            exists.count(function(err, count) {
+             
+              // If media doesn't exist
+              if(count==0) {
+                
+                // Create media object
+                new_medias.push({
+
+                  media_id: media.id
+                  ,images: media.images
+                  ,user: media.user
+                  ,filter: media.filter
+                  ,tags: media.tags
+                  ,link: media.link
+                  ,created_time: media.created_time
+                  ,modified_time: Date.now().toString()
+                  ,locked_time: Date.now().toString()
+                  ,locked: false
+                  ,approved: false
+                  ,reviewed: false
+                });
+              }
+              
+              next_media(list, callback);
+              
+            });
+          }
+        };
+        
+        // Check all media and add to db
+        // if media does not exist
+        next_media(Array.clone(medias), function() {
+          
+          var d = new Date();
+          Console.status(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ' + new_medias.length + ' media added');
+          
+          if(new_medias.length > 0) {
+            
+            collection.insert(new_medias, {w:1}, function(err, result) {
+
+              if(err) throw err;
+
+              // Call next page if pagination
+              // is available
+              if(pagination) { 
+                if(pagination.next) { 
+                  pagination.next(rm_callback); 
+                } else { 
+                  retry(); 
+                }
+              } else {
+                retry();
+              }  
+            });
+          } else {
+            retry(); 
+          }
+        });
+
       } else {
         retry(); 
       }
     }
     
+    // Get recent media for tag
     this.instagram.getTagRecentMedia(tag, {}, rm_callback);
   }
   
