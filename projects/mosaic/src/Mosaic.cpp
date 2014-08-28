@@ -60,6 +60,8 @@ namespace mos {
   }
 
   void Mosaic::update() {
+
+    /* update the input texture - is used by the gpu analyzer.*/
     video_input.update();
     
     /* new input, update gpu analyzer. */
@@ -76,7 +78,7 @@ namespace mos {
 
   void Mosaic::draw() {
     
-    video_input.draw();
+   
 
     /* tmp - fullscreen draw */
     GLint vp[4];
@@ -91,6 +93,7 @@ namespace mos {
     painter.draw();
 
     //featurex.draw();
+    video_input.draw();
   }
 
   int Mosaic::shutdown() {

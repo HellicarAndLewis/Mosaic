@@ -124,14 +124,10 @@ namespace mos {
   }
 
   void VideoInput::update() {
-    if (0 == is_init) {  return;  }
 
-    needs_update = capture.needs_update;
-
-    capture.update();
-  }
-
-  void VideoInput::draw() {
+    if (0 == is_init) {
+      return; 
+    }
 
 #if !defined(NDEBUG)
     if (0 != mos::config.validateWindowSize()) {
@@ -139,8 +135,11 @@ namespace mos {
     }
 #endif
 
-    if (0 == is_init) { return; }
+    needs_update = capture.needs_update;
 
+    capture.update();
+
+    /* update the input texture */
     if (needs_update) {
       glViewport(0, 0, mos::config.webcam_width, mos::config.webcam_height);
       fbo.bind();
@@ -148,12 +147,22 @@ namespace mos {
       fbo.unbind();
       glViewport(0, 0, mos::config.window_width, mos::config.window_height);
     }
+  }
 
-    /* draw the webcam to screen */
-    capture.draw(); 
-    /*
+  void VideoInput::draw() {
+
+    if (0 == is_init) {
+      return; 
+    }
+
+#if !defined(NDEBUG)
+    if (0 != mos::config.validateWindowSize()) {
+      return;
+    }
+#endif
+
+    /* draw the webcam to screen (tiny) */
     capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
-    */
   }
 
 
