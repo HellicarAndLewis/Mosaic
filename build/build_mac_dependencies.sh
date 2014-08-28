@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 d=${PWD}
 sd=${d}/mac-sources
 bd=${d}/../extern/mac-clang-x86_64
@@ -168,7 +168,7 @@ if [ ! -d ${sd}/imagemagick ] ; then
 fi
 
 # Fix ImageMagick dylibs + install
-if [ ! -f ${id}/lib/libMagick++-6.Q16.3.dylib ] ; then
+if [ ! -f ${id}/bin/convert ] ; then
     if [ ! -d ${id} ] ; then 
         mkdir ${id}
     fi
@@ -184,6 +184,7 @@ if [ ! -f ${id}/lib/libMagick++-6.Q16.3.dylib ] ; then
     for dylib in `ls -1 *.dylib`; do
         for app in ${sd}/imagemagick/bin/* ; do 
             install_name_tool -change "/ImageMagick-6.8.9/lib/${dylib}" "@executable_path/../lib/${dylib}" ${app}
+            cp ${app} ${id}/imagemagick/
         done
     done
     
