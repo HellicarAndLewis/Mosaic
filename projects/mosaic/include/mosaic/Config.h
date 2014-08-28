@@ -10,6 +10,9 @@ namespace mos {
 
   /* --------------------------------------------------------------------------------- */
 
+  int load_config();
+  int save_config();
+
   class Config {
   public:
     Config();

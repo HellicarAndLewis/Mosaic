@@ -78,6 +78,12 @@ int main() {
   // ----------------------------------------------------------------
   rx_log_init();
 
+  if (0 != mos::load_config()) {
+    RX_ERROR("Cannot load config. stopping.");
+    exit(EXIT_FAILURE);
+  }
+
+#if 0
   /* mosaic settings. */
   mos::config.webcam_device = 0;
   mos::config.webcam_width = 640;
@@ -96,6 +102,7 @@ int main() {
   fex::config.file_tile_width = 64;
   fex::config.file_tile_height = 64;
   fex::config.memory_pool_size = 1000;
+#endif
 
   mos::Mosaic mosaic;
   if (0 != mosaic.init()) {

@@ -1,0 +1,12 @@
+<settings>
+  <webcam_device>0</webcam_device>
+  <webcam_width>640</webcam_width>
+  <webcam_height>480</webcam_height>
+  <raw_filepath>input_raw/</raw_filepath>
+  <resized_filepath>input_resized/</resized_filepath>
+  <blurred_filepath>input_blurred/</blurred_filepath>
+  <input_tile_size>16</input_tile_size>
+  <file_tile_width>64</file_tile_width>  
+  <file_tile_height>64</file_tile_height>
+  <memory_pool_size>1000</memory_pool_size>
+</settings>

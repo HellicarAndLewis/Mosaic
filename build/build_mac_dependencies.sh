@@ -117,6 +117,14 @@ if [ ! -d ${sd}/libpng ] ; then
     mv libpng-1.2.51 libpng
 fi
 
+# Download rapidxml
+if [ ! -d ${sd}/rapidxml ] ; then 
+    cd ${sd}
+    curl -o rapidxml.zip -L "https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip/download"
+    unzip rapidxml.zip
+    mv rapidxml-1.13 rapidxml
+fi 
+
 # Download libjpg
 if [ ! -d ${sd}/libjpeg ] ; then 
     cd ${sd}
@@ -229,9 +237,13 @@ fi
 if [ -f ${sd}/imagemagick.tar.gz ] ; then 
     rm ${sd}/imagemagick.tar.gz
 fi 
-if [ -f $sd}/yasm.tar.gz ] ; then 
+
+if [ -f ${sd}/yasm.tar.gz ] ; then 
     rm ${sd}/yasm.tar.gz
 fi 
+if [ -f ${sd}/rapidxml.zip ] ; then
+    rm ${sd}/rapidxml.zip
+fi
 
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
@@ -343,4 +355,13 @@ if [ ! -f ${bd}/lib/libavcodec.a ] ; then
     ./configure --prefix=${bd} --enable-gpl 
     make
     make install
+fi
+
+# Move rapid xml sources 
+if [ ! -f ${bd}/include/rapidxml_iterators.hpp ] ; then
+    cd ${sd}/rapidxml
+    cp rapidxml_iterators.hpp ${bd}/include/
+    cp rapidxml_print.hpp ${bd}/include/
+    cp rapidxml_utils.hpp ${bd}/include/
+    cp rapidxml.hpp ${bd}/include/
 fi
