@@ -14,6 +14,11 @@ namespace mos {
   int Mosaic::init() {
     int r;
 
+    if (0 != mos::load_config()) {
+      RX_ERROR("Cannot load config. stopping.");
+      return -99;
+    }
+
     /* get the texture sizes for the mosaic. */
     int mw = fex::config.getMosaicImageWidth();
     int mh = fex::config.getMosaicImageHeight();
@@ -70,19 +75,21 @@ namespace mos {
   }
 
   void Mosaic::draw() {
+    
+    video_input.draw();
+
     /* tmp - fullscreen draw */
     GLint vp[4];
     glGetIntegerv(GL_VIEWPORT, vp);
     if (0 == vp[3] || 0 == vp[2]) {
       RX_ERROR("Cannot get viewport values!");
       return;
-    }
-    
+    } 
+
     painter.clear();
     painter.texture(mosaic_tex, 0, vp[3], vp[2], -vp[3]);
     painter.draw();
 
-    video_input.draw();
     //featurex.draw();
   }
 

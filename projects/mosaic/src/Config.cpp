@@ -41,10 +41,24 @@ namespace mos {
     return 0;
   }
 
+  int Config::validateWindowSize() {
+    if (0 == mos::config.window_width) {
+      RX_ERROR("Invalid window width.");
+      return -1;
+    }
+    if (0 == mos::config.window_height) {
+      RX_ERROR("Invalid window height.");
+      return -2;
+    }
+    return 0;
+  }
+
   void Config::reset() {
     webcam_device = 0;
     webcam_width = 0;
     webcam_height = 0;
+    window_width = 0;
+    window_height = 0;
   }
 
   /* --------------------------------------------------------------------------------- */
@@ -62,7 +76,8 @@ namespace mos {
     if (false == ifs.is_open()) {
       RX_ERROR("Cannot open the configuration file.");
       return -2;
-    }
+   
+ }
 
     std::string xml_str;
     xml_str.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());

@@ -78,10 +78,8 @@ int main() {
   // ----------------------------------------------------------------
   rx_log_init();
 
-  if (0 != mos::load_config()) {
-    RX_ERROR("Cannot load config. stopping.");
-    exit(EXIT_FAILURE);
-  }
+  mos::config.window_width = w;
+  mos::config.window_height = h;
 
 #if 0
   /* mosaic settings. */

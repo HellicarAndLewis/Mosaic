@@ -94,12 +94,8 @@ namespace fex {
         desc.average_color[2] = b;
         desc.row = j;
         desc.col = i;
-        //printf("(%d,%d,%d,%d),  ", colors[dx + 0], colors[dx + 1], colors[dx + 2], colors[dx + 3]);
       }
-      //printf("\n");
     }
-
-    //printf("-\n");
 #endif
 
     return 0;
