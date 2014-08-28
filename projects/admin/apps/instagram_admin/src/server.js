@@ -47,7 +47,8 @@ var Server = new Class({
     // Process args
     this.args = Program
       .version('0.0.1')
-      .option('-c, --clear', 'Clear all subscriptions')
+      .option('-c, --clear', 'Clear all instagram subscriptions')
+      .option('-n, --nopoll', 'Start without media polling')
       .parse(process.argv);
     
     this.connectDb();
@@ -129,8 +130,10 @@ var Server = new Class({
       return;
     }
 
-    // Get recent medua
-    this.getTagRecentMedia('beautiful');
+    // Get recent media
+    if(!Program.nopoll) {
+      this.getTagRecentMedia('beautiful');
+    }
     
   }
   
@@ -210,9 +213,9 @@ var Server = new Class({
                   ,filter: media.filter
                   ,tags: media.tags
                   ,link: media.link
-                  ,created_time: media.created_time
-                  ,modified_time: Date.now().toString()
-                  ,locked_time: Date.now().toString()
+                  ,created_time: parseInt(media.created_time)
+                  ,modified_time: Date.now()
+                  ,locked_time: Date.now()
                   ,locked: false
                   ,approved: false
                   ,reviewed: false
