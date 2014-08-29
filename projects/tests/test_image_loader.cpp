@@ -165,8 +165,11 @@ int main() {
     }
 
     if (0 != tex_id) {
+      int x = MAX(0, (w/2) - (tex_width/2));
+      int y = 0;
+
       painter.clear();
-      painter.texture(tex_id, 0, 0, tex_width, tex_height);
+      painter.texture(tex_id, x, y, tex_width, tex_height);
       painter.draw();
     }
 
