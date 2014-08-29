@@ -10,6 +10,15 @@ set(gfx_sd ${bd}/projects/gfx/src)
 set(vid_sd ${bd}/projects/video/src)
 set(mos_sd ${bd}/projects/mosaic/src)
 
+ADD_DEFINITIONS(
+ 
+    # Other flags
+)
+set(CMAKE_CXX_FLAGS "-std=c++11") 
+ # Or -std=c++0x
+    # Other flags
+#)
+
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/../src
   ${CMAKE_CURRENT_LIST_DIR}/../include
@@ -96,12 +105,16 @@ set(mosaic_lib_sources
   ${mos_sd}/Mosaic.cpp
   ${mos_sd}/Config.cpp
   ${mos_sd}/VideoInput.cpp
+  ${mos_sd}/ImageLoader.cpp
+  ${mos_sd}/DirWatcher.cpp
 )
 
 macro(create_test name)
-  add_executable(test_${name} ${bd}/projects/tests/test_${name}.cpp ${extern_source_dir}/glad.c)
+  add_executable(test_${name} 
+    ${bd}/projects/tests/test_${name}.cpp 
+    ${extern_source_dir}/glad.c
+    )
   target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic videocapture)
-  #oadd_dependencies(test_${name} gfx fex vid mosaic videocapture)
   install(TARGETS test_${name} DESTINATION bin)
 endmacro()
 
@@ -122,13 +135,15 @@ add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
 # The tests used during development
-create_test(mosaic)
+#create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
 #create_test(video_stream_player)
 #create_test(offline_analyzer)
 #create_test(online_analyzer)
 #create_test(async_upload)
+create_test(image_loader)
+
 
 
 

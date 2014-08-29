@@ -155,7 +155,6 @@ namespace gfx {
     float val = 0;
     char buf[128] = { 0 };
 
-
     /* And draw :) */
     std::map<std::string, std::deque<double> >::iterator it = history.begin();
     while (it != history.end()) {
@@ -181,9 +180,10 @@ namespace gfx {
       painter_fg.rect(0, y - 3, viewport[2], 3);
       painter_bg.color(0.3f, 0.1f, 0.8f, 0.8f);      
       
+
       /* bars */
       for (size_t i = 0; i < vals.size(); ++i) {
-        
+
         /* make sure we never overshoot ^.^ */
         val = vals[i] / max_val; 
         if (val > 1.0) {

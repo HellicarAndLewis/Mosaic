@@ -77,22 +77,13 @@ namespace mos {
   }
 
   void Mosaic::draw() {
-    
-   
 
-    /* tmp - fullscreen draw */
-    GLint vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
-    if (0 == vp[3] || 0 == vp[2]) {
-      RX_ERROR("Cannot get viewport values!");
-      return;
-    } 
-
+    /* draw the result. */
     painter.clear();
-    painter.texture(mosaic_tex, 0, vp[3], vp[2], -vp[3]);
+    painter.texture(mosaic_tex, 0, mos::config.window_height, mos::config.window_width, -mos::config.window_height);
     painter.draw();
 
-    //featurex.draw();
+    /* draw a debug image. */
     video_input.draw();
   }
 
