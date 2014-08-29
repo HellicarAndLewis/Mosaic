@@ -21,11 +21,20 @@ var MosaicInstagramAdmin = Class.extend({
     var socket = io.connect('http://localhost:3333');
     
     this.getQueuedImages(2);
+    
+    var self = this;
+    $('div#approved-btn').click(function(e) {
+      self.updateImage($('#instagram-images li:first-child'), true);
+    });
+    
+    $('div#declined-btn').click(function(e) {
+      self.updateImage($('#instagram-images li:first-child'), false);
+    });
   }
   
   // 
   // --------------------------------------------------------
-  ,getQueuedImages: function(limit) {
+  ,getQueuedImages: function(limit, callback) {
     
     var self = this;
   
@@ -39,7 +48,11 @@ var MosaicInstagramAdmin = Class.extend({
       
       ,function(images) {
       
-        self.addImages(images); 
+        self.addImages(images);
+        
+        if(callback) {
+          callback(); 
+        }
       }
     );
   }
@@ -51,13 +64,18 @@ var MosaicInstagramAdmin = Class.extend({
     $(images).each(function(i, image) {
       
       var li = $('<li/>');
-      var img = new Image();
-
-      img.src = image.images.thumbnail.url;
-      $(img).attr('width', '100%');
-      $(img).attr('height', '100%');
       
-      li.append($(img));
+      li.attr({
+        'id': 'instagram-image-' + image.id
+      });
+      
+      li.data('media-id', image.id);
+      li.data('item-id', image._id);
+      
+      li.css({
+        'background-image': 'url(' + image.images.low_resolution.url + ')'
+      });
+      
       
       $('#instagram-images').append(li);
     });
@@ -65,7 +83,9 @@ var MosaicInstagramAdmin = Class.extend({
 
   // 
   // --------------------------------------------------------
-  ,updateImage: function(id, approved) {
+  ,updateImage: function(el, approved) {
+    
+    var self = this;
     
     $.post(
       'http://' 
@@ -74,12 +94,13 @@ var MosaicInstagramAdmin = Class.extend({
       + this.options.http.port 
       + '/images/update/' 
       ,{
-        id: id
+        id: el.data('item-id')
         ,approved: approved
-      })
-    
-    .done(function( data ) {
-      alert( "Data Loaded: " + data );
+      }).done(function(data) {
+  
+      self.getQueuedImages(2, function() {
+       el.remove(); 
+      });
     })
   }
 });

@@ -1,16 +1,25 @@
 {
   "name": "instagram-admin",
-  "version": "0.0.1",
+  "subdomain": "mosaic-instagram-admin",
+  "version": "0.0.1-1",
+  "scripts": {
+    "start": "node src/server.js"
+  },
   "description": "",
   "author": "Martin Bartels <martin@apollomedia.nl>",
-  "contributors": [{
-    "name": "Diederick Huijbers",
-    "email": "diederick@apollomedia.nl"
-  }],
-  "main": "src/main.js",
+  "contributors": [
+    {
+      "name": "Diederick Huijbers",
+      "email": "diederick@apollomedia.nl"
+    }
+  ],
+  "main": "src/server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/HellicarAndLewis/Mosaic"
+  },
+  "engines": {
+    "node": "v0.8.x"
   },
   "dependencies": {
     "express": "4.2.x",

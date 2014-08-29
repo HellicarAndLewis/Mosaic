@@ -47,7 +47,8 @@ var Server = new Class({
     // Process args
     this.args = Program
       .version('0.0.1')
-      .option('-c, --clear', 'Clear all subscriptions')
+      .option('-c, --clear', 'Clear all instagram subscriptions')
+      .option('-n, --nopoll', 'Start without media polling')
       .parse(process.argv);
     
     this.connectDb();
@@ -129,8 +130,10 @@ var Server = new Class({
       return;
     }
 
-    // Get recent medua
-    this.getTagRecentMedia('beautiful');
+    // Get recent media
+    if(!Program.nopoll) {
+      this.getTagRecentMedia('beautiful');
+    }
     
   }
   
@@ -157,10 +160,6 @@ var Server = new Class({
         
     // Get recent media for tag callback
     var rm_callback = function(err, medias, pagination, remaining, limit) {
- 
-      //Console.status('Received recent media for tag ' + tag);
-      Console.status('  ' + remaining + ' remaining calls');
-      //Console.status('  ' + medias.length + ' media found');
       
       // Retry after x seconds
       // if media is not updated or
@@ -168,10 +167,34 @@ var Server = new Class({
       var retry = function() {
         
         setTimeout(function() {
-
-          self.instagram.getTagRecentMedia(tag, {min_tag_id:pagination.min_tag_id}, rm_callback);
+          var opt = {};
+          
+          if(pagination) {
+            if(pagination.min_tag_id) {
+              var opt = {
+                min_tag_id: pagination.min_tag_id
+              }; 
+            }
+          }
+          
+          self.instagram.getTagRecentMedia(tag, opt, rm_callback);
         }, 2000); 
       }
+      
+      if(err) {
+        
+        if(err.status_code == 503) {
+          Console.error('503 Service Unavailable. No server is available to handle this request.');
+        } else {
+          Console.error('Get recent media request failed.');
+        }
+        retry();
+        return;
+      }
+      
+      //Console.status('Received recent media for tag ' + tag);
+      Console.status('  ' + remaining + ' remaining calls');
+      //Console.status('  ' + medias.length + ' media found');
       
       // Empty check
       if(medias) {
@@ -210,9 +233,9 @@ var Server = new Class({
                   ,filter: media.filter
                   ,tags: media.tags
                   ,link: media.link
-                  ,created_time: media.created_time
-                  ,modified_time: Date.now().toString()
-                  ,locked_time: Date.now().toString()
+                  ,created_time: parseInt(media.created_time)
+                  ,modified_time: Date.now()
+                  ,locked_time: Date.now()
                   ,locked: false
                   ,approved: false
                   ,reviewed: false
@@ -229,8 +252,8 @@ var Server = new Class({
         // if media does not exist
         next_media(Array.clone(medias), function() {
           
-          var d = new Date();
-          Console.status(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ' + new_medias.length + ' media added');
+          
+          Console.status(new_medias.length + ' media added');
           
           if(new_medias.length > 0) {
             
