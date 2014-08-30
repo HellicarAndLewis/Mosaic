@@ -66,7 +66,7 @@ var Server = new Class({
       // Include project file
       var settings = require(file);
       
-      Console.status('Started with custom settings ' + file);
+      Console.status('Started with settings ' + file);
       this.setOptions(settings);
       
       this.connectDb();

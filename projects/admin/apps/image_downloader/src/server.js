@@ -38,13 +38,13 @@ var ImageDownloader = new Class({
       // Include project file
       self.settings = require(file);
       
-      Console.status('Started with custom settings ' + file);
+      console.log('Started with settings ' + file);
       self.start();
       
     } else {
     
       // No file found
-      Console.error('Could not find settings file at ' + file);
+      console.log('Could not find settings file at ' + file);
     }
 
     
