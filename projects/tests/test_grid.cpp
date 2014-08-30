@@ -49,10 +49,10 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   
   GLFWwindow* win = NULL;
-  int w = 1800;
-  int h = 720;
+  int w = 1010;
+  int h = 355;
  
-  win = glfwCreateWindow(w, h, "++ --- GRID -- ++ ", NULL, NULL);
+  win = glfwCreateWindow(w, h, "++ --- GRID : copy images into the bin/data/test directory-- ++ ", NULL, NULL);
   if(!win) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -77,14 +77,11 @@ int main() {
 
   rx_log_init();
 
-  //uint64_t t = rx_get_file_mtime(rx_to_data_path("test/gray.png"));
-  //printf("%llu\n", t);
-
-  grid::Grid gr; 
-  if (0 != gr.init(rx_to_data_path("test"), 64, 64, 3, 5)) {
+  grid::Grid gr(GRID_DIR_LEFT); 
+  if (0 != gr.init(rx_to_data_path("test"), 64, 64, 5, 15)) {
     exit(EXIT_FAILURE);
   }
-  gr.offset.set(200,300);
+  gr.offset.set(10,10);
   gr.padding.set(2,2);
 
   grid_ptr = &gr;
@@ -122,11 +119,28 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
 
   switch(key) {
     case GLFW_KEY_LEFT: {
-      grid_ptr->pos_a.x -= 3.5;
+      grid_ptr->pos_a.x -= 5.5;
       break;
     }
     case GLFW_KEY_RIGHT: {
-      grid_ptr->pos_a.x += 3.5;
+      grid_ptr->pos_a.x += 5.5;
+      break;
+    }
+    case GLFW_KEY_I: {
+      RX_VERBOSE("Initializing the grid again.");
+      if (0 != grid_ptr->init(rx_to_data_path("test"), 64, 64, 5, 3)) {
+        RX_ERROR("Cannot initialize the grid.");
+        return;
+      }
+      grid_ptr->offset.set(300,300);
+      grid_ptr->padding.set(2,2);
+      break;
+    }
+    case GLFW_KEY_S: {
+      RX_VERBOSE("Shutdown the grid.");
+      if (0 != grid_ptr->shutdown()) {
+        RX_ERROR("Cannot shutdown!");
+      }
       break;
     }
     case GLFW_KEY_ESCAPE: {
