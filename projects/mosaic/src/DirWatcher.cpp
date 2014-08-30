@@ -91,19 +91,10 @@ namespace mos {
   /* --------------------------------------------------------------------- */
 
   static void on_dir_change(uv_fs_event_t* handle, const char* fname, int events, int status) {
-    RX_VERBOSE("Dir changed: %s", fname);
     if (UV_RENAME != events) {
       return ;
     }
     
-    /*
-    std::string ext = rx_get_file_ext(fname);
-    if (ext != "jpg" && ext != "png") {
-      RX_VERBOSE("Received an directory event for a non-image file: %s", fname);
-      return;
-    }
-    */
-
     DirWatcher* watch = static_cast<DirWatcher*>(handle->data);
     if (NULL == watch) {
       RX_ERROR("No data member set on the fs_event handle, not supposed to happend!");
