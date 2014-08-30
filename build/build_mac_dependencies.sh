@@ -168,7 +168,7 @@ if [ ! -d ${sd}/imagemagick ] ; then
 fi
 
 # Fix ImageMagick dylibs + install
-if [ ! -f ${id}/bin/convert ] ; then
+if [ ! -f ${id}/bin/imagemagick/convert ] ; then
     if [ ! -d ${id} ] ; then 
         mkdir ${id}
     fi
@@ -214,6 +214,12 @@ if [ ! -d ${sd}/yasm ] ; then
     curl -o yasm.tar.gz http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz
     tar -zxvf yasm.tar.gz
     mv yasm-1.3.0 yasm
+fi
+
+# Download microprofile
+if [ ! -d ${sd}/microprofile ] ; then
+    cd ${sd}
+    hg clone https://bitbucket.org/jonasmeyer/microprofile 
 fi
 
 # Cleanup some files we don't need anymore.
@@ -365,4 +371,10 @@ if [ ! -f ${bd}/include/rapidxml_iterators.hpp ] ; then
     cp rapidxml_print.hpp ${bd}/include/
     cp rapidxml_utils.hpp ${bd}/include/
     cp rapidxml.hpp ${bd}/include/
+fi
+
+# Move the microprofiler
+if [ ! -f ${bd}/include/microprofile.h ] ; then
+    cp ${sd}/microprofile/microprofile.h ${bd}/include
+    cp ${sd}/microprofile/demo/ui/microprofile.cpp ${bd}/src
 fi
