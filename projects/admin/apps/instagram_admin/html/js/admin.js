@@ -19,9 +19,6 @@ var MosaicInstagramAdmin = Class.extend({
     
     var self = this;
     
-    // Setup socket.io
-    var socket = io.connect('http://localhost:3333');
-    
     this.getQueuedImages(2, function() {
       
       // Approve / decline buttons events
