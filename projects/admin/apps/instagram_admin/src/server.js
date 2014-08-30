@@ -8,6 +8,8 @@ require('mootools');
 var Express = require('express');
 var Program = require('commander');
 var Http = require('http');
+var Path = require('path');
+var Fs = require('fs');
 var SocketIo = require('socket.io');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
@@ -26,6 +28,7 @@ var Server = new Class({
     instagram: {
       client_id: '8357c3f32006446f9fd97d907e1a2954'
       ,client_secret: 'd20bc262654f47c0a90ecda76af22120'
+      ,hashtag: 'beautiful'
     }
     ,http: {
       host: '77.248.89.153'
@@ -42,16 +45,38 @@ var Server = new Class({
   // --------------------------------------------------------
   ,initialize: function() {
     
-    var self = this;
-    
     // Process args
     this.args = Program
       .version('0.0.1')
       .option('-c, --clear', 'Clear all instagram subscriptions')
-      .option('-n, --nopoll', 'Start without media polling')
+      .option('-n, --nopolling', 'Start without media polling')
+      .option('-s, --settings [path]', 'Start with custom settings file')
       .parse(process.argv);
     
-    this.connectDb();
+    
+    var file = './settings.json';
+    
+    if(Program.settings) {
+      file = Path.normalize(process.cwd() + '/' + Program.settings);
+    }
+   
+    // Check if file exists...
+    if(Fs.existsSync(file)) {
+    
+      // Include project file
+      var settings = require(file);
+      
+      Console.status('Started with custom settings ' + file);
+      this.setOptions(settings);
+      
+      this.connectDb();
+      
+    } else {
+    
+      // No file found
+      Console.error('Could not find settings file at ' + file);
+    }
+
   }
   
   // Connect to mongodb
@@ -69,13 +94,19 @@ var Server = new Class({
       
       , function(err, db) {
 
-        if(err) throw err;
+        if(err) {
+          Console.error('Could not connect to DB');
+          process.exit(0);
+        }
         
         Console.info('MongoDb connected');
         
         self.db = db;
         
+        // Setup server
         self.setupServer();
+        
+        // Setup Instagram api
         self.setupInstagramApi();
       }
     
@@ -131,8 +162,8 @@ var Server = new Class({
     }
 
     // Get recent media
-    if(!Program.nopoll) {
-      this.getTagRecentMedia('beautiful');
+    if(!Program.nopolling) {
+      this.getTagRecentMedia(this.options.instagram.hashtag);
     }
     
   }
@@ -181,20 +212,24 @@ var Server = new Class({
         }, 2000); 
       }
       
+      // 503 error
       if(err) {
-        
+     
+        // Check for 503 status code
         if(err.status_code == 503) {
           Console.error('503 Service Unavailable. No server is available to handle this request.');
         } else {
           Console.error('Get recent media request failed.');
         }
+        
+        // Retry after x seconds
         retry();
+        
         return;
       }
-      
-      //Console.status('Received recent media for tag ' + tag);
-      Console.status('  ' + remaining + ' remaining calls');
-      //Console.status('  ' + medias.length + ' media found');
+      Console.clear();
+      Console.status('Received recent media for tag ' + tag);
+      Console.status(remaining + ' remaining calls');
       
       // Empty check
       if(medias) {
@@ -233,6 +268,8 @@ var Server = new Class({
                   ,filter: media.filter
                   ,tags: media.tags
                   ,link: media.link
+                  ,likes: media.likes.count
+                  ,location: media.location
                   ,created_time: parseInt(media.created_time)
                   ,modified_time: Date.now()
                   ,locked_time: Date.now()
@@ -251,7 +288,6 @@ var Server = new Class({
         // Check all media and add to db
         // if media does not exist
         next_media(Array.clone(medias), function() {
-          
           
           Console.status(new_medias.length + ' media added');
           
@@ -277,7 +313,6 @@ var Server = new Class({
             retry(); 
           }
         });
-
       } else {
         retry(); 
       }

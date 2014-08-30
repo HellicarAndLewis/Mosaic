@@ -1,0 +1,16 @@
+{
+  "instagram": {
+    "client_id": "8357c3f32006446f9fd97d907e1a2954"
+    ,"client_secret": "d20bc262654f47c0a90ecda76af22120"
+    ,"hashtag": "beautiful"
+  }
+  ,"http": {
+    "host": "77.248.89.153"
+    ,"port": 3333
+  }
+  ,"mongodb": {
+    "host": "localhost"
+    ,"port": 27017
+    ,"db": "mosaic"
+  }
+}

@@ -17,19 +17,31 @@ var MosaicInstagramAdmin = Class.extend({
   // --------------------------------------------------------
   ,init: function() {
     
+    var self = this;
+    
     // Setup socket.io
     var socket = io.connect('http://localhost:3333');
     
-    this.getQueuedImages(2);
-    
-    var self = this;
-    $('div#approved-btn').click(function(e) {
-      self.updateImage($('#instagram-images li:first-child'), true);
+    this.getQueuedImages(2, function() {
+      
+      // Approve / decline buttons events
+      $('div#approved-btn').click(function(e) {
+        if(!self.locked) {
+          $(this).addClass('highlight');
+          self.updateImage($('#instagram-images li:first-child'), true);
+        }
+      });
+
+      $('div#declined-btn').click(function(e) {
+        if(!self.locked) {
+          $(this).addClass('highlight');
+          self.updateImage($('#instagram-images li:first-child'), false);
+        }
+      });
+      
     });
     
-    $('div#declined-btn').click(function(e) {
-      self.updateImage($('#instagram-images li:first-child'), false);
-    });
+    
   }
   
   // 
@@ -37,7 +49,8 @@ var MosaicInstagramAdmin = Class.extend({
   ,getQueuedImages: function(limit, callback) {
     
     var self = this;
-  
+    
+    // Get queued images json
     $.getJSON(
       'http://' 
       + this.options.http.host 
@@ -47,46 +60,78 @@ var MosaicInstagramAdmin = Class.extend({
       + limit
       
       ,function(images) {
-      
-        self.addImages(images);
         
-        if(callback) {
-          callback(); 
-        }
+        // Add images
+        self.addImages(images, callback);
       }
     );
   }
   
   // 
   // --------------------------------------------------------
-  ,addImages: function(images) {
+  ,addImages: function(images, callback) {
     
-    $(images).each(function(i, image) {
+    var check_img = function(queue, cb) {
       
-      var li = $('<li/>');
+      if(queue.length == 0) {
+        cb();
+        return;
+      }
       
-      li.attr({
-        'id': 'instagram-image-' + image.id
-      });
+      var image = queue.pop();
+      var url = image.images.low_resolution.url;
       
-      li.data('media-id', image.id);
-      li.data('item-id', image._id);
+      var img = new Image();
       
-      li.css({
-        'background-image': 'url(' + image.images.low_resolution.url + ')'
-      });
+      img.onload = function() { 
+
+        var li = $('<li/>');
+        var info = $('<div/>');
+        info.addClass('instagram-image-info');
+
+        info.html(image.user.username);
+
+        li.append(info);
+
+        li.attr({
+          'id': 'instagram-image-' + image.media_id
+        });
+
+        li.data('media-id', image.media_id);
+        li.data('item-id', image._id);
+
+        li.css({
+          'background-image': 'url(' + url + ')'
+        });
+
+
+        $('#instagram-images').append(li);
+        
+        check_img(queue, cb);
+
+      };
       
+      img.onerror = function() { 
+        
+        check_img(queue, cb);
+
+      };
       
-      $('#instagram-images').append(li);
-    });
+      img.src = url;
+    };
+    
+    check_img($.merge(images, []), callback);
   }
 
   // 
   // --------------------------------------------------------
   ,updateImage: function(el, approved) {
     
+    this.locked = true;
+    
     var self = this;
     
+    // Post new data to server
     $.post(
       'http://' 
       + this.options.http.host 
@@ -98,8 +143,15 @@ var MosaicInstagramAdmin = Class.extend({
         ,approved: approved
       }).done(function(data) {
   
-      self.getQueuedImages(2, function() {
-       el.remove(); 
+      self.getQueuedImages(1, function() {
+        
+        $('#instagram-images').fadeOut(150, function() {
+          el.remove();
+          $('#instagram-images').fadeIn(150, function() {
+            self.locked = false; 
+            $('.control-btn').removeClass('highlight');
+          });
+        });
       });
     })
   }

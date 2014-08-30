@@ -90,36 +90,36 @@ var Admin = new Class({
   // Unlock images older than 30 min
   // --------------------------------------------------------
   ,unlockImages: function(callback, ms) {
+
+      var collection = this.app.db.collection('instagram');
     
-    var collection = this.app.db.collection('instagram');
-    
-    var result = collection.find({
-      locked: true
-      ,approved: false
-      ,reviewed: false
-      ,locked_time: {$lt: Date.now()-ms}
-    })
-    .sort({lock_time:1});
+      var result = collection.find({
+        locked: true
+        ,approved: false
+        ,reviewed: false
+        ,locked_time: {$lt: Date.now()-ms}
+      })
+      .sort({lock_time:1});
 
-    result.toArray(function(err, docs) {
-      
-      var docs_ids = new Array();
+      result.toArray(function(err, docs) {
 
-      // Lock documents
-      docs.each(function(doc, i) {
-        docs_ids.push(doc._id);
+        var docs_ids = new Array();
+
+        // Lock documents
+        docs.each(function(doc, i) {
+          docs_ids.push(doc._id);
+        });
+
+        collection.update(
+          {_id:{$in:docs_ids}}
+          ,{$set:{locked: false, reviewed: false}}
+          ,{w:1, multi:true}
+          ,function() {
+
+            Console.status(docs.length + ' images unlocked');
+            callback();
+        });
       });
-
-      collection.update(
-        {_id:{$in:docs_ids}}
-        ,{$set:{locked: false, reviewed: false}}
-        ,{w:1, multi:true}
-        ,function() {
-
-          Console.status(docs.length + ' images unlocked');
-          callback();
-      });
-    });
     
   }
 });
