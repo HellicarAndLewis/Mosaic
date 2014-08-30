@@ -55,6 +55,7 @@ var MosaicInstagramAdmin = Class.extend({
       + this.options.http.port 
       + '/images/queued/' 
       + limit
+      + '/0/0/'
       
       ,function(images) {
         
