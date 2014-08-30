@@ -143,7 +143,7 @@ var Images = new Class({
     this.router = Express.Router();
     this.router.use(BodyParser.urlencoded({extended: false}));
     
-    this.router.get('/images/:action/:limit', function(req, res) {
+    this.router.get('/images/:action/:limit/:mintime/:maxtime', function(req, res) {
       
       // Get queued images
       if(req.params.action == 'queued') {
@@ -154,7 +154,7 @@ var Images = new Class({
           locked: false
           ,approved: false
           ,reviewed: false
-        }).sort({_id:-1}).limit(parseInt(req.params.limit));
+        }).sort({created_time:-1}).limit(parseInt(req.params.limit));
         
         result.toArray(function(err, docs) {
           
@@ -189,17 +189,52 @@ var Images = new Class({
         
         var collection = self.app.db.collection('instagram');
         
-        var result = collection.find({
-          locked: false
-          ,approved: true
-          ,reviewed: true
-        }).sort({modified_time:-1}).limit(parseInt(req.params.limit));
-        
-        result.toArray(function(err, docs) {
+        if(req.params.mintime != '0' && req.params.maxtime != '0') {
           
-          // Output json docs
-          res.json(docs);
-        });
+          var max_result = collection.find({
+            locked: false
+            ,approved: true
+            ,reviewed: true
+            ,created_time: {$gt: parseInt(req.params.maxtime)}
+          }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+          
+          max_result.toArray(function(err, docs) {
+            
+            // Output json docs
+            if(docs.length > 0) {
+              
+              res.json(docs);
+              
+            } else {
+              
+              var min_result = collection.find({
+                locked: false
+                ,approved: true
+                ,reviewed: true
+                ,created_time: {$lt: parseInt(req.params.mintime)}
+              }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+              
+              min_result.toArray(function(err, docs) {
+                res.json(docs);
+              });
+              
+            }
+          });
+          
+        } else {
+          
+          var result = collection.find({
+            locked: false
+            ,approved: true
+            ,reviewed: true
+          }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+
+          result.toArray(function(err, docs) {
+
+            // Output json docs
+            res.json(docs);
+          });
+        }
       }
       
     });

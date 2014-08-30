@@ -67,8 +67,11 @@ var Server = new Class({
       var settings = require(file);
       
       Console.status('Started with settings ' + file);
+      
+      // Set options
       this.setOptions(settings);
       
+      // Connect mongo db
       this.connectDb();
       
     } else {
@@ -181,6 +184,17 @@ var Server = new Class({
       process.exit(0);
     });
 
+  }
+  
+  // Get users
+  // --------------------------------------------------------
+  ,getUsers: function(usernames) {
+    
+  }
+  
+  ,getUser:function(username) {
+    
+    
   }
   
   // Get recent media

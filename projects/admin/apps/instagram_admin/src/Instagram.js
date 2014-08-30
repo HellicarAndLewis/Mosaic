@@ -69,6 +69,13 @@ var Instagram = new Class({
     this.api.tag_media_recent(tag, options, callback);
   }
   
+  // Get user
+  // --------------------------------------------------------
+  ,getUser: function(username, callback) {
+    
+    this.api.user_search(tag, {count:1}, callback);
+  }
+  
   // List subscriptions
   // --------------------------------------------------------
   ,listSubscriptions: function(callback) {
