@@ -28,7 +28,7 @@
   We're combining all the images into one atlas texture so we wonly had to
   deal with one texture and don't need to bind and manage multiple textures.
 
-  This code doubles the number of colums (see init); see an explanation why 
+  This code doubles the number of columns (see init); see an explanation why 
   we do that  here: http://i.imgur.com/m5RKNDQ.png
 
  */
@@ -202,7 +202,7 @@ namespace grid {
     GLint u_pos;                                  /* uniform to the position */
     GLint vp[4];                                  /* viewport */
 
-    vec2 pos_a;                                   /* position of first set*/
+    vec2 pos_a;                                   /* position of first set */
     vec2 pos_b;                                   /* position of second set */
     vec2 offset;                                  /* top left position where we start drawing (relative to the current position) */
     vec2 padding;                                 /* padding between cells. */

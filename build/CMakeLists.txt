@@ -4,6 +4,9 @@ set(USE_OPENGL OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 set(fex_sd ${bd}/projects/featurex/src) 
 set(gfx_sd ${bd}/projects/gfx/src)
@@ -137,7 +140,7 @@ add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
 # The tests used during development
-#create_test(mosaic)
+create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
 #create_test(video_stream_player)
@@ -145,7 +148,7 @@ install(TARGETS mosaic ARCHIVE DESTINATION lib)
 #create_test(online_analyzer)
 #create_test(async_upload)
 #create_test(image_loader)
-create_test(grid)
+#create_test(grid)
 #create_test(png_rgba)
 
 

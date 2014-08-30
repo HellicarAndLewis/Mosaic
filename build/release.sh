@@ -43,10 +43,10 @@ fi
 #./test_fex_load_image
 #./test_libav_rtmp
 #./test_video_stream_player
-#./test_mosaic
+./test_mosaic
 #./test_offline_analyzer
 #./test_online_analyzer
 #./test_async_upload
 #./test_image_loader
-./test_grid
+#./test_grid
 #./test_png_rgba

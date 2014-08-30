@@ -36,6 +36,8 @@
 
 namespace fex {
 
+  typedef void(*on_pixdata_callback)(int x, int y, int width, int height, unsigned char* pixels, void* user);
+
   class Featurex {
 
   public:
@@ -56,6 +58,12 @@ namespace fex {
     Comparator comp;
     TilesPool tiles;
     unsigned char* mosaic_pixels; 
+
+    /* TESTING */
+    on_pixdata_callback on_pixdata; 
+    void* user;
+    /* END TESTING */
+
   };
 
 } /* namespace fex */

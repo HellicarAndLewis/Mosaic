@@ -116,7 +116,7 @@ int main() {
     mosaic.update();
     mosaic.draw();
     double dt = double(rx_hrtime() - n) / 1e9;
-    RX_VERBOSE("FRAME: %f", dt);
+    //RX_VERBOSE("FRAME: %f", dt);
 
     glfwSwapBuffers(win);
     glfwPollEvents();

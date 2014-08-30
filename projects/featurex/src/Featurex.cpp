@@ -6,6 +6,8 @@ namespace fex {
 
   Featurex::Featurex() 
     :mosaic_pixels(NULL)
+    ,user(NULL) /* testing */
+    ,on_pixdata(NULL) /* testing */
   {
 
   }
@@ -136,9 +138,11 @@ namespace fex {
 
     uint64_t n = rx_hrtime();
 
+#if 0
     RX_VERBOSE("CPU descriptors: %lu, GPU descriptors: %lu", 
                analyzer_cpu.descriptors.size(), 
                analyzer_gpu.descriptors.size());
+#endif
 
     for (size_t i = 0; i < analyzer_gpu.descriptors.size(); ++i) {
 
@@ -150,6 +154,13 @@ namespace fex {
 
       Descriptor& gdesc = analyzer_gpu.descriptors[i];
       Descriptor& cdesc = analyzer_cpu.descriptors[dx];
+
+      /* when it's the same match, there is no need to copy */
+      if (gdesc.matched_id == cdesc.id) {
+        continue;
+      }
+
+      gdesc.matched_id = cdesc.id;
 
       Tile* tile = tiles.getTileForDescriptorID(cdesc.id);
       if (NULL == tile) {
@@ -174,6 +185,12 @@ namespace fex {
         int dest_dx = y0 + (k * dest_stride) + x0;
         memcpy(mosaic_pixels + dest_dx, tile->pixels + src_dx, src_stride);
       }
+#else
+      if (NULL != on_pixdata) {
+        int x = (gdesc.col * fex::config.file_tile_width);
+        int y = (gdesc.row * fex::config.file_tile_height);
+        on_pixdata(x, y, fex::config.file_tile_width, fex::config.file_tile_height, tile->pixels, user);
+      }
 #endif
 
 #if 0
@@ -188,8 +205,8 @@ namespace fex {
 
     }
 
-    double d = double(rx_hrtime() - n) / (1000.0 * 1000.0 * 1000.0);
-    RX_VERBOSE("Comparing + constructing the image took: ~%f", d);
+    //double d = double(rx_hrtime() - n) / (1000.0 * 1000.0 * 1000.0);
+    //RX_VERBOSE("Comparing + constructing the image took: ~%f", d);
 
 #if 0
     static int frame = 1;

@@ -2,6 +2,10 @@
 
 namespace mos {
 
+  /* TESTING */
+  static void on_pixdata(int x, int y, int w, int h, unsigned char* pixels, void* user);
+  /* END TESTING */
+
   Mosaic::Mosaic()
     :mosaic_tex(0)
   {
@@ -13,6 +17,11 @@ namespace mos {
 
   int Mosaic::init() {
     int r;
+
+    /* TESTING */
+    featurex.on_pixdata = on_pixdata;
+    featurex.user = this;
+    /* END TESTING */
 
     if (0 != mos::load_config()) {
       RX_ERROR("Cannot load config. stopping.");
@@ -55,6 +64,7 @@ namespace mos {
     if (0 != async_upload.init(mw, mh, GL_RGBA)) {
       return -102;
     }
+
 
     return 0;
   }
@@ -115,5 +125,19 @@ namespace mos {
 
     return result;
   }
+
+  /* TESTING */
+  static void on_pixdata(int x, int y, int w, int h, unsigned char* pixels, void* user) {
+    Mosaic* m = static_cast<Mosaic*>(user);
+    if (NULL == m) {
+      RX_ERROR("mosaic pointer invalid.");
+      return;
+    }
+    int mw = fex::config.getMosaicImageWidth();
+    int mh = fex::config.getMosaicImageHeight();
+    glBindTexture(GL_TEXTURE_2D, m->mosaic_tex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
+  }
+  /* END TESTING */
 
 } /* namespace mos */

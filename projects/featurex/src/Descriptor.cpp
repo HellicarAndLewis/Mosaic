@@ -11,6 +11,7 @@ namespace fex {
 
   Descriptor::Descriptor() 
     :id(0)
+    ,matched_id(0)
     ,row(-1)
     ,col(-1)
   {
@@ -27,6 +28,7 @@ namespace fex {
     average_color[0] = 0;
     average_color[1] = 0;
     average_color[2] = 0;
+    matched_id = 0;
   }
 
   /* ---------------------------------------------------------------------------------- */
