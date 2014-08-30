@@ -66,12 +66,6 @@ Console.prototype = {
   }
   
   //--------------------------------------------------------------
-  ,statusGrowl: function(v) {
-    
-    this.status(v);
-  }
-  
-  //--------------------------------------------------------------
   ,start: function(v) {
     
     console.info(this.clc_start(this.addSpace(v)));
