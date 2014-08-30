@@ -23,13 +23,13 @@ int main() {
   int nbytes;
 
   /* load an rgb png, and convert it to rgba when loading. */
-  nbytes = rx_load_png(rx_to_data_path("test/rgb.png"), &pixels, width, height, channels, NULL, RX_FLAG_LOAD_AS_RGBA);
+  nbytes = rx_load_png(rx_to_data_path("test/num_001.png"), &pixels, width, height, channels, NULL, RX_FLAG_LOAD_AS_RGBA);
   if (0 > nbytes) {
     RX_ERROR("Cannot load test/rgb.png");
     exit(EXIT_FAILURE);
   }
 
-  RX_VERBOSE("swidth: %d, height: %d, channels: %d, snbytes: %d", 
+  RX_VERBOSE("width: %d, height: %d, channels: %d, snbytes: %d", 
              width, height, channels, nbytes);
 
   rx_save_png(rx_to_data_path("test/rgb_to_rgba.png"), pixels, width, height, channels, false);

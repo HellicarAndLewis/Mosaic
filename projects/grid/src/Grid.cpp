@@ -54,17 +54,23 @@ namespace grid {
 
   /* ---------------------------------------------------------------------------------- */
 
-  Grid::Grid() 
-    :img_width(0)
+  Grid::Grid(int dir) 
+    :is_init(false)
+    ,direction(dir)
+    ,img_width(0)
     ,img_height(0)
     ,rows(0)
     ,cols(0)
     ,tex_id(0)
     ,tex_width(0)
     ,tex_height(0)
-    ,cell_n(0)
     ,col_hidden(0)
     ,prev_col_hidden(-1)
+    ,vert(0)
+    ,frag(0)
+    ,prog(0)
+    ,vao(0)
+    ,vbo(0)
   {
     if (0 != pthread_mutex_init(&mutex, NULL)) {
       RX_ERROR("Something went wrong when trying to create the mutex.");
@@ -72,7 +78,10 @@ namespace grid {
   }
 
   Grid::~Grid() {
-    shutdown();
+
+    if (true == is_init) {
+      shutdown();
+    }
 
     if (0 != pthread_mutex_destroy(&mutex)) {
       RX_ERROR("Something went wrong when trying to destroy the mutex.");
@@ -81,12 +90,22 @@ namespace grid {
 
   int Grid::init(std::string path, int imgWidth, int imgHeight, int rws, int cls) {
 
+    if (true == is_init) {
+      RX_ERROR("Grid is already initialized, first shut it down.");
+      return -97;
+    }
+
     img_width = imgWidth; 
     img_height = imgHeight;
     rows = rws;
     cols = cls * 2; /* we need to duplicate the number of columns so we can update cells which are hidden. */
     tex_width = img_width * cols;
     tex_height = img_height * rows;
+    
+    if (GRID_DIR_LEFT != direction && GRID_DIR_RIGHT != direction) {
+      RX_ERROR("Invalid direction value.");
+      return -98;
+    }
 
     if (0 == path.size()) {
       RX_ERROR("Path is empty");
@@ -162,13 +181,20 @@ namespace grid {
 
         /* set the cell + vertex col/row */
         int dx = (j * cols) + i;
-
         cells[dx].pixels = new unsigned char[bytes_per_cell];
-        cells[dx].col = i;
+
+        if (GRID_DIR_LEFT == direction) {
+          index_order[c++] = j * cols + i;
+          cells[dx].col = i;
+        }
+        else {
+          index_order[c++] = j * cols + ((cols-1) - i);
+          cells[dx].col = (cols-1) - i;
+        }
+
         cells[dx].row = j;
         vertices[dx].col = i;
         vertices[dx].row = j;
-        index_order[c++] = j * cols + i;
 
         if (NULL == cells[dx].pixels) {
           RX_ERROR("Couldn't allocate buffer for grid cells, bytes: %d. Out of mem?", bytes_per_cell);
@@ -231,6 +257,8 @@ namespace grid {
         break;
       }
     }
+
+    is_init = true;
 
     return 0;
   }
@@ -300,12 +328,22 @@ namespace grid {
     /* @todo - we could optimize this a bit and keep track if we need to reposition; though this takes basically no time atm. */
 
     /* position the images. */
-    for (size_t i = 0; i < vertices.size(); ++i) {
-      Vertex& v = vertices[i];
-      v.size = img_width; /* @todo - for now the cells are square */
-      v.pos.set(offset.x + img_width * 0.5 + v.col * img_width + v.col * padding.x,
-                offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
+    if (GRID_DIR_LEFT == direction) {
+      for (size_t i = 0; i < vertices.size(); ++i) {
+        Vertex& v = vertices[i];
+        v.size = img_width; /* @todo - for now the cells are square */
+        v.pos.set(offset.x + img_width * 0.5 + v.col * img_width + v.col * padding.x,
+                  offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
 
+      }
+    }
+    else {
+      for (size_t i = 0; i < vertices.size(); ++i) {
+        Vertex& v = vertices[i];
+        v.size = img_width; /* @todo - for now the cells are square */
+        v.pos.set(offset.x - img_width * 0.5 - v.col * img_width - v.col * padding.x,
+                  offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
+      }
     }
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * vertices.size(), vertices[0].pos.ptr());
@@ -318,13 +356,24 @@ namespace grid {
     }
 
     /* check if we need to switch set A with B */
-    if (fabs(pos_a.x) >= (cols * img_width + cols * padding.x)) {
+    if (GRID_DIR_LEFT == direction && (fabs(pos_a.x) >= (cols * img_width + cols * padding.x))) {
+      vec2 tmp = pos_b;
+      pos_b = pos_a;
+      pos_a = tmp;
+    }
+    else if (GRID_DIR_RIGHT == direction && pos_a.x >= (cols * img_width + cols * padding.x)) {
       vec2 tmp = pos_b;
       pos_b = pos_a;
       pos_a = tmp;
     }
 
-    pos_a.x -= 1.5;
+    /* move into the correct direction. */
+    if (GRID_DIR_LEFT == direction) {
+      pos_a.x -= 1.5;
+    }
+    else {
+      pos_a.x += 1.5;
+    }
 
     /* Detect which column is hidden, because the hidden column 
        can be reused. When a column is hidden we also need to disable
@@ -356,7 +405,12 @@ namespace grid {
     int grid_height = rows * img_height + rows * padding.y;
 
     glEnable(GL_SCISSOR_TEST);
-    glScissor(offset.x, (vp[3] - offset.y) - grid_height, half_grid_width, grid_height); 
+    if (GRID_DIR_LEFT == direction) {
+      glScissor(offset.x, (vp[3] - offset.y) - grid_height, half_grid_width, grid_height); 
+    }
+    else {
+      glScissor(offset.x - half_grid_width, (vp[3] - offset.y) - grid_height, half_grid_width, grid_height); 
+    }
 
     /* draw all the rects */
     glActiveTexture(GL_TEXTURE0);
@@ -369,19 +423,37 @@ namespace grid {
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, vertices.size());
 
     /* draw second set (copy) */
-    pos_b.x = pos_a.x + cols * img_width + cols * padding.x;
+    if (GRID_DIR_LEFT == direction) {
+      pos_b.x = pos_a.x + cols * img_width + cols * padding.x;
+    }
+    else {
+      pos_b.x = pos_a.x - cols * img_width - cols * padding.x;
+    }
+
     glUniform2fv(u_pos, 1, pos_b.ptr());
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, vertices.size());
-
     glDisable(GL_SCISSOR_TEST);
   }
 
   int Grid::shutdown() {
 
-    if (0 != tex_id) {
-      glDeleteTextures(1, &tex_id);
+    if (false == is_init) {
+      RX_ERROR("Trying to shutdown but we're not yet initialized.");
+      return -1;
     }
 
+    if (0 != vao)        {   glDeleteVertexArrays(1, &vao);    }
+    if (0 != vert)       {   glDeleteShader(vert);             }
+    if (0 != frag)       {   glDeleteShader(frag);             }
+    if (0 != prog)       {   glDeleteProgram(prog);            }
+    if (0 != tex_id)     {   glDeleteTextures(1, &tex_id);     }
+    if (0 != vbo)        {   glDeleteBuffers(1, &vbo);         }
+
+    vert = 0;
+    frag = 0;
+    prog = 0;
+    vao = 0;
+    vbo = 0;
     tex_id = 0;
     tex_width = 0;
     tex_height = 0;
@@ -389,8 +461,30 @@ namespace grid {
     rows = 0;
     img_width = 0;
     img_height = 0;
+    col_hidden = 0;
+    prev_col_hidden = -1;
+    pos_a.set(0,0);
+    pos_b.set(0,0);
 
-    RX_ERROR("We should free/cleanup the cells, vertices and sources too");
+    if (0 != img_loader.shutdown()) {
+      RX_ERROR("Error while trying to shutdown the image loader.");
+    }
+
+    if (0 != dir_watcher.shutdown()) {
+      RX_ERROR("Error while trying to shutdown the dir watcher.");
+    }
+
+    /* just make sure that all these vectors are sync'd */
+    lock();
+    {
+      cells.clear();
+      sources.clear();
+      vertices.clear();
+      index_order.clear();
+    }
+    unlock();
+    
+    is_init = false;
 
     return 0;
   }
@@ -482,12 +576,10 @@ namespace grid {
     grid->lock();
     {
       Cell& cell = grid->cells.at(cdx);
-      cell.state = CELL_STATE_LOADED;
       memcpy(cell.pixels, task->pixels, nbytes);
     }
     grid->unlock();
   }
-
 
   /* gets called when a file is added to the given path (see init) */
   static void on_dir_changed(std::string dir, std::string filename, void* user) {
@@ -521,6 +613,7 @@ namespace grid {
   static bool source_sorter(const Source& a, const Source& b) {
     return a.mtime > b.mtime; 
   }
+
   /* ---------------------------------------------------------------------------------- */
 
 } /* namespace grid */

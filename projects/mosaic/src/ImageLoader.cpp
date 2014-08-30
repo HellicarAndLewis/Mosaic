@@ -295,12 +295,21 @@ namespace mos {
           continue;
         }
 
+        /* make sure we're using png only */
+        if (t->extension != "png") {
+          RX_ERROR("We only support PNG because we can force 4 channels!");
+          ::exit(EXIT_FAILURE);
+        }
+
         /* load the image */
+        /*
         if (t->extension == "jpg") {
           t->nbytes = rx_load_jpg(t->filepath, &t->pixels, t->width, t->height, t->channels, &t->capacity);
         }
-        else if (t->extension == "png") {
-          t->nbytes = rx_load_png(t->filepath, &t->pixels, t->width, t->height, t->channels, &t->capacity);
+        else 
+        */
+        if (t->extension == "png") {
+          t->nbytes = rx_load_png(t->filepath, &t->pixels, t->width, t->height, t->channels, &t->capacity, RX_FLAG_LOAD_AS_RGBA);
         }
         else {
           RX_ERROR("Unhandled image extension - not supposed to happen");

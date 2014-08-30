@@ -54,6 +54,9 @@
 #define CELL_STATE_RESERVED 0x02              /* the cell is reserved and should be filled when the file is loaded. */
 #define CELL_STATE_IN_USE 0x03                /* the cell is in use */
 
+#define GRID_DIR_RIGHT 0x01
+#define GRID_DIR_LEFT 0x02
+
 namespace grid {
 
   static const char* GRID_VS = ""
@@ -155,7 +158,7 @@ namespace grid {
   class Grid {
 
   public:
-    Grid();
+    Grid(int direction);
     ~Grid();
     int init(std::string path, int imgWidth, int imgHeight, int rows, int cols);
     void update();
@@ -170,10 +173,12 @@ namespace grid {
     mos::ImageLoader img_loader;
     mos::DirWatcher dir_watcher;
 
-    int img_width;
-    int img_height;
-    int rows;
-    int cols;
+    bool is_init;                                 /* is set to true when init() completed successfully */
+    int direction;                                /* the direction into wich the stream with images moves; this also has influence on the offset. e.g. when direction is right, the offset.x is the right edge. */
+    int img_width;                                /* width of an image, for now this must be similar as the img_height */ 
+    int img_height;                               /* height of an image, see img_width. */
+    int rows;                                     /* number of rows. */
+    int cols;                                     /* number of columns, but note that we double the number, which is necessary to smoothly, continuously scroll the images. */
 
     GLuint tex_id;
     GLsizei tex_width;
@@ -182,7 +187,7 @@ namespace grid {
     std::vector<Cell> cells;                      /* keeps state for the separate cells */
     std::deque<Source> sources;                   /* a list with source files */
     std::vector<Vertex> vertices;                 /* the data for the VBO */
-    std::vector<size_t> index_order;              /* what grid element do we need to fill next */
+    std::vector<size_t> index_order;              /* what grid element do we need to fill next, depending on the direction the order will be different. */
     pthread_mutex_t mutex;                        /* used to protect sources */
     int col_hidden;                               /* which column is currently hidden? this is always the 'last' column the scrolled out of view and this column can be reused. */
     int prev_col_hidden;                          /* previously column that was set to hidden; used to track if a the hidden column changed */
@@ -214,7 +219,6 @@ namespace grid {
       RX_ERROR("Something went wrong when trying to unlock the mutex.");
     }
   }
-
 
 } /* namespace grid */
 
