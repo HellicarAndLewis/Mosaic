@@ -227,7 +227,7 @@ var Server = new Class({
         
         return;
       }
-      Console.clear();
+      
       Console.status('Received recent media for tag ' + tag);
       Console.status(remaining + ' remaining calls');
       
