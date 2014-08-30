@@ -312,9 +312,11 @@ namespace mos {
           continue;
         }
 
+#if 0
         RX_VERBOSE("Loaded: %s", t->filepath.c_str());
         RX_VERBOSE("width: %d, height: %d, channels: %d, capacity: %d, nbytes: %d", 
                    t->width, t->height, t->channels, t->capacity, t->nbytes);
+#endif
 
         /* notify the user that we've loaded an image */
         if (NULL != loader->on_loaded) {

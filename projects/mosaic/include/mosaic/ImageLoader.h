@@ -56,6 +56,7 @@ extern "C" {
 namespace mos {
 
   /* ---------------------------------------------------------------------------------- */
+
   class ImageTask;
   typedef void(*imageloader_on_loaded)(ImageTask* task, void* user); /* gets called from the loader thread when we've loaded a new image - you need to copy the pixels but be aware that we're running in a separate thread. */
 
