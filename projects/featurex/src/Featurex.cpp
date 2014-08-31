@@ -156,10 +156,9 @@ namespace fex {
       Descriptor& cdesc = analyzer_cpu.descriptors[dx];
 
       /* when it's the same match, there is no need to copy */
-      if (gdesc.matched_id == cdesc.id) {
+      if (0 != cdesc.id && gdesc.matched_id == cdesc.id) {
         continue;
       }
-
       gdesc.matched_id = cdesc.id;
 
       Tile* tile = tiles.getTileForDescriptorID(cdesc.id);

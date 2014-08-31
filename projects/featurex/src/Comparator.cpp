@@ -18,14 +18,19 @@ namespace fex {
     /* basic distance check for now */
     for (size_t i = 0; i < database.size(); ++i) {
       Descriptor& other = database[i];
-      dr = input.average_color[0] - other.average_color[0];
-      dg = input.average_color[1] - other.average_color[1];
-      db = input.average_color[2] - other.average_color[2];
+      dr = abs(input.average_color[0] - other.average_color[0]);
+      dg = abs(input.average_color[1] - other.average_color[1]);
+      db = abs(input.average_color[2] - other.average_color[2]);
       dr = dr * dr;
       dg = dg * dg;
       db = db * db;
       dist = dr + dg + db;
       if (dist < min_dist) {
+#if 0
+        if (other.average_color[0] == 248 && other.average_color[1] == 248) {
+          RX_VERBOSE("DIST: %llu,", dist, dr, dg, db);
+        }
+#endif
         min_dist = dist;
         dx = i;
       }

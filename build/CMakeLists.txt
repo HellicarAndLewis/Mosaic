@@ -50,6 +50,14 @@ if(APPLE)
     ${extern_lib_dir}/libavformat.a
     ${extern_lib_dir}/libavutil.a
     ${extern_lib_dir}/libavresample.a
+    ${extern_lib_dir}/libtcmalloc.a
+
+    ${extern_lib_dir}/librxp_player.a
+    ${extern_lib_dir}/librxp_player_driver_cpp.a
+    ${extern_lib_dir}/libtheora.a
+    ${extern_lib_dir}/libvorbis.a
+    ${extern_lib_dir}/libogg.a
+
 
     ${fr_corefoundation}               # uv
     ${fr_cocoa}                        # uv
@@ -140,7 +148,7 @@ add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
 # The tests used during development
-create_test(mosaic)
+#create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
 #create_test(video_stream_player)
@@ -150,7 +158,7 @@ create_test(mosaic)
 #create_test(image_loader)
 #create_test(grid)
 #create_test(png_rgba)
-
+create_test(ogg_player)
 
 
 

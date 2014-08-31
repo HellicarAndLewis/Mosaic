@@ -6,8 +6,11 @@ bd=${d}/../extern/mac-clang-x86_64
 id=${d}/../install/mac-clang-x86_64
 
 export PATH=${PATH}:${bd}/bin/:${sd}/gyp/
-export CFLAGS="-I\"${bd}/include\""
-export LDFLAGS="-L\"${bd}/lib\""
+export CFLAGS="-I${bd}/include"
+export LDFLAGS="-L${bd}/lib"
+cfcopy=${CFLAGS}
+ldcopy=${LDFLAGS}
+
 
 # ----------------------------------------------------------------------- #
 #                D O W N L O A D   D E P E N D E N C I E S 
@@ -168,7 +171,7 @@ if [ ! -d ${sd}/imagemagick ] ; then
 fi
 
 # Fix ImageMagick dylibs + install
-if [ ! -f ${id}/bin/imagemagick/convert ] ; then
+if [ ! -f ${id}/imagemagick/convert ] ; then
     if [ ! -d ${id} ] ; then 
         mkdir ${id}
     fi
@@ -222,6 +225,47 @@ if [ ! -d ${sd}/microprofile ] ; then
     hg clone https://bitbucket.org/jonasmeyer/microprofile 
 fi
 
+# Download ogg for rxp_player
+if [ ! -d ${sd}/libogg ] ; then
+    cd ${sd}
+    curl -o libogg.tar.gz http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz
+    tar -zxvf libogg.tar.gz
+    mv libogg-1.3.1 libogg
+fi
+
+# Download theora
+if [ ! -d ${sd}/theora ] ; then
+    cd ${sd}
+    # git clone https://git.xiph.org/mirrors/theora.git  # configure error on mac, uses invalid flags.
+    #curl -o theora.zip http://downloads.xiph.org/releases/theora/libtheora-1.1.1.zip
+    #unzip theora
+    #mv libtheora-1.1.1 theora
+
+    svn co http://svn.xiph.org/trunk/theora
+fi     
+
+# Downoad vorbis 
+if [ ! -d ${sd}/vorbis ] ; then
+    cd ${sd}
+    curl -o vorbis.tar.gz http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz
+    tar -zxvf vorbis.tar.gz
+    mv libvorbis-1.3.3 vorbis
+fi
+
+# Download rxp_player for video playback
+if [ ! -d ${sd}/rxp_player ] ; then 
+    cd ${sd}
+    git clone git@github.com:roxlu/rxp_player.git
+fi 
+
+# Download tcmalloc
+# if [ ! -d ${sd}/tcmalloc ] ; then
+#     cd ${sd}
+#     mkdir tcmalloc
+#     cd tcmalloc
+#     git clone https://code.google.com/p/gperftools/ .
+# fi
+
 # Cleanup some files we don't need anymore.
 if [ -f ${sd}/autoconf.tar.gz ] ; then
     rm ${sd}/autoconf.tar.gz
@@ -251,7 +295,15 @@ fi
 if [ -f ${sd}/rapidxml.zip ] ; then
     rm ${sd}/rapidxml.zip
 fi
-
+if [ -f ${sd}/libogg.tar.gz ] ; then
+    rm ${sd}/libogg.tar.gz
+fi
+if [ -f ${sd}/theora.zip ] ; then
+    rm ${sd}/theora.zip
+fi
+if [ -f ${sd}/vorbis.tar.gz ] ; then
+    rm ${sd}/vorbis.tar.gz
+fi
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
 # ----------------------------------------------------------------------- #
@@ -378,3 +430,48 @@ if [ ! -f ${bd}/include/microprofile.h ] ; then
     cp ${sd}/microprofile/microprofile.h ${bd}/include
     cp ${sd}/microprofile/demo/ui/microprofile.cpp ${bd}/src
 fi
+
+# Compile ogg
+if [ ! -f ${bd}/lib/libogg.a ] ; then
+    cd ${sd}/libogg
+    ./configure --prefix=${bd}
+    make
+    make install
+fi
+
+# Compile vorbis
+if [ ! -f ${bd}/lib/libvorbis.a ] ; then
+    cd ${sd}/vorbis
+    ./configure --prefix=${bd}
+    make
+    make install
+fi
+
+# Compile libtheora
+if [ ! -f ${bd}/lib/libtheora.a ] ; then 
+    cd ${sd}/theora
+    ./autogen.sh
+    ./configure --prefix=${bd} 
+    make
+    make install
+fi
+
+# Compile rxp_player
+if [ ! -f {bd}/lib/rxp_player.a ] ; then
+    cd ${sd}/rxp_player/build
+    mkdir build.release
+    cd build.release
+    cmake -DCMAKE_INSTALL_PREFIX=${bd} -DCMAKE_BUILD_TYPE=Release ..
+    cmake --build . --target install
+fi
+
+
+
+# Compile tcmalloc
+# if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then
+#     cd ${sd}/tcmalloc
+#     ./autogen.sh
+#     ./configure --prefix=${bd} CC=clang CXX=clang++ CXXFLAGS=-fno-builtin
+#     make
+#     make install
+# fi
