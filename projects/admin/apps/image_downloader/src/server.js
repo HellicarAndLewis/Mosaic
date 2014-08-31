@@ -154,7 +154,7 @@ var ImageDownloader = new Class({
     // Start download request
     Request.head(uri, function(err, res, body) {
 
-     
+     /*
       if(res.headers['content-length'] < 20) {
         console.log('Image size invalid, skipping file');
         errCallback();
@@ -162,7 +162,7 @@ var ImageDownloader = new Class({
       }
       console.log('content-type:', res.headers['content-type']);
       console.log('content-length:', res.headers['content-length']);
-
+*/
       var r = Request(uri).pipe(Fs.createWriteStream(filename));
       r.on('close', callback);
     });
