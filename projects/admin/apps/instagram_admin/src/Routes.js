@@ -28,22 +28,30 @@ var TagSubscription = new Class({
     
     var self = this;
     
+    // Create express router
     this.router = Express.Router();
-
+    
+    // Use bodyparser to parse post data
     this.router.use(BodyParser.urlencoded({extended: false}));
     this.router.use(BodyParser.json());
-
-    this.router.get('/tag/:tagName', function(req, res) {
     
+    // Create get route
+    this.router.get('/tag/:tagName', function(req, res) {
+      
+      // Fire verified event
       self.emit(self.VERIFIED);
+      
       Console.status('Instagram authenticated');
       
+      // Send back challenge code
       res.set('Content-Type', 'text/html');
       res.send(req.query['hub.challenge']);
     });
     
+    // Create post route
     this.router.post('/tag/:tagName', function(req, res) {
       
+      // Fire new tag event
       self.emit(self.NEW_TAG, req.body);
     });
   
@@ -66,13 +74,16 @@ var Admin = new Class({
     
     var self = this;
     
+    // Create express router
     this.router = Express.Router();
     
+    // Serve static
     this.router.use('/admin/css', Express.static(__dirname + '/../html/css'));
     this.router.use('/admin/js', Express.static(__dirname + '/../html/js'));
     this.router.use('/admin/images', Express.static(__dirname + '/../html/images'));
     this.router.use('/admin/fonts', Express.static(__dirname + '/../html/fonts'));
     
+    // Create admin route
     this.router.get('/admin', function(req, res) {
       
       // Unlock images older than x ms
@@ -92,7 +103,8 @@ var Admin = new Class({
   ,unlockImages: function(callback, ms) {
 
       var collection = this.app.db.collection('instagram');
-    
+      
+      // Find all images that are locked
       var result = collection.find({
         locked: true
         ,approved: false
@@ -105,7 +117,7 @@ var Admin = new Class({
 
         var docs_ids = new Array();
 
-        // Lock documents
+        // Unlock documents
         docs.each(function(doc, i) {
           docs_ids.push(doc._id);
         });
@@ -140,10 +152,14 @@ var Images = new Class({
     
     var self = this;
     
+    // Create express router
     this.router = Express.Router();
+    
+    // Use bodyparser to parse post data
     this.router.use(BodyParser.urlencoded({extended: false}));
     
-    this.router.get('/images/:action/:limit/:mintime/:maxtime', function(req, res) {
+    // Create get route
+    this.router.get('/images/:action/:limit/:min_id/:max_id', function(req, res) {
       
       // Get queued images
       if(req.params.action == 'queued') {
@@ -154,7 +170,7 @@ var Images = new Class({
           locked: false
           ,approved: false
           ,reviewed: false
-        }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+        }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
         
         result.toArray(function(err, docs) {
           
@@ -189,32 +205,37 @@ var Images = new Class({
         
         var collection = self.app.db.collection('instagram');
         
-        if(req.params.mintime != '0' && req.params.maxtime != '0') {
-          
+        if(req.params.min_id != '0' && req.params.max_id != '0') {
+  
           var max_result = collection.find({
             locked: false
             ,approved: true
             ,reviewed: true
-            ,created_time: {$gt: parseInt(req.params.maxtime)}
-          }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+            ,queue_id: {$gt: ObjectID(req.params.max_id)}
+          }).sort({_id:1}).limit(parseInt(req.params.limit));
           
+          // Find images later than the max queue id
           max_result.toArray(function(err, docs) {
-            
-            // Output json docs
+
+            // Check for docs
             if(docs.length > 0) {
               
+              // Output json docs
               res.json(docs);
               
             } else {
               
+              // Find images earlier than the min queue id
               var min_result = collection.find({
                 locked: false
                 ,approved: true
                 ,reviewed: true
-                ,created_time: {$lt: parseInt(req.params.mintime)}
-              }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+                ,queue_id: {$lt: ObjectID(req.params.min_id)}
+              }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
               
               min_result.toArray(function(err, docs) {
+                
+                // Output json docs
                 res.json(docs);
               });
               
@@ -223,11 +244,12 @@ var Images = new Class({
           
         } else {
           
+          // Find next images in queue
           var result = collection.find({
             locked: false
             ,approved: true
             ,reviewed: true
-          }).sort({created_time:-1}).limit(parseInt(req.params.limit));
+          }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
 
@@ -239,17 +261,21 @@ var Images = new Class({
       
     });
     
+    
+    // Create post route (update)
     this.router.post('/images/update', function(req, res) {
-      
-  
+ 
       if(req.body.id) {
         
         var collection = self.app.db.collection('instagram');  
+        
+        // Update
         collection.update(
           {_id: ObjectID(req.body.id)}
           ,{
             $set:{
-              locked: false
+              queue_id: ObjectID()
+              ,locked: false
               ,approved: (req.body.approved == 'true') ? true : false
               ,modified_time: Date.now()
               ,reviewed: true

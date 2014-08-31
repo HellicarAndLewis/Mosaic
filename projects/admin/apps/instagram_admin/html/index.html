@@ -17,7 +17,13 @@
 <body>
   <div class="container">
     <div class="instagram-images-container">
-      <div id="instagram-images-overlay"></div>
+      <div id="instagram-images-overlay">
+        <div class="inner">
+          <div id="instagram-images-result"></div>
+          <img id="instagram-images-loader" src="/admin/images/loading.gif" width="32" height="32" alt="Loading..." />
+          <div id="instagram-images-loading">Updating..please wait</div>
+        </div>
+      </div>
       <ul id="instagram-images"></ul>
     </div>
     <div id="controls">

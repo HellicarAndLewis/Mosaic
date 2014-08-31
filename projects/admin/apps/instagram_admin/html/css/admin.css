@@ -102,8 +102,53 @@ div.instagram-images-container {
 }
 
 #instagram-images-overlay {
+  
   position: absolute;
-  display: none;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.8);
+  z-index: 10;
+  color: #fff;
+  text-align: center;
+}
+
+#instagram-images-overlay .inner {
+  
+  position: absolute;
+  width: 100%;
+  height: 150px;
+  top: 50%;
+  margin-top: -75px;
+}
+
+#instagram-images-result {
+  
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 25px;
+  margin-bottom: 45px;
+  font-weight: bold;
+  padding: 15px;
+  color: #fff;
+  display: inline-block;
+  border-radius: 10px;
+}
+
+#instagram-images-loader {
+  
+  display: block;
+  clear: both;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+}
+
+#instagram-images-loading {
+  
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  margin-top: 15px;
 }
 
 /* Instagram images */
