@@ -65,6 +65,7 @@ $ mongo mosaic
 
 Todo
 =========
-- Add menu for tags / users view
+- login styling
+- add menu for tags / users view
 - add ip whitelist for requests
 - add touch control
