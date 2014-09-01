@@ -359,6 +359,11 @@ namespace mos {
       r = -2;
     }
 
+    if (0 == backup_player.isPlaying()) {
+      if (0 != backup_player.stop()) {
+        RX_ERROR("Failed to stop the backup player.");
+      }
+    }
     if (0 != backup_player.shutdown()) {
       RX_ERROR("Error while trying to shutdown the backup player.");
       r = -3;

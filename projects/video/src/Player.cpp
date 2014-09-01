@@ -93,7 +93,7 @@ namespace vid {
       must_shutdown = false;
       return 0;
     }
-
+    
     lock();
       jitter.update();
     unlock();
