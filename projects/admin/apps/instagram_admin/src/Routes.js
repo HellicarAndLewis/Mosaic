@@ -93,7 +93,8 @@ var Admin = new Class({
     this.router.use(BodyParser.urlencoded({extended: false}));
     
     this.router.get('/login', function(req, res) {
-      
+      self.app.iaid = ObjectID();
+      req.session.iaid = '';
       Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
         res.send(text);
       });
@@ -160,7 +161,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(req.session.iaid == this.app.iaid) {
+    if(req.session.iaid == this.app.iaid && (req.session.iaid != undefined && this.app.iaid != undefined)) {
       next();
     } else {
       res.redirect('/login');
