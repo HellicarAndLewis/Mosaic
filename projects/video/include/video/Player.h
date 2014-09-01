@@ -49,7 +49,6 @@ extern "C" {
 
 namespace vid {
 
-
   class Player;
   typedef void(*player_on_frame)(AVFrame* frame, void* user);
   typedef void(*player_on_event)(Player* p, int event);
@@ -77,7 +76,6 @@ namespace vid {
     pthread_t thread;                 /* the stream/decoding thread */
     pthread_mutex_t mutex;            /* secures the jitter buffer */
 
-
     /* callback */
     player_on_frame on_frame;         /* gets called when a new video frame needs to be shown. */
     player_on_event on_event;         /* gets called when a event like shutdown happens */
@@ -85,22 +83,17 @@ namespace vid {
   };
 
   inline void Player::lock() {
-
-    if (false == is_running) {
-      RX_ERROR("Cannot lock because we're not running and the mutex is invalid!");
-      return;
+    int r = pthread_mutex_lock(&mutex);
+    if (r != 0) {
+      RX_ERROR("Error while trying to lock the mutex: %s", strerror(r));
     }
-    pthread_mutex_lock(&mutex);
   }
 
   inline void Player::unlock() {
-
-    if (false == is_running) {
-      RX_ERROR("Cannot unlock because we're not running and the mutex is invalid!");
-      return;
+    int r = pthread_mutex_unlock(&mutex);
+    if (r != 0) {
+      RX_ERROR("Error while trying to unlock the mutex: %s", strerror(r));
     }
-
-    pthread_mutex_unlock(&mutex);
   }
 } /* namespace vid */
 

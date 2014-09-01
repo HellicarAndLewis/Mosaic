@@ -57,6 +57,8 @@ namespace mos {
 #include <sys/time.h>
 #include <rxp_player/PlayerGL.h>
 #include <tinylib.h>
+#include <stdio.h>
+#include <pthread.h>
 
 #define MOS_VID_STATE_NONE 0x00
 #define MOS_VID_STATE_CONNECTING 0x01
@@ -74,7 +76,10 @@ namespace mos {
     int shutdown();
     GLuint texid();
     int needsUpdate();                          /* checks if we updated a video frame; will reset the internal flag once called. */
-
+    
+    void lock();
+    void unlock();
+    
   public:
     int state;                                  /* used to keep track of the current state; and based on the state we show either a pre-recorded video or the live stream */
     bool is_init;
@@ -86,6 +91,7 @@ namespace mos {
     vid::Player player;
     vid::YUV420P yuv;
     gfx::FBO fbo;                               /* we write the decoded video to a FBO, RTT, and the texture is used by the GPU analyzer. */
+    pthread_mutex_t mutex;
   };
   
   inline GLuint VideoInput::texid() {
@@ -98,6 +104,21 @@ namespace mos {
     needs_update = false; 
     return (needs) ? 0 : -1;
   }
+
+  inline void VideoInput::lock() {
+    int r = pthread_mutex_lock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Failed when trying to lock: %s", strerror(r));
+    }
+  }
+
+  inline void VideoInput::unlock() {
+    int r = pthread_mutex_unlock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Failed when trying to unlock: %s", strerror(r));
+    }
+  }
+
 
 } /* namespace mos */
 

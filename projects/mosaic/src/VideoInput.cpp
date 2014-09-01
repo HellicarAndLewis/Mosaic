@@ -191,7 +191,10 @@ namespace mos {
     ,video_tex(0)
     ,state(MOS_VID_STATE_NONE)
   {
-
+    int r = pthread_mutex_init(&mutex, NULL);
+    if (r != 0) {
+      RX_ERROR("Cannot initialize the mutex: %s", strerror(errno));
+    }
   }
 
   VideoInput::~VideoInput() {
@@ -202,6 +205,11 @@ namespace mos {
     state = MOS_VID_STATE_NONE;
     backup_player.on_event = NULL;
     backup_player.on_video_frame = NULL;
+
+    int r = pthread_mutex_destroy(&mutex);
+    if (r != 0) {
+      RX_ERROR("Cannot destroy the mutex: %s", strerror(errno));
+    }
   }
 
   int VideoInput::init() {
@@ -286,23 +294,37 @@ namespace mos {
       RX_ERROR("mos::config.window_width == 0... not good!");
       return;
     }
+
+    /* lock the state and time. */
+    uint64_t local_rtime;
+    int local_state;
+    lock();
+      local_rtime = restart_time;
+      local_state = state;  
+    unlock();
+
+    /* force restart when libav is not calling the sigpipe */
+    if (1 != player.stream.is_stream_open && 0 == local_rtime) {
+      lock();
+        restart_time = time(NULL) + 1;
+      unlock();
+    }
     
     /* restart the player if necessary */
-    if (0 != restart_time) {
-      RX_VERBOSE("check....:%llu", restart_time);
+    if (0 != local_rtime) {
       uint64_t now = time(NULL);
-      if (now > restart_time) {
+      if (now > local_rtime) {
         RX_VERBOSE("Restarting rtmp stream: %s", mos::config.stream_url.c_str());
         player.init(mos::config.stream_url);
-        restart_time = 0;
+        lock();
+          restart_time = 0;
+        unlock();
       }
     }
 
-    RX_VERBOSE("check....:%llu", restart_time);
-
     player.update();
 
-    if (MOS_VID_STATE_PLAYING == state) {
+    if (MOS_VID_STATE_PLAYING == local_state) {
       /* update the input texture from the rtmp stream. */
       if (is_init && needs_update) {
         glViewport(0, 0, fbo.width, fbo.height);
@@ -337,16 +359,21 @@ namespace mos {
   }
 
   void VideoInput::draw() {
-    glViewport(0, 0, yuv.w >> 2, yuv.h >> 2);
-    {
-      if (MOS_VID_STATE_PLAYING == state) {
-        yuv.draw();
+      int local_state;
+      lock();
+        local_state = state;
+      unlock();
+
+      glViewport(0, 0, yuv.w >> 2, yuv.h >> 2);
+      {
+        if (MOS_VID_STATE_PLAYING == local_state) {
+          yuv.draw();
+        }
+        else {
+          backup_player.draw(0, 0, yuv.w >> 2, yuv.h >> 2);      
+        }
       }
-      else {
-        backup_player.draw(0, 0, yuv.w >> 2, yuv.h >> 2);      
-      }
-    }
-    glViewport(0, 0, mos::config.window_width, mos::config.window_height);
+      glViewport(0, 0, mos::config.window_width, mos::config.window_height);
   }
 
   int VideoInput::shutdown() {
@@ -371,9 +398,15 @@ namespace mos {
       RX_ERROR("Error while trying to shutdown the backup player.");
       r = -3;
     }
-    
+
+    needs_update = false;
     is_init = false;
-    state = MOS_VID_STATE_NONE;
+
+    lock();
+       RX_VERBOSE("SET TIME TIME 0");
+       restart_time = 0;
+       state = MOS_VID_STATE_NONE;
+    unlock();
 
     return r;
   }
@@ -453,12 +486,15 @@ namespace mos {
 
     if (VID_EVENT_SHUTDOWN == event || VID_EVENT_INIT_ERROR == event) {
       RX_VERBOSE("Received VID_EVENT_SHUTDOWN - restarting the stream.");
-      vid->restart_time = time(NULL) + 5; /* start after a couple of seconds. */
-      vid->state = MOS_VID_STATE_CONNECTING;
-      RX_VERBOSE("RESTART TIME SET: %llu", vid->restart_time);
+      vid->lock();
+        vid->restart_time = time(NULL) + 5; /* start after a couple of seconds. */
+        vid->state = MOS_VID_STATE_CONNECTING;
+      vid->unlock();
     }
     else if (VID_EVENT_INIT_SUCCESS) {
-      vid->state = MOS_VID_STATE_PLAYING;
+      vid->lock();
+        vid->state = MOS_VID_STATE_PLAYING;
+      vid->unlock();   
     }
     else {
       RX_VERBOSE("Unhandled player event: %d", event);
