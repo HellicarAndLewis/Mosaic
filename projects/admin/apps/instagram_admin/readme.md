@@ -23,6 +23,12 @@ $ cd ./project/admin/apps/instagram_admin
 $ sudo npm install
 ```
 
+Fire up mongodb
+
+```sh
+$ mongod
+```
+
 Now the admin is ready to start
 
 ```sh
