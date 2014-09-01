@@ -9,6 +9,10 @@ var Express = require('express');
 var BodyParser = require('body-parser');
 var Fs = require('fs');
 var ObjectID = require('mongodb').ObjectID;
+var Dot = require('dot');
+var CookieSession = require('cookie-session');
+var CookieParser = require('cookie-parser');
+var MethodOverride = require('method-override');
 
 // Tag subscription router
 // --------------------------------------------------------
@@ -83,19 +87,84 @@ var Admin = new Class({
     this.router.use('/admin/images', Express.static(__dirname + '/../html/images'));
     this.router.use('/admin/fonts', Express.static(__dirname + '/../html/fonts'));
     
-    // Create admin route
-    this.router.get('/admin', function(req, res) {
+    this.router.use(MethodOverride());
+    this.router.use(CookieParser());
+    this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD'}));
+    this.router.use(BodyParser.urlencoded({extended: false}));
+    
+    this.router.get('/login', function(req, res) {
+      
+      Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
+        res.send(text);
+      });
+    });
+    
+    this.router.post('/login', function(req, res) {
+      
+      if(req.body.username == self.app.options.admin.username 
+         && req.body.password == self.app.options.admin.password) {
+        
+        self.app.iaid = ObjectID();
+        req.session.iaid = self.app.iaid;
+        res.redirect('/admin/tags'); 
+        
+      } else {
+        
+        res.redirect('/login');
+      }
+    });
+    
+    this.router.get('/', this.validate.bind(this), function(req, res) {
+      
+      res.redirect('/admin/tags');
+    });
+    
+    this.router.get('/admin', this.validate.bind(this), function(req, res) {
+      
+      res.redirect('/admin/tags');
+    });
+    
+    this.router.get('/admin/tags', this.validate.bind(this), function(req, res) {
       
       // Unlock images older than x ms
       self.unlockImages(function() {
         
         // Return index.html
+        
         Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
-          res.send(text);
+          
+          var tpl = Dot.template(text);
+          res.send(tpl({msg_type: 'tag'}));
+        });
+      }, (30*60*1000));
+    });
+    
+    this.router.get('/admin/users', this.validate.bind(this), function(req, res) {
+      
+      // Unlock images older than x ms
+      self.unlockImages(function() {
+        
+        // Return index.html
+        
+        Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
+          
+          var tpl = Dot.template(text);
+          res.send(tpl({msg_type: 'user', auto_approve_users: self.app.options.instagram.auto_approve_users}));
         });
       }, (30*60*1000));
     });
   
+  }
+  
+  // Validate user
+  // --------------------------------------------------------
+  ,validate: function(req, res, next) {
+    
+    if(req.session.iaid == this.app.iaid) {
+      next();
+    } else {
+      res.redirect('/login');
+    }
   }
   
   // Unlock images older than 30 min
@@ -159,8 +228,16 @@ var Images = new Class({
     this.router.use(BodyParser.urlencoded({extended: false}));
     
     // Create get route
-    this.router.get('/images/:action/:limit/:min_id/:max_id', function(req, res) {
+    this.router.get('/images/:action/:type/:min_id/:max_id/:limit', function(req, res) {
       
+      // Set type
+      var type = ['user', 'tag'];
+      if(req.params.type == 'user') {
+        type = ['user'];
+      } else if(req.params.type == 'tag') {
+        type = ['tag'];
+      }
+ 
       // Get queued images
       if(req.params.action == 'queued') {
        
@@ -170,6 +247,7 @@ var Images = new Class({
           locked: false
           ,approved: false
           ,reviewed: false
+          ,msg_type: {$in: type}
         }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
         
         result.toArray(function(err, docs) {
@@ -212,6 +290,7 @@ var Images = new Class({
             ,approved: true
             ,reviewed: true
             ,queue_id: {$gt: ObjectID(req.params.max_id)}
+            ,msg_type: {$in: type}
           }).sort({_id:1}).limit(parseInt(req.params.limit));
           
           // Find images later than the max queue id
@@ -249,6 +328,7 @@ var Images = new Class({
             locked: false
             ,approved: true
             ,reviewed: true
+            ,msg_type: {$in: type}
           }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {

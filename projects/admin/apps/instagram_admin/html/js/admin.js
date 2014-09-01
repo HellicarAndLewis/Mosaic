@@ -13,14 +13,20 @@ var MosaicInstagramAdmin = Class.extend({
     }
   }
   
+  ,messageType: ''
+  
   // Constructor
   // --------------------------------------------------------
-  ,init: function() {
+  ,init: function(msgType) {
     
     var self = this;
-    $('#instagram-images-overlay').fadeOut(0);
     
-    this.getQueuedImages(2, function() {
+    this.messageType = msgType;
+    
+    $('#instagram-images-overlay').fadeOut(0);
+    $('#controls').hide();
+    
+    this.getQueuedImages(this.messageType, 1, function() {
       
       // Approve / decline buttons events
       $('div#approved-btn').click(function(e) {
@@ -61,7 +67,7 @@ var MosaicInstagramAdmin = Class.extend({
   
   // 
   // --------------------------------------------------------
-  ,getQueuedImages: function(limit, callback) {
+  ,getQueuedImages: function(type, limit, callback) {
     
     var self = this;
     
@@ -72,15 +78,66 @@ var MosaicInstagramAdmin = Class.extend({
       + ':' 
       + this.options.http.port 
       + '/images/queued/' 
-      + limit
+      + type
       + '/0/0/'
+      + limit
       
       ,function(images) {
+        
+        // Check for images
+        if(images.length == 0) {
+          
+          $('#controls').hide();
+          $('#instagram-images').fadeOut(100, function() {
+            $('#instagram-images').empty();
+            self.retryRequest(type, limit, function() {
+            
+              $('#instagram-images-overlay').fadeOut(100);
+              $('#instagram-images').fadeIn(100);
+              callback();
+            });
+          });
+          
+          
+          return;
+        }
+        
+        $('#controls').show();
         
         // Add images
         self.addImages(images, callback);
       }
     );
+  }
+  
+  // 
+  // --------------------------------------------------------
+  ,retryRequest: function(type, limit, callback) {
+    
+    var self = this;
+    
+    
+    $('#instagram-images-overlay div.inner-update').hide();
+    $('#instagram-images-overlay div.inner-error').show();
+    $('#instagram-images-overlay').fadeIn(100, function() {
+      
+      var update_seconds = function(secondsLeft) {
+        
+        if(secondsLeft == 0) {
+          self.getQueuedImages(type, limit, callback);
+          return;
+        }
+        
+        $('#error-timeout').text(secondsLeft);
+        secondsLeft--;
+        
+        setTimeout(function() {
+          update_seconds(secondsLeft);
+        }, 1000);
+      }
+      
+      update_seconds(5);
+    });
   }
   
   // 
@@ -147,6 +204,8 @@ var MosaicInstagramAdmin = Class.extend({
     
     var self = this;
     
+    $('#instagram-images-overlay div.inner-error').hide();
+    $('#instagram-images-overlay div.inner-update').show();
     $('#instagram-images-overlay').fadeIn(100);
     
     // Post new data to server
@@ -159,9 +218,10 @@ var MosaicInstagramAdmin = Class.extend({
       ,{
         id: el.data('item-id')
         ,approved: approved
-      }).done(function(data) {
+      }).done(function() {
       
       $('#instagram-images-result').empty();
+      
       if(approved) {  
         $('#instagram-images-result').css('background', 'green');
         $('#instagram-images-result').text('Approved');
@@ -170,7 +230,7 @@ var MosaicInstagramAdmin = Class.extend({
         $('#instagram-images-result').text('Declined');
       }
   
-      self.getQueuedImages(1, function() {
+      self.getQueuedImages(self.messageType, 1, function() {
         
         $('#instagram-images').fadeOut(100, function() {
           el.remove();
@@ -183,8 +243,4 @@ var MosaicInstagramAdmin = Class.extend({
       });
     })
   }
-});
-
-$(document).ready(function() {
-  MosaicInstagramAdmin = new MosaicInstagramAdmin();
 });
