@@ -69,6 +69,7 @@ namespace vid  {
     stream_on_frame on_frame;                                   /* whenever we decode an frame, this will be called. */
     video_on_event on_event;                                    /* is called whenever e.g. the stream get disconnected or eof is read */
     void* user;                                                 /* user data; gets passed into the callback. */
+    static int sighandler_installed;                            /* we need to handle sigpipe which libav fires. */
   };
 
   inline int Stream::eof() {

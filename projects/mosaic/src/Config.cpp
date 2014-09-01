@@ -38,6 +38,19 @@ namespace mos {
       RX_ERROR("Invalid height");
       return -1;
     }
+
+    return validateAnalyzerSize();
+  }
+  
+  int Config::validateAnalyzerSize() {
+    if (0 == analyzer_width) {
+      RX_ERROR("Invalid analyzer width.");
+      return -1;
+    }
+    if (0 == analyzer_height) {
+      RX_ERROR("Invalid analyzer height.");
+      return -2;
+    }
     return 0;
   }
 
@@ -53,12 +66,34 @@ namespace mos {
     return 0;
   }
 
+  int Config::validateStream() {
+    if (0 == stream_width) {
+      RX_ERROR("Invalid stream width.");
+      return -1;
+    }
+    if (0 == stream_height) {
+      RX_ERROR("Invalid stream height");
+      return -2;
+    }
+    if (0 == stream_url.size()) {
+      RX_ERROR("Invalid stream url");
+      return -3;
+    }
+
+    return validateAnalyzerSize();
+  }
+
   void Config::reset() {
+    analyzer_width = 0;
+    analyzer_height = 0;
     webcam_device = 0;
     webcam_width = 0;
     webcam_height = 0;
     window_width = 0;
     window_height = 0;
+    stream_width = 0;
+    stream_height = 0;
+    stream_url.clear();
   }
 
   /* --------------------------------------------------------------------------------- */
@@ -101,7 +136,12 @@ namespace mos {
       mos::config.webcam_device = read_xml_int(cfg, "webcam_device", 0);
       mos::config.webcam_width = read_xml_int(cfg, "webcam_width", 640);
       mos::config.webcam_height = read_xml_int(cfg, "webcam_height", 480);
-      
+      mos::config.stream_url = read_xml_str(cfg, "stream_url", "");
+      mos::config.stream_width = read_xml_int(cfg, "stream_width", 0);
+      mos::config.stream_height = read_xml_int(cfg, "stream_height", 0);
+      mos::config.analyzer_width =  read_xml_int(cfg, "analyzer_width", 0);
+      mos::config.analyzer_height =  read_xml_int(cfg, "analyzer_height", 0);
+            
       /* feature extractor and matcher */
       fex::config.raw_filepath = rx_to_data_path(read_xml_str(cfg, "raw_filepath", "input_raw/"));
       fex::config.resized_filepath = rx_to_data_path(read_xml_str(cfg, "resized_filepath", "input_resized/"));
@@ -110,8 +150,8 @@ namespace mos {
       fex::config.file_tile_width = read_xml_int(cfg, "file_tile_width", 64);
       fex::config.file_tile_height = read_xml_int(cfg, "file_tile_height", 64);
       fex::config.memory_pool_size = read_xml_int(cfg, "memory_pool_size", 1000);
-      fex::config.input_image_width = mos::config.webcam_width;
-      fex::config.input_image_height = mos::config.webcam_height;
+      fex::config.input_image_width = mos::config.analyzer_width;
+      fex::config.input_image_height = mos::config.analyzer_height;
       fex::config.cols = (fex::config.input_image_width / fex::config.input_tile_size);
       fex::config.rows = (fex::config.input_image_height / fex::config.input_tile_size);
     }

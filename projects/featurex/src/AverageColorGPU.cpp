@@ -149,5 +149,4 @@ void AverageColorGPU::calculate() {
   /* reset fbo. */
   glViewport(0, 0, viewport[2], viewport[3]);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  
 }

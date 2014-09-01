@@ -2,11 +2,61 @@
   <webcam_device>0</webcam_device>
   <webcam_width>640</webcam_width>
   <webcam_height>480</webcam_height>
+
   <raw_filepath>input_raw/</raw_filepath>
   <resized_filepath>input_resized/</resized_filepath>
   <blurred_filepath>input_blurred/</blurred_filepath>
+
+  <!-- 
+       The `input_tile_size` is the size that is used to analyze 
+       the input. When the mosaic image is drawn using the same resolution
+       as `analyzer_width` and `analyzer_height` the pixels on screen 
+       match the `input_tile_size`.
+  --> 
   <input_tile_size>16</input_tile_size>
+
+  <!-- 
+       The `file_tile_width` and `file_tile_height` describe the resolution
+       of the input images that we use to create the mosiac. During time of 
+       writing, these images are stored in input_resized (see above). Make sure
+       that the input images are square (so `file_tile_width` == `file_file_height`
+       for now). 
+
+       The `memory_pool_size` is the number of tiles that we can store in memory. We
+       will load the tiles from the `resized_filepath`. We allocate one huge buffer
+       that is the size of: `file_tile_width * file_tile_height * 4 * memory_pool_size`.
+       For optimization reasons we're using only 4 channels imaes.
+       
+       ITS EXTREMELLY IMPORTANT THAT ALL IMAGES ARE PNG AND HAVE 4 CHANNELS. 
+      
+  --> 
   <file_tile_width>64</file_tile_width>  
   <file_tile_height>64</file_tile_height>
-  <memory_pool_size>500</memory_pool_size>
+  <memory_pool_size>2000</memory_pool_size>
+
+<!--
+  <stream_url>rtmp://localhost</stream_url>
+  <stream_width>1280</stream_width>
+  <stream_height>720</stream_height>
+-->
+
+  <!--
+      The `stream_url` is the RTMP url to which we connect when your compiling
+      with the `-DUSE_WEBCAM_AS_INPUT=0` flag. This width/height must match the
+      stream otherwise unexpected behavior will occur. 
+  -->
+  <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+  <stream_width>640</stream_width>
+  <stream_height>360</stream_height>
+ 
+  <!--
+      The `analyzer_width` and `analyzer_height` describe the size of the buffer 
+      that is used by the GPU analyzer. This should have the same aspect
+      ratio as the input resolution. Because we can use a webcam as input
+      or an rtmp video stream you need to adjust these two settings whenever
+      you change (`webcam_width`, `webcam_height`) or (`stream_width`, `stream_height`).
+  -->
+  <analyzer_width>720</analyzer_width>
+  <analyzer_height>360</analyzer_height>
+
 </settings>

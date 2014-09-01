@@ -6,10 +6,7 @@ namespace fex {
 
   Featurex::Featurex() 
     :mosaic_pixels(NULL)
-    ,user(NULL) /* testing */
-    ,on_pixdata(NULL) /* testing */
   {
-
   }
 
   Featurex::~Featurex() {
@@ -172,7 +169,6 @@ namespace fex {
         continue;
       }
 
-#if 1
       /* construct the mosaic. */
       int src_stride = tile->nchannels * fex::config.file_tile_width;
       int dest_stride = fex::config.getMosaicImageWidth() * 4; /* @todo - make dynamic */
@@ -180,26 +176,22 @@ namespace fex {
       int x0 = (gdesc.col * fex::config.file_tile_width * 4);
 
       for (int k = 0; k < fex::config.file_tile_height; ++k) {
-        int src_dx = (fex::config.file_tile_height - k) * src_stride;
+        int src_dx = ((fex::config.file_tile_height-1) - k) * src_stride;
         int dest_dx = y0 + (k * dest_stride) + x0;
+
+#if !defined(NDEBUG)        
+        if ((src_dx + src_stride) > tile->nbytes) { //  || tile->pixels == NULL) {
+          RX_ERROR("Out of bounds: %d > %d, tile->pixels: %p, tile->width: %d, tile->height: %d", (src_dx + src_stride), tile->nbytes, tile->pixels, tile->width, tile->height);
+          continue;
+        }
+#endif
+     
         memcpy(mosaic_pixels + dest_dx, tile->pixels + src_dx, src_stride);
       }
-#else
-      if (NULL != on_pixdata) {
-        int x = (gdesc.col * fex::config.file_tile_width);
-        int y = (gdesc.row * fex::config.file_tile_height);
-        on_pixdata(x, y, fex::config.file_tile_width, fex::config.file_tile_height, tile->pixels, user);
-      }
-#endif
+
 
 #if 0
-      RX_VERBOSE("Matched: (%d,%d,%d) <> (%d,%d,%d)",
-                 gdesc.average_color[0],
-                 gdesc.average_color[1],
-                 gdesc.average_color[2],
-                 cdesc.average_color[0],
-                 cdesc.average_color[1],
-                 cdesc.average_color[2]);
+      RX_VERBOSE("Matched: (%d,%d,%d) <> (%d,%d,%d)", gdesc.average_color[0],gdesc.average_color[1], gdesc.average_color[2], cdesc.average_color[0], cdesc.average_color[1],cdesc.average_color[2]);
 #endif
 
     }
@@ -208,6 +200,7 @@ namespace fex {
     //RX_VERBOSE("Comparing + constructing the image took: ~%f", d);
 
 #if 0
+    /* write an image to disk */
     static int frame = 1;
     if (frame % 30 == 0) {
       std::string fname = "mosaic_" +rx_get_time_string() +".png";
@@ -215,8 +208,6 @@ namespace fex {
     }
     frame++;
 #endif
-
-    //    RX_VERBOSE("-");
   }
 
 } /* namespace fex */

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <glad/glad.h>
+#include <signal.h>
 #include <GLFW/glfw3.h>
 
 #define ROXLU_IMPLEMENTATION
@@ -34,6 +35,8 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods);
 void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
+
+static void sigh(int s);
 
 int main() {
  
@@ -76,8 +79,10 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-  rx_log_init();
 
+  signal(SIGPIPE, sigh);
+
+  rx_log_init();
   mos::config.window_width = w;
   mos::config.window_height = h;
 
@@ -183,4 +188,8 @@ void button_callback(GLFWwindow* win, int bt, int action, int mods) {
  
 void error_callback(int err, const char* desc) {
   printf("GLFW error: %s (%d)\n", desc, err);
+}
+
+static void sigh(int s) {
+  RX_VERBOSE("GOT SIGNAL!");
 }

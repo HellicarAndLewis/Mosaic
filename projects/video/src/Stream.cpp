@@ -1,7 +1,24 @@
 #include <video/Stream.h>
 
+/* 
+   libav signals a SIGPIPE when the remote connections disconnects 
+   when it's not yet initialized, therefore we need to handle the
+   SIGPIPE.
+
+   See: https://git.libav.org/?p=libav.git;a=commitdiff;h=6ee1cb5740e7490151db7dcec7e20ceaf8a2fe1f
+   
+*/
+
+#include <signal.h> 
+
+extern "C" {
+  static void sigpipe_handler(int s); /* we attach this to the SIGPIPE */
+}
+
 namespace vid {
 
+
+  int Stream::sighandler_installed = 0;
 
   /* --------------------------------------------------------------------- */
   static int interrupt_cb(void* user);                                         /* is called by libav and used to make sure a socket read will not last forever */
@@ -28,6 +45,12 @@ namespace vid {
 #if !defined(NDEBUG)
     av_log_set_level(AV_LOG_DEBUG);
 #endif
+
+    /* install our sigpipe handler, which libav fires when writing to a invald socket. */
+    if (0 == sighandler_installed) {
+      signal(SIGPIPE, sigpipe_handler);
+      sighandler_installed = 1;
+    }
   }
   
   Stream::~Stream() {
@@ -171,13 +194,8 @@ namespace vid {
       is_eof = 1;
 
       if (on_event) {
-        RX_VERBOSE("----------- CALLING ON_EVENT");
         on_event(VID_EVENT_EOF, user);
       }
-      else {
-        RX_VERBOSE("NONONON----------- CALLING ON_EVENT");
-      }
-
       return 0;
     }
     else if (0 != r) {
@@ -277,3 +295,9 @@ namespace vid {
   /* --------------------------------------------------------------------- */
 
 } /* namespace vid */
+
+extern "C" {
+  void sigpipe_handler(int n) {
+    RX_VERBOSE("Received a SIGPIPE from libav");
+  }
+}

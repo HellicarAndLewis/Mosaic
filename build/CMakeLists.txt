@@ -148,10 +148,10 @@ add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
 # The tests used during development
-#create_test(mosaic)
+create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
-create_test(video_stream_player)
+#create_test(video_stream_player)
 #create_test(offline_analyzer)
 #create_test(online_analyzer)
 #create_test(async_upload)

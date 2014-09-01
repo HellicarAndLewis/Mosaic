@@ -105,6 +105,9 @@ namespace vid {
     glPixelStorei(GL_UNPACK_ROW_LENGTH, vs);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, hw, hh, GL_RED, GL_UNSIGNED_BYTE, v);
 
+    /* reset */
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
     return 0;
   }
 

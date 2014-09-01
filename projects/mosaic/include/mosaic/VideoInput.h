@@ -4,6 +4,7 @@
 #include <mosaic/Config.h>
 
 #if USE_WEBCAM_AS_INPUT
+
 /* --------------------------------------------------------------------------------- */
 /*                             W E B C A M   I N P U T                               */
 /* --------------------------------------------------------------------------------- */
@@ -48,7 +49,47 @@ namespace mos {
 /* --------------------------------------------------------------------------------- */
 /*                            R T M P   I N P U T                                    */
 /* --------------------------------------------------------------------------------- */
-#  error "Need to implement the RTMP stream input"  
+//#  error "Need to implement the RTMP stream input"  
+#include <glad/glad.h>
+#include <gfx/FBO.h>
+#include <video/YUV420P.h>
+#include <video/Player.h>
+#include <sys/time.h>
+
+namespace mos {
+
+  class VideoInput {
+  public:
+    VideoInput();
+    ~VideoInput();
+    int init();
+    void update();
+    void draw();
+    int shutdown();
+    GLuint texid();
+    int needsUpdate();                          /* checks if we updated a video frame; will reset the internal flag once called. */
+
+  public:
+    bool is_init;
+    bool needs_update;
+    uint64_t restart_time;
+    GLuint video_tex;
+    vid::Player player;
+    vid::YUV420P yuv;
+    gfx::FBO fbo;                               /* we write the decoded video to a FBO, RTT, and the texture is used by the GPU analyzer. */
+  };
+  
+  inline GLuint VideoInput::texid() {
+    return video_tex;
+  }
+
+  inline int VideoInput::needsUpdate() {
+    bool needs = needs_update;
+    needs_update = false; 
+    return (needs) ? 0 : -1;
+  }
+
+} /* namespace mos */
 
 
 #endif /* #if USE_WEBCAM_AS_INPUT */
