@@ -14,6 +14,7 @@ var SocketIo = require('socket.io');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
+
 var Console = require('./Console');
 var Instagram = require('./Instagram');
 var Routes = require('./Routes');
@@ -24,15 +25,20 @@ var Server = new Class({
   
   // Options
   ,options: {
+    
+    "admin": {
+      "username": "",
+      "password": ""
+    },
     "instagram": {
-      "client_id": "8357c3f32006446f9fd97d907e1a2954"
-      ,"client_secret": "d20bc262654f47c0a90ecda76af22120"
-      ,"hashtags": ["beautiful"]
-      ,"users": ["mrtnbbbls","roxlu"]
+      "client_id": ""
+      ,"client_secret": ""
+      ,"hashtags": []
+      ,"users": []
       ,"request_delay": 2000
     }
     ,"http": {
-      "host": "77.248.89.153"
+      "host": "localhost"
       ,"port": 3333
     }
     ,"mongodb": {
@@ -49,9 +55,11 @@ var Server = new Class({
     // Process args
     this.args = Program
       .version('0.0.1')
-      .option('-c, --clear', 'Clear all instagram subscriptions')
-      .option('-n, --nopolling', 'Start without media polling')
       .option('-s, --settings [path]', 'Start with custom settings file')
+      .option('-n, --nopolling', 'Start without media polling')
+      .option('-t, --polltags', 'Start with tag media polling')
+      .option('-u, --pollusers', 'Start with users media polling')
+      .option('-c, --clear', 'Clear all instagram subscriptions')
       .parse(process.argv);
     
     
@@ -96,7 +104,7 @@ var Server = new Class({
       + ':' + this.options.mongodb.port 
       + '/' + this.options.mongodb.db
       
-      , function(err, db) {
+      ,function(err, db) {
 
         if(err) {
           Console.error('Could not connect to DB');
@@ -174,15 +182,32 @@ var Server = new Class({
       // Get recent media
       if(!Program.nopolling) {
         
-        // Get recent tag media
-        self.options.instagram.hashtags.each(function(tag, i) {
-          self.getTagRecentMedia(tag);
-        });
+        if(!Program.polltags && !Program.pollusers) {
+          
+          // Get recent tag media
+          self.options.instagram.hashtags.each(function(tag, i) {
+            self.getTagRecentMedia(tag);
+          });
+
+          // Get recent user media
+          self.users.each(function(user, i) {
+            self.getUserRecentMedia(user);
+          });
         
-        // Get recent user media
-        self.users.each(function(user, i) {
-          self.getUserRecentMedia(user);
-        });
+        } else if(Program.polltags && !Program.pollusers) {
+          
+          // Get recent tag media
+          self.options.instagram.hashtags.each(function(tag, i) {
+            self.getTagRecentMedia(tag);
+          });
+        
+        } else if(!Program.polltags && Program.pollusers) {
+          
+          // Get recent user media
+          self.users.each(function(user, i) {
+            self.getUserRecentMedia(user);
+          });
+        }
         
       }
       
@@ -318,6 +343,7 @@ var Server = new Class({
                 new_medias.push({
 
                   media_id: media.id
+                  ,msg_type: 'tag'
                   ,queue_id: ObjectID()
                   ,images: media.images
                   ,user: media.user
@@ -347,7 +373,7 @@ var Server = new Class({
           
           if(new_medias.length > 0) {
             
-            Console.status(medias.length + ' images added for tag ' + tag);
+            Console.status(new_medias.length + ' images added for tag ' + tag);
             
             collection.insert(new_medias, {w:1}, function(err, result) {
 
@@ -413,7 +439,7 @@ var Server = new Class({
      
         // Check for 503 status code
         if(err.status_code == 503) {
-          Console.error('503 Service Unavailable. No server is available to handle this request.');
+          Console.error('503 Service Unavailable. No server is available to handle this request. Possible cause is too ouch calls per hour or Instagram is having a hard time.');
         } else {
           Console.error('Get recent media request failed for ' + user.username + '. Make sure the profile is public!');
         }
@@ -445,40 +471,59 @@ var Server = new Class({
           
           var media = list.pop();
           
-          // Check for image type and existing id
+          // Check for image type, existing media id
           if(media.type = 'image' && media.id) {
             
-            // Check if media already exists
-            var exists = collection.find({media_id: media.id}, {_id: 1}).limit(1);
-            exists.count(function(err, count) {
-             
-              // If media doesn't exist
-              if(count == 0) {
-                
-                // Create media object
-                new_medias.push({
-
-                  media_id: media.id
-                  ,queue_id: ObjectID()
-                  ,images: media.images
-                  ,user: media.user
-                  ,filter: media.filter
-                  ,tags: media.tags
-                  ,link: media.link
-                  ,likes: media.likes.count
-                  ,location: media.location
-                  ,created_time: parseInt(media.created_time)
-                  ,modified_time: Date.now()
-                  ,locked_time: Date.now()
-                  ,locked: false
-                  ,approved: false
-                  ,reviewed: false
-                });
+            // Check if media has one of the set hashtags
+            var has_hashtag = false;
+            
+            media.tags.each(function(tag, i) {
+              if(self.options.instagram.hashtags.indexOf(tag) > -1) {
+                 has_hashtag = true;
               }
-              
-              next_media(list, callback);
-              
             });
+            
+            // If media has a corresponding hashtag
+            if(has_hashtag) {
+              
+              // Check if media already exists
+              var exists = collection.find({media_id: media.id}, {_id: 1}).limit(1);
+              exists.count(function(err, count) {
+
+                // If media doesn't exist
+                if(count == 0) {
+
+                  // Create media object
+                  new_medias.push({
+
+                    media_id: media.id
+                    ,msg_type: 'user'
+                    ,queue_id: ObjectID()
+                    ,images: media.images
+                    ,user: media.user
+                    ,filter: media.filter
+                    ,tags: media.tags
+                    ,link: media.link
+                    ,likes: media.likes.count
+                    ,location: media.location
+                    ,created_time: parseInt(media.created_time)
+                    ,modified_time: Date.now()
+                    ,locked_time: Date.now()
+                    ,locked: false
+                    ,approved: self.options.instagram.auto_approve_users
+                    ,reviewed: self.options.instagram.auto_approve_users
+                  });
+                }
+
+                next_media(list, callback);
+
+              });
+              
+            } else {
+              
+              // Next if tag is not in list
+              next_media(list, callback);
+            }
           }
         };
         
@@ -488,7 +533,7 @@ var Server = new Class({
     
           if(new_medias.length > 0) {
             
-            Console.status(medias.length + ' images added for user ' + user.username);
+            Console.status(new_medias.length + ' images added for user ' + user.username);
             
             collection.insert(new_medias, {w:1}, function(err, result) {
 

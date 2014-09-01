@@ -62,7 +62,7 @@ var ImageDownloader = new Class({
   ,start: function() {
     
     var self = this;
-    var url = this.settings.queue_url + '/' + this.settings.limit + '/' +  this.lastModIdMin + '/' + this.lastModIdMax;
+    var url = this.settings.queue_url + '/all/' +  this.lastModIdMin + '/' + this.lastModIdMax + '/' + this.settings.limit + '/';
     
     console.log('Get new results - ' + url);
 
