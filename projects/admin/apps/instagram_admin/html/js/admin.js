@@ -144,6 +144,8 @@ var MosaicInstagramAdmin = Class.extend({
   // --------------------------------------------------------
   ,addImages: function(images, callback) {
     
+    var self = this;
+    
     var check_img = function(queue, cb) {
       
       if(queue.length == 0) {
@@ -186,7 +188,17 @@ var MosaicInstagramAdmin = Class.extend({
       
       img.onerror = function() { 
         
-        check_img(queue, cb);
+        self.retryRequest(self.messageType, 1, function() {
+        
+          $('#instagram-images').fadeOut(100, function() {
+            el.remove();
+            $('#instagram-images-overlay').fadeOut(100);
+            $('#instagram-images').fadeIn(100, function() {
+              self.locked = false; 
+              $('.control-btn').removeClass('highlight');
+            });
+          });
+        });
 
       };
       
