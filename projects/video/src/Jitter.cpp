@@ -75,7 +75,7 @@ namespace vid {
     }
 
     int64_t pts = (frame->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu;
-    curr_buffer_ns = (pts - first_pts);
+    curr_buffer_ns = (pts - first_pts) - curr_pts;
 
     /* and store! */
     frames.push_back(frame);
@@ -92,7 +92,10 @@ namespace vid {
     
     /* not frame yet .. or played back everything */
     if (0 == frames.size()) {
-      RX_VERBOSE("No frames left");
+      RX_VERBOSE("No frames left - we're restarting the playback buffer");
+      first_pts = 0;
+      curr_pts = 0;
+      curr_buffer_ns = 0;
       return 0;
     }
 
@@ -119,7 +122,7 @@ namespace vid {
       /* get the current frame */
       AVFrame* f = *it;
       pts = ((f->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu) - first_pts;
-      RX_VERBOSE("f->pkt_pts: %lld, curr_pts: %llu", f->pkt_pts, curr_pts);
+      RX_VERBOSE("f->pkt_pts: %lld, curr_pts: %llu, frames: %lu", f->pkt_pts, curr_pts, frames.size());
       if (pts > curr_pts) {
         break;
       }
