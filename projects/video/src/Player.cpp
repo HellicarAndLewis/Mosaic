@@ -1,5 +1,6 @@
 #include <video/Player.h>
 #include <errno.h>
+#include <unistd.h>
 
 namespace vid {
   
@@ -46,6 +47,8 @@ namespace vid {
     jitter.on_frame = NULL;
     jitter.user = NULL;
     must_shutdown = false;
+    must_stop = true;
+    is_running = false;
   }
 
   int Player::init(std::string surl) {
@@ -72,6 +75,7 @@ namespace vid {
       return -102;
     }
 
+    RX_VERBOSE("PTHREAD: %p", &thread);
     return 0;
   }
 
@@ -88,8 +92,6 @@ namespace vid {
       return 0;
     }
 
-    RX_VERBOSE("Updating jitter.");
-
     lock();
       jitter.update();
     unlock();
@@ -103,7 +105,7 @@ namespace vid {
       RX_VERBOSE("Cannot stop the player; not running.");
       return -1;
     }
- 
+
     if (0 != shutdown()) {
       return -2;
     }
@@ -134,14 +136,15 @@ namespace vid {
       return 0;
     }
 
-    RX_VERBOSE("Joining player thread");
-
     must_stop = true;
+
+    RX_VERBOSE("Joining stream thread.");
 
     r = pthread_join(thread, NULL);
     if (0 != r) {
-      RX_WARNING("Failed to join the player thread: %d", r);
+      RX_WARNING("Failed to join the player thread: %d, %s", r, strerror(r));
     }
+    is_running = false;
 
     if (0 != jitter.shutdown()) {
       RX_ERROR("Error while trying to shut down the Jitter.");
@@ -185,12 +188,7 @@ namespace vid {
       p->stream.update();
     }
 
-    /* shutdown the stream and jitter buffer. */
-    if (0 != p->shutdown()) {
-      RX_ERROR("Error while trying to shutdown the player.");
-    }
-
-    p->is_running = false;
+    RX_VERBOSE("Player thread stopped/returning");
 
     return NULL;
   }
@@ -218,8 +216,6 @@ namespace vid {
   }
 
   static void on_play_frame(AVFrame* frame, void* user) {
-
-    RX_VERBOSE("ON_PLAY_FRAME");
 
     if (NULL == frame) {
       RX_ERROR("Invalid frame given");
@@ -257,20 +253,15 @@ namespace vid {
 
     if (VID_EVENT_STOP_PLAYBACK == event) {
       RX_VERBOSE("Received a VID_EVENT_STOP_PLAYBACK");
-      // p->must_stop = true;
       p->must_shutdown = true;
-      //      p->shutdown();
     }
     else if (VID_EVENT_EOF == event) {
       RX_VERBOSE("Received a VID_EVENT_EOF");
       p->must_shutdown = true;
-      //p->shutdown();
     }
     else if (VID_EVENT_TIMEOUT == event) {
       RX_VERBOSE("Received a VID_EVENT_TIMEOUT.");
       p->must_shutdown = true;
-      //      p->shutdown();
-      //p->must_stop = true;
     }
   }
 

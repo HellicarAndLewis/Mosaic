@@ -259,7 +259,7 @@ namespace vid {
       RX_ERROR("The user pointer to interrupt_cb is invalid.");
       return 1; /* stop */
     }
-
+    
     /* timeout after 15 seconds */
     uint64_t dt = rx_hrtime() - s->timestamp;
     if (dt > (15e9)) {

@@ -71,7 +71,7 @@ namespace vid {
 
     bool is_running;                  /* is set to true when the player thread is running */
     bool must_stop;                   /* is set to true when we must stop the thread. */
-    bool must_shutdown;
+    bool must_shutdown;               /* a flag which is set to true in the event handler and handled in update(). we handle it in update so shutdown happens from the same thread as the user who is using this player. This isn't 100% necessary; just a precaution. */
     pthread_t thread;                 /* the stream/decoding thread */
     pthread_mutex_t mutex;            /* secures the jitter buffer */
 
@@ -88,7 +88,6 @@ namespace vid {
       RX_ERROR("Cannot lock because we're not running and the mutex is invalid!");
       return;
     }
-
     pthread_mutex_lock(&mutex);
   }
 

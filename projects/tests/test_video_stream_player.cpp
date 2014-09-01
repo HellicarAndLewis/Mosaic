@@ -201,8 +201,6 @@ void error_callback(int err, const char* desc) {
 /* ------------------------------------------------------------- */
 static void on_video_frame(AVFrame* frame, void* user) {
 
-  RX_VERBOSE("updating video frame");
-
   if (NULL == frame) { return; } 
 
   if (0 == frame->width) {
@@ -243,6 +241,7 @@ static void on_video_frame(AVFrame* frame, void* user) {
   yuv->update(frame->data[0], frame->linesize[0],
               frame->data[1], frame->linesize[1],
               frame->data[2], frame->linesize[2]);
+
 
 #if USE_TIMER
   timer_ptr->stop();

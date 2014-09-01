@@ -48,7 +48,6 @@ namespace vid {
 
     /* free all frames that are buffered. */
     for (size_t i = 0; i < frames.size(); ++i) {
-      RX_VERBOSE("FREEING FRAME");
       av_frame_free(&frames[i]);
     }
     frames.clear();
