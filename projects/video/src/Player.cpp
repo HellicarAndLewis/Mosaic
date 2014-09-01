@@ -19,9 +19,26 @@ namespace vid {
     ,on_frame(NULL)
     ,on_event(NULL)
   {
+    /* init mutex. */
+    if (0 != pthread_mutex_init(&mutex, NULL)) {
+      RX_ERROR("Cannot init mutex");
+    }
   }
 
   Player::~Player() {
+
+    int r;
+
+    if (is_running) {
+      RX_VERBOSE("stop runing!");
+      shutdown();
+    }
+
+    /* destroy the mutex. */
+    r = pthread_mutex_destroy(&mutex);
+    if (r != 0) {
+      RX_ERROR("Cannot destory the mutex: %d, %s", r, strerror(errno));
+    }
 
     stream.user = NULL;
     stream.on_frame = NULL;
@@ -34,12 +51,6 @@ namespace vid {
     if (true == is_running) {
       RX_ERROR("The player is already initialized. Call shutdown() first.");
       return -100;
-    }
-
-    /* init mutex. */
-    if (0 != pthread_mutex_init(&mutex, NULL)) {
-      RX_ERROR("Cannot init mutex");
-      return -101;
     }
 
     /* init members */
@@ -65,7 +76,7 @@ namespace vid {
   int Player::update() {
 
     /* silently ignore updates when we're stopped. */
-    if (true == must_stop) {
+    if (true == must_stop || false == is_running) {
       return 0;
     }
 
@@ -78,17 +89,14 @@ namespace vid {
 
   int Player::stop() {
 
-    if (0 == is_running) {
-      RX_VERBOSE("Cannot stop the player; not running");
+    if (false == is_running) {
+      RX_VERBOSE("Cannot stop the player; not running.");
       return -1;
     }
-    if (true == must_stop) {
-      RX_VERBOSE("Already stopping the player");
+ 
+    if (0 != shutdown()) {
       return -2;
     }
-
-    RX_VERBOSE("Stopping the player");
-    must_stop = true;
 
     return 0;
   }
@@ -106,14 +114,23 @@ namespace vid {
   int Player::shutdown() {
     int r;
 
+    if (false == is_running) {
+      RX_VERBOSE("Not joining player thread, already stopped.");
+      return 0;
+    }
+
+    if (true == must_stop) {
+      RX_VERBOSE("Already shutting down the player thread.");
+      return 0;
+    }
+
     RX_VERBOSE("Joining player thread");
 
     must_stop = true;
-    pthread_join(thread, NULL);
 
-    r = pthread_mutex_destroy(&mutex);
-    if (r != 0) {
-      RX_ERROR("Cannot destory the mutex: %d, %s", r, strerror(errno));
+    r = pthread_join(thread, NULL);
+    if (0 != r) {
+      RX_WARNING("Failed to join the player thread: %d", r);
     }
 
     if (0 != jitter.shutdown()) {
@@ -225,9 +242,18 @@ namespace vid {
       return;
     }
 
-    if (event == VID_EVENT_STOP_PLAYBACK) {
+    if (VID_EVENT_STOP_PLAYBACK == event) {
       RX_VERBOSE("Received a VID_EVENT_STOP_PLAYBACK");
-      p->must_stop = true;
+      // p->must_stop = true;
+      p->shutdown();
+    }
+    else if (VID_EVENT_EOF == event) {
+      p->shutdown();
+    }
+    else if (VID_EVENT_TIMEOUT == event) {
+      RX_VERBOSE("Received a VID_EVENT_TIMEOUT.");
+      p->shutdown();
+      //p->must_stop = true;
     }
   }
 

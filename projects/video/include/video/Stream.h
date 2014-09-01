@@ -22,7 +22,8 @@
 
   References:
   ----------
-  See "Reading from an opened file" for some info on how to decode a stream: https://libav.org/doxygen/master/group__lavf__decoding.html#gae804b99aec044690162b8b9b110236a4
+  See "Reading from an opened file" for some info on how to decode a stream: 
+  https://libav.org/doxygen/master/group__lavf__decoding.html#gae804b99aec044690162b8b9b110236a4
 
 */
 #ifndef VIDEO_STREAM_H
@@ -61,6 +62,7 @@ namespace vid  {
     AVCodec* input_codec;                                        /* the codec that is used by the video stream */
     int video_stream_dx;                                         /* the video stream index; */ 
     double video_stream_timebase;                                /* the timebase of the video stream in seconds */
+    uint64_t timestamp;                                          /* the time in ns. when init was called. this is used by the interrupt to make sure a avformat_open_iput() won't hang until forever when the endpoint can't be opened. */
     int is_stream_open;                                          /* is set to 1 when the stream has been opened successfully */
     int is_eof;                                                  /* is set to 1 when the end of the stream is reached */
 

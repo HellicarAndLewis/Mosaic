@@ -103,8 +103,8 @@ int main() {
   player_ptr = &player;
   player.on_frame = on_video_frame;
   //if (0 != player.init("rtmp://edge01.fms.dutchview.nl/botr/bunny.flv")) {
-  if (0 != player.init("rtmp://cp123195.live.edgefcs.net/live/topshop@27056")) {
-  //if (0 != player.init("rtmp://localhost")) {
+  //if (0 != player.init("rtmp://cp123195.live.edgefcs.net/live/topshop@27056")) {
+  if (0 != player.init("rtmp://localhost")) {
     exit(0);
   }
 
@@ -191,10 +191,6 @@ void cursor_callback(GLFWwindow* win, double x, double y) {
 }
  
 void button_callback(GLFWwindow* win, int bt, int action, int mods) {
-  /*
-    if(action == GLFW_PRESS) { 
-    }
-  */
 }
  
 void error_callback(int err, const char* desc) {

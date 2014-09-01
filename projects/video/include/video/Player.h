@@ -19,7 +19,15 @@
   -------
 
   Uses libav to decode a video stream url in a separate thread and makes sure
-  we have a big enough jitter buffer for smooth play back 
+  we have a big enough jitter buffer for smooth play back. You can test this with 
+  e.g. avconv. To create a "server" to which you can connect with libav/avconv
+  use something like this:
+
+  --
+    ./avconv -re -i yourvideo.mov -an -v debug -f flv -listen 1 rtmp://localhost/
+  --
+
+  Then you can connect to the `rtmp://localhost` stream.
 
  */
 #ifndef VIDEO_PLAYER_H

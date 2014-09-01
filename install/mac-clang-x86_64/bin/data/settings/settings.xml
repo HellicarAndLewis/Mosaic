@@ -5,8 +5,8 @@
   <raw_filepath>input_raw/</raw_filepath>
   <resized_filepath>input_resized/</resized_filepath>
   <blurred_filepath>input_blurred/</blurred_filepath>
-  <input_tile_size>8</input_tile_size>
+  <input_tile_size>16</input_tile_size>
   <file_tile_width>64</file_tile_width>  
   <file_tile_height>64</file_tile_height>
-  <memory_pool_size>2000</memory_pool_size>
+  <memory_pool_size>500</memory_pool_size>
 </settings>

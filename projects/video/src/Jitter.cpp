@@ -119,12 +119,12 @@ namespace vid {
       /* get the current frame */
       AVFrame* f = *it;
       pts = ((f->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu) - first_pts;
-      RX_VERBOSE("f->pkt_pts: %lld, curr_pts: %llu", f->pkt_pts, curr_pts);
+      //RX_VERBOSE("f->pkt_pts: %lld, curr_pts: %llu", f->pkt_pts, curr_pts);
       if (pts > curr_pts) {
         break;
       }
 
-      RX_VERBOSE("Using frame pts: %lld", f->pkt_pts);
+      //RX_VERBOSE("Using frame pts: %lld", f->pkt_pts);
 
       /* call the callback */
       on_frame(f, user);

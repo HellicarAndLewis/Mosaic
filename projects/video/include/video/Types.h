@@ -21,6 +21,7 @@
 #define VID_EVENT_START_PLAYBACK 0x01                         /* this jitter buffer has enough frames to start playback; playback will start now */
 #define VID_EVENT_STOP_PLAYBACK 0x02                          /* we've played all the frames from the jitter buffer. */
 #define VID_EVENT_EOF 0x03                                    /* the eof has been read; doesn't mean we've played back everything */
+#define VID_EVENT_TIMEOUT 0x04                                /* when we can't connect to the remote stream and we timeout in the interrupt callback (see Stream.cpp) this event is fired. */
 
 typedef void(*video_on_event)(int event, void* user);         /* gets called when the playback e.g. starts, stops or eof happens. */
 

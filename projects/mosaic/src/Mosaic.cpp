@@ -65,7 +65,6 @@ namespace mos {
       return -102;
     }
 
-
     return 0;
   }
 

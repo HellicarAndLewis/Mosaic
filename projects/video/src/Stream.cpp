@@ -2,12 +2,18 @@
 
 namespace vid {
 
+
+  /* --------------------------------------------------------------------- */
+  static int interrupt_cb(void* user);                                         /* is called by libav and used to make sure a socket read will not last forever */
+  /* --------------------------------------------------------------------- */
+
   Stream::Stream() 
     :fmt_ctx(NULL)
     ,codec_ctx(NULL)
     ,input_codec(NULL)
     ,video_stream_dx(-1)
     ,video_stream_timebase(-1)
+    ,timestamp(0)
     ,is_stream_open(-1)
     ,is_eof(-1)
     ,on_frame(NULL)
@@ -29,6 +35,7 @@ namespace vid {
 
   int Stream::init(std::string url) {
 
+    AVDictionary *options = NULL;
     int r, i;
 
     /* validate */
@@ -42,25 +49,39 @@ namespace vid {
       return -2;
     }
 
-    /* open the stream */
-    r = avformat_open_input(&fmt_ctx, url.c_str(), NULL, NULL);
-    if (r < 0) {
-      RX_ERROR("Trying to open the rtmp stream.");
+    av_dict_set(&options, "analyzeduration", "1500000", 0);
+    fmt_ctx = avformat_alloc_context();
+    if (NULL == fmt_ctx) {
+      RX_ERROR("Cannot allocate the AVFormatContext");
       return -3;
     }
 
+    /* set the interrupt so we can stop when we cannot connect to the stream. */
+    fmt_ctx->interrupt_callback.callback = interrupt_cb;
+    fmt_ctx->interrupt_callback.opaque = this;
+    timestamp = rx_hrtime();
+
+    /* open the stream */
+    r = avformat_open_input(&fmt_ctx, url.c_str(), NULL, &options);
+    if (r < 0) {
+      RX_ERROR("Trying to open the rtmp stream.");
+      return -4;
+    }
     is_stream_open = 1;
+
+    av_dict_free(&options);
+    options = NULL;
 
     r = avformat_find_stream_info(fmt_ctx, NULL);
     if (r < 0) {
       RX_ERROR("Cannot find stream info.");
-      return -4;
+      return -5;
     }
     
     /* check if there are streams */
     if (0 == fmt_ctx->nb_streams) {
       printf("No streams found.");
-      return -5;
+      return -6;
     }
 
     /* find the video stream */
@@ -71,14 +92,14 @@ namespace vid {
     }
     if (-1 == video_stream_dx) {
       RX_ERROR("Warning: cannot find a video stream.");
-      return -6;
+      return -7;
     }
 
     /* find decoder */
     input_codec = avcodec_find_decoder(fmt_ctx->streams[video_stream_dx]->codec->codec_id);  
     if (NULL == input_codec) {
       RX_ERROR("Cannot find input codec.");
-      return -7;
+      return -8;
     }
 
     /* open codec. */
@@ -97,7 +118,7 @@ namespace vid {
     r = avcodec_open2(codec_ctx, input_codec, NULL);
     if (r < 0) {
       RX_ERROR("Cannot open the coded for the rtmp stream.");
-      return -8;
+      return -9;
     }
 
     /* we are keeping track of frames in our jitter buffer, so this must be set.
@@ -134,6 +155,9 @@ namespace vid {
     if (-1 == is_stream_open) { return -6; } 
     if (1 == is_eof) { return -7; } 
 
+    /* make sure we update our running time so the interrupt will return success */
+    timestamp = rx_hrtime();
+
     /* initialize the packet that will hold the encoded data */
     av_init_packet(&pkt);
     pkt.data = NULL;
@@ -147,7 +171,11 @@ namespace vid {
       is_eof = 1;
 
       if (on_event) {
+        RX_VERBOSE("----------- CALLING ON_EVENT");
         on_event(VID_EVENT_EOF, user);
+      }
+      else {
+        RX_VERBOSE("NONONON----------- CALLING ON_EVENT");
       }
 
       return 0;
@@ -217,9 +245,34 @@ namespace vid {
     video_stream_timebase = -1;
     is_stream_open = -1;
     is_eof = -1;
+    timestamp = 0;
 
     return 0;
   }
 
+  /* --------------------------------------------------------------------- */
+
+  static int interrupt_cb(void* user) {
+
+    Stream* s = static_cast<Stream*>(user);
+    if (NULL == s) {
+      RX_ERROR("The user pointer to interrupt_cb is invalid.");
+      return 1; /* stop */
+    }
+
+    /* timeout after 15 seconds */
+    uint64_t dt = rx_hrtime() - s->timestamp;
+    if (dt > (15e9)) {
+      if (NULL != s->on_event) {
+        s->on_event(VID_EVENT_TIMEOUT, s->user);
+      }
+      RX_ERROR("We timed out the video stream.");
+      return 1;
+    }
+
+    return 0;
+  }
+
+  /* --------------------------------------------------------------------- */
 
 } /* namespace vid */
