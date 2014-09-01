@@ -200,6 +200,9 @@ void error_callback(int err, const char* desc) {
 
 /* ------------------------------------------------------------- */
 static void on_video_frame(AVFrame* frame, void* user) {
+
+  RX_VERBOSE("updating video frame");
+
   if (NULL == frame) { return; } 
 
   if (0 == frame->width) {
@@ -226,6 +229,11 @@ static void on_video_frame(AVFrame* frame, void* user) {
       RX_ERROR("Cannot initialize the yuv decoder");
       exit(1);
     }
+  }
+
+  if (NULL == frame->data[0]) {
+    RX_VERBOSE("Invalid data.");
+    return;
   }
 
 #if USE_TIMER

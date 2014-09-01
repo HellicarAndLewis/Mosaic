@@ -14,6 +14,7 @@ namespace vid {
 
   Player::Player() 
     :must_stop(true)
+    ,must_shutdown(false)
     ,is_running(false)
     ,user(NULL)
     ,on_frame(NULL)
@@ -44,6 +45,7 @@ namespace vid {
     stream.on_frame = NULL;
     jitter.on_frame = NULL;
     jitter.user = NULL;
+    must_shutdown = false;
   }
 
   int Player::init(std::string surl) {
@@ -79,6 +81,14 @@ namespace vid {
     if (true == must_stop || false == is_running) {
       return 0;
     }
+
+    if (true == must_shutdown) {
+      shutdown();
+      must_shutdown = false;
+      return 0;
+    }
+
+    RX_VERBOSE("Updating jitter.");
 
     lock();
       jitter.update();
@@ -171,7 +181,7 @@ namespace vid {
     }
 
     /* our thread loop */
-    while (false == p->must_stop) {
+    while (false == p->must_stop && false == p->must_shutdown) {
       p->stream.update();
     }
 
@@ -209,6 +219,8 @@ namespace vid {
 
   static void on_play_frame(AVFrame* frame, void* user) {
 
+    RX_VERBOSE("ON_PLAY_FRAME");
+
     if (NULL == frame) {
       RX_ERROR("Invalid frame given");
       return;
@@ -233,6 +245,7 @@ namespace vid {
     p->on_frame(frame, p->user);
   }
 
+  /* can be called from another thread, so we set flags that update the main/user thread. */
   static void on_video_event(int event, void* user) {
 
     /* get the player. */
@@ -245,14 +258,18 @@ namespace vid {
     if (VID_EVENT_STOP_PLAYBACK == event) {
       RX_VERBOSE("Received a VID_EVENT_STOP_PLAYBACK");
       // p->must_stop = true;
-      p->shutdown();
+      p->must_shutdown = true;
+      //      p->shutdown();
     }
     else if (VID_EVENT_EOF == event) {
-      p->shutdown();
+      RX_VERBOSE("Received a VID_EVENT_EOF");
+      p->must_shutdown = true;
+      //p->shutdown();
     }
     else if (VID_EVENT_TIMEOUT == event) {
       RX_VERBOSE("Received a VID_EVENT_TIMEOUT.");
-      p->shutdown();
+      p->must_shutdown = true;
+      //      p->shutdown();
       //p->must_stop = true;
     }
   }

@@ -71,8 +71,10 @@ namespace vid {
 
     bool is_running;                  /* is set to true when the player thread is running */
     bool must_stop;                   /* is set to true when we must stop the thread. */
+    bool must_shutdown;
     pthread_t thread;                 /* the stream/decoding thread */
     pthread_mutex_t mutex;            /* secures the jitter buffer */
+
 
     /* callback */
     player_on_frame on_frame;         /* gets called when a new video frame needs to be shown. */

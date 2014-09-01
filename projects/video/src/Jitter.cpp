@@ -48,6 +48,7 @@ namespace vid {
 
     /* free all frames that are buffered. */
     for (size_t i = 0; i < frames.size(); ++i) {
+      RX_VERBOSE("FREEING FRAME");
       av_frame_free(&frames[i]);
     }
     frames.clear();
@@ -75,7 +76,7 @@ namespace vid {
     }
 
     int64_t pts = (frame->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu;
-    curr_buffer_ns = (pts - first_pts) - curr_pts;
+    curr_buffer_ns = (pts - first_pts); //  - curr_pts;
 
     /* and store! */
     frames.push_back(frame);
@@ -93,9 +94,11 @@ namespace vid {
     /* not frame yet .. or played back everything */
     if (0 == frames.size()) {
       RX_VERBOSE("No frames left - we're restarting the playback buffer");
+#if 0
       first_pts = 0;
       curr_pts = 0;
       curr_buffer_ns = 0;
+#endif
       return 0;
     }
 
