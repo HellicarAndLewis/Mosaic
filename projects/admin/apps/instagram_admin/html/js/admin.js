@@ -18,6 +18,7 @@ var MosaicInstagramAdmin = Class.extend({
   ,init: function() {
     
     var self = this;
+    $('#instagram-images-overlay').fadeOut(0);
     
     this.getQueuedImages(2, function() {
       
@@ -36,9 +37,26 @@ var MosaicInstagramAdmin = Class.extend({
         }
       });
       
+      $(document).keyup(function(e) {
+        
+        // Approve (arrow up)
+        if(e.keyCode == 38) {
+          if(!self.locked) {
+            $('div#approved-btn').addClass('highlight');
+            self.updateImage($('#instagram-images li:first-child'), true);
+          }
+        }
+        
+        // Decline (arrow down)
+        if(e.keyCode == 40) {
+          if(!self.locked) {
+            $('div#declined-btn').addClass('highlight');
+            self.updateImage($('#instagram-images li:first-child'), false);
+          }
+        }
+      });
+      
     });
-    
-    
   }
   
   // 
@@ -129,6 +147,8 @@ var MosaicInstagramAdmin = Class.extend({
     
     var self = this;
     
+    $('#instagram-images-overlay').fadeIn(100);
+    
     // Post new data to server
     $.post(
       'http://' 
@@ -140,12 +160,22 @@ var MosaicInstagramAdmin = Class.extend({
         id: el.data('item-id')
         ,approved: approved
       }).done(function(data) {
+      
+      $('#instagram-images-result').empty();
+      if(approved) {  
+        $('#instagram-images-result').css('background', 'green');
+        $('#instagram-images-result').text('Approved');
+      } else {
+        $('#instagram-images-result').css('background', 'red');
+        $('#instagram-images-result').text('Declined');
+      }
   
       self.getQueuedImages(1, function() {
         
-        $('#instagram-images').fadeOut(150, function() {
+        $('#instagram-images').fadeOut(100, function() {
           el.remove();
-          $('#instagram-images').fadeIn(150, function() {
+          $('#instagram-images-overlay').fadeOut(100);
+          $('#instagram-images').fadeIn(100, function() {
             self.locked = false; 
             $('.control-btn').removeClass('highlight');
           });
@@ -155,4 +185,6 @@ var MosaicInstagramAdmin = Class.extend({
   }
 });
 
-MosaicInstagramAdmin = new MosaicInstagramAdmin();
+$(document).ready(function() {
+  MosaicInstagramAdmin = new MosaicInstagramAdmin();
+});

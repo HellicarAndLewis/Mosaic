@@ -26,8 +26,8 @@ var ImageDownloader = new Class({
       .parse(process.argv);
     
     
-    this.lastModTimeMin = 0;
-    this.lastModTimeMax = 0;
+    this.lastModIdMin = 0;
+    this.lastModIdMax = 0;
     
     var file = './settings.json';
     
@@ -62,11 +62,10 @@ var ImageDownloader = new Class({
   ,start: function() {
     
     var self = this;
-    var url = this.settings.queue_url + '/' + this.settings.limit + '/' +  this.lastModTimeMin + '/' + this.lastModTimeMax;
+    var url = this.settings.queue_url + '/' + this.settings.limit + '/' +  this.lastModIdMin + '/' + this.lastModIdMax;
     
-    console.log('Get new results...');
-    console.log(url);
-    
+    console.log('Get new results - ' + url);
+
     // Start request
     Request({
       url: url
@@ -80,15 +79,21 @@ var ImageDownloader = new Class({
         images.filter(function(image, i) {
           return (!image.locked && (image.reviewed && image.approved));
         });
-        
-        if(images.length == 0) {
+
+        if(images.length > 0) {
+          self.lastModIdMin = images[images.length-1].queue_id;
+        } else {
           setTimeout(function() {
             self.start();
-          }, 5000);
+          }, self.settings.request_delay);
           return;
         }
-        self.lastModTimeMin = images[images.length-1].created_time;
-        self.lastModTimeMax = images[0].modified_time;
+        
+        
+        
+        if(self.lastModIdMax == '0') {
+          self.lastModIdMax = images[0].queue_id; 
+        }
         
         // Download callback
         var dl_img = function(queue) {
@@ -97,7 +102,7 @@ var ImageDownloader = new Class({
             
             setTimeout(function() {
               self.start();
-            }, 5000);
+            }, self.settings.request_delay);
             return;
           }
           
@@ -127,10 +132,21 @@ var ImageDownloader = new Class({
             // Download image
             self.download(img.images[self.settings.image_size].url, tmp_file, function(err) {
               
-              // Move image from tmp to save dir
-              Fs.rename(tmp_file, dest_file, function() {
-                dl_img(queue);
-              })
+              var stats = Fs.statSync(tmp_file)
+              var size = stats["size"];
+              
+              if(size < 1000) {
+                Fs.unlink(tmp_file, function() {
+                  console.log('Image size invalid. ' + size + ' bytes received, removed tmp file ' + tmp_file);
+                  dl_img(queue);
+                });
+              } else {
+              
+                // Move image from tmp to save dir
+                Fs.rename(tmp_file, dest_file, function() {
+                  dl_img(queue);
+                });
+              }
               
             }, function() {
               
@@ -143,6 +159,18 @@ var ImageDownloader = new Class({
         };
         
         dl_img(Array.clone(images));
+        
+      } else {
+        
+        console.log('Failed to load ' + url);
+        
+        this.lastModIdMin = 0;
+        this.lastModIdMax = 0;
+        
+        setTimeout(function() {
+          self.start();
+        }, self.settings.request_delay);
+        return;
       }
     });
   }
@@ -154,15 +182,6 @@ var ImageDownloader = new Class({
     // Start download request
     Request.head(uri, function(err, res, body) {
 
-     /*
-      if(res.headers['content-length'] < 20) {
-        console.log('Image size invalid, skipping file');
-        errCallback();
-        return;
-      }
-      console.log('content-type:', res.headers['content-type']);
-      console.log('content-length:', res.headers['content-length']);
-*/
       var r = Request(uri).pipe(Fs.createWriteStream(filename));
       r.on('close', callback);
     });
