@@ -30,7 +30,8 @@ extern "C" {
 
 #define JITTER_STATE_NONE 0x00
 #define JITTER_STATE_PLAYING 0x01
-#define JITTER_STATE_READY 0x02
+//#define JITTER_STATE_READY 0x02
+#define JITTER_STATE_BUFFERING 0x02
 
 namespace vid {
 

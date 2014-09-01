@@ -50,7 +50,6 @@ if(APPLE)
     ${extern_lib_dir}/libavformat.a
     ${extern_lib_dir}/libavutil.a
     ${extern_lib_dir}/libavresample.a
-    ${extern_lib_dir}/libtcmalloc.a
 
     ${extern_lib_dir}/librxp_player.a
     ${extern_lib_dir}/librxp_player_driver_cpp.a

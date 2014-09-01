@@ -8,8 +8,8 @@ namespace vid {
   Jitter::Jitter()
     :first_pts(0)
      /* @todo - increase the jitter buffer time, we're just testing now ...  */
-     //,buffer_size_ns(1000llu * 1000llu * 1000llu * 3)  /* we need at least 3 seconds before we start player. */
-    ,buffer_size_ns(1000llu * 1000llu * 500llu)  /* we need at least 3 seconds before we start player. */
+     ,buffer_size_ns(1000llu * 1000llu * 1000llu * 3)  /* we need at least 3 seconds before we start player. */
+     //,buffer_size_ns(1000llu * 1000llu * 500llu)  /* we need at least 3 seconds before we start player. */
     ,curr_buffer_ns(0)
     ,time_base(0)
     ,curr_pts(0)
@@ -75,7 +75,12 @@ namespace vid {
     }
 
     int64_t pts = (frame->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu;
-    curr_buffer_ns = (pts - first_pts); //  - curr_pts;
+    curr_buffer_ns = (pts - first_pts)  - curr_pts;
+
+    if (state == JITTER_STATE_BUFFERING) {
+      double s = double(curr_buffer_ns) / 1000000.0;
+      RX_VERBOSE("PTS: %llu, first_pts: %llu, curr_pts: %llu, buffer: %f, frames: %lu", pts, first_pts, curr_pts, s, frames.size());
+    }
 
     /* and store! */
     frames.push_back(frame);
@@ -91,16 +96,20 @@ namespace vid {
     }
     
     /* not frame yet .. or played back everything */
-    if (0 == frames.size()) {
+    if (JITTER_STATE_BUFFERING != state && 0 == frames.size()) {
       RX_VERBOSE("No frames left - we're restarting the playback buffer");
       first_pts = 0;
       curr_pts = 0;
       curr_buffer_ns = 0;
+      start_pts = 0;
+      state = JITTER_STATE_BUFFERING;
       return 0;
     }
 
-    if (curr_buffer_ns < buffer_size_ns) {
-      RX_VERBOSE("We haven't enough frames in our buffer");
+    if (JITTER_STATE_PLAYING != state && curr_buffer_ns < buffer_size_ns) {      
+      curr_pts = 0;
+      double s = double(curr_buffer_ns) / 1000000.0;
+      RX_VERBOSE("We haven't enough frames in our buffer, buffer time: %f ms", s);
       return 0;
     }
 
@@ -110,6 +119,10 @@ namespace vid {
       if (on_event) {
         on_event(VID_EVENT_START_PLAYBACK, user);
       }
+    }
+
+    if (JITTER_STATE_PLAYING != state) {
+      return 0;
     }
 
     curr_pts = rx_hrtime() - start_pts;

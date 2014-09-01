@@ -278,9 +278,9 @@ namespace vid {
       return 1; /* stop */
     }
     
-    /* timeout after 15 seconds */
+    /* timeout after X seconds */
     uint64_t dt = rx_hrtime() - s->timestamp;
-    if (dt > (5e9)) {
+    if (dt > (10e9)) {
       RX_VERBOSE("TIMEOUT!");
       if (NULL != s->on_event) {
         s->on_event(VID_EVENT_TIMEOUT, s->user);
