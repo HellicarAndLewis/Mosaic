@@ -28,7 +28,7 @@ Console.prototype = {
   //--------------------------------------------------------------
   ,clear: function() {
   
-    console.log('\033[2J\033[0f');
+    console.log(clc.reset);
   }
   
   //--------------------------------------------------------------
@@ -40,8 +40,9 @@ Console.prototype = {
   //--------------------------------------------------------------
   ,error: function(v) {
     
-    console.error(this.clc_error(this.addSpace(v)));
-    this.empty();
+    var d = new Date();
+    var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
+    console.error(this.clc_error(this.addSpace(t+v)));
   }
   
   //--------------------------------------------------------------
@@ -59,13 +60,9 @@ Console.prototype = {
   //--------------------------------------------------------------
   ,status: function(v) {
     
-    console.info(this.clc_status(v));
-  }
-  
-  //--------------------------------------------------------------
-  ,statusGrowl: function(v) {
-    
-    this.status(v);
+    var d = new Date();
+    var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
+    console.info(this.clc_status(t+v));
   }
   
   //--------------------------------------------------------------
@@ -89,7 +86,9 @@ Console.prototype = {
   //--------------------------------------------------------------
   ,info: function(v) {
     
-    console.info(this.clc_info(this.addSpace(v)));
+    var d = new Date();
+    var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
+    console.info(this.clc_info(this.addSpace(t+v)));
   }
 };
 

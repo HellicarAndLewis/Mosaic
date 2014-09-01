@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 d=${PWD}
 sd=${d}/mac-sources
 bd=${d}/../extern/mac-clang-x86_64
@@ -117,6 +117,14 @@ if [ ! -d ${sd}/libpng ] ; then
     mv libpng-1.2.51 libpng
 fi
 
+# Download rapidxml
+if [ ! -d ${sd}/rapidxml ] ; then 
+    cd ${sd}
+    curl -o rapidxml.zip -L "https://sourceforge.net/projects/rapidxml/files/rapidxml/rapidxml%201.13/rapidxml-1.13.zip/download"
+    unzip rapidxml.zip
+    mv rapidxml-1.13 rapidxml
+fi 
+
 # Download libjpg
 if [ ! -d ${sd}/libjpeg ] ; then 
     cd ${sd}
@@ -160,7 +168,7 @@ if [ ! -d ${sd}/imagemagick ] ; then
 fi
 
 # Fix ImageMagick dylibs + install
-if [ ! -f ${id}/lib/libMagick++-6.Q16.3.dylib ] ; then
+if [ ! -f ${id}/bin/imagemagick/convert ] ; then
     if [ ! -d ${id} ] ; then 
         mkdir ${id}
     fi
@@ -176,6 +184,7 @@ if [ ! -f ${id}/lib/libMagick++-6.Q16.3.dylib ] ; then
     for dylib in `ls -1 *.dylib`; do
         for app in ${sd}/imagemagick/bin/* ; do 
             install_name_tool -change "/ImageMagick-6.8.9/lib/${dylib}" "@executable_path/../lib/${dylib}" ${app}
+            cp ${app} ${id}/imagemagick/
         done
     done
     
@@ -207,6 +216,12 @@ if [ ! -d ${sd}/yasm ] ; then
     mv yasm-1.3.0 yasm
 fi
 
+# Download microprofile
+if [ ! -d ${sd}/microprofile ] ; then
+    cd ${sd}
+    hg clone https://bitbucket.org/jonasmeyer/microprofile 
+fi
+
 # Cleanup some files we don't need anymore.
 if [ -f ${sd}/autoconf.tar.gz ] ; then
     rm ${sd}/autoconf.tar.gz
@@ -229,9 +244,13 @@ fi
 if [ -f ${sd}/imagemagick.tar.gz ] ; then 
     rm ${sd}/imagemagick.tar.gz
 fi 
-if [ -f $sd}/yasm.tar.gz ] ; then 
+
+if [ -f ${sd}/yasm.tar.gz ] ; then 
     rm ${sd}/yasm.tar.gz
 fi 
+if [ -f ${sd}/rapidxml.zip ] ; then
+    rm ${sd}/rapidxml.zip
+fi
 
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
@@ -343,4 +362,19 @@ if [ ! -f ${bd}/lib/libavcodec.a ] ; then
     ./configure --prefix=${bd} --enable-gpl 
     make
     make install
+fi
+
+# Move rapid xml sources 
+if [ ! -f ${bd}/include/rapidxml_iterators.hpp ] ; then
+    cd ${sd}/rapidxml
+    cp rapidxml_iterators.hpp ${bd}/include/
+    cp rapidxml_print.hpp ${bd}/include/
+    cp rapidxml_utils.hpp ${bd}/include/
+    cp rapidxml.hpp ${bd}/include/
+fi
+
+# Move the microprofiler
+if [ ! -f ${bd}/include/microprofile.h ] ; then
+    cp ${sd}/microprofile/microprofile.h ${bd}/include
+    cp ${sd}/microprofile/demo/ui/microprofile.cpp ${bd}/src
 fi

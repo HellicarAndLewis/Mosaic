@@ -25,6 +25,11 @@ namespace mos {
   int VideoInput::init() {
     int r;
 
+    if (0 != mos::config.validateWindowSize()) {
+      RX_ERROR("Cannot init VideoInput");
+      return -3;
+    }
+
     /* only init once. */
     if (1 == is_init) {
       RX_ERROR("Trying to initialize the VideoInput, but we're already initialzed.");
@@ -49,7 +54,7 @@ namespace mos {
     if (-1 == device_index) {
       RX_ERROR("The device index from mos::Config (%d) is not found. Did you set the correct device id?", mos::config.webcam_device);
       capture.listDevices();
-      return -1;
+      return -2;
     }
 
     /* initialze the webcam. */
@@ -119,24 +124,44 @@ namespace mos {
   }
 
   void VideoInput::update() {
-    if (0 == is_init) {  return;  }
+
+    if (0 == is_init) {
+      return; 
+    }
+
+#if !defined(NDEBUG)
+    if (0 != mos::config.validateWindowSize()) {
+      return;
+    }
+#endif
 
     needs_update = capture.needs_update;
 
     capture.update();
-  }
 
-  void VideoInput::draw() {
-    if (0 == is_init) { return; }
-
+    /* update the input texture */
     if (needs_update) {
+      glViewport(0, 0, mos::config.webcam_width, mos::config.webcam_height);
       fbo.bind();
         capture.draw();
       fbo.unbind();
+      glViewport(0, 0, mos::config.window_width, mos::config.window_height);
+    }
+  }
+
+  void VideoInput::draw() {
+
+    if (0 == is_init) {
+      return; 
     }
 
-    /* draw the webcam to screen */
-    /* capture.draw(); */
+#if !defined(NDEBUG)
+    if (0 != mos::config.validateWindowSize()) {
+      return;
+    }
+#endif
+
+    /* draw the webcam to screen (tiny) */
     capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
   }
 

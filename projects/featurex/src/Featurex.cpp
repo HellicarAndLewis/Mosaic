@@ -170,7 +170,7 @@ namespace fex {
       int x0 = (gdesc.col * fex::config.file_tile_width * 4);
 
       for (int k = 0; k < fex::config.file_tile_height; ++k) {
-        int src_dx = k * src_stride;
+        int src_dx = (fex::config.file_tile_height - k) * src_stride;
         int dest_dx = y0 + (k * dest_stride) + x0;
         memcpy(mosaic_pixels + dest_dx, tile->pixels + src_dx, src_stride);
       }

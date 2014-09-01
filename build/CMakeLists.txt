@@ -9,6 +9,7 @@ set(fex_sd ${bd}/projects/featurex/src)
 set(gfx_sd ${bd}/projects/gfx/src)
 set(vid_sd ${bd}/projects/video/src)
 set(mos_sd ${bd}/projects/mosaic/src)
+set(grid_sd ${bd}/projects/grid/src)
 
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/../src
@@ -19,6 +20,7 @@ include_directories(
   ${bd}/projects/gfx/include
   ${bd}/projects/video/include
   ${bd}/projects/mosaic/include
+  ${bd}/projects/grid/include
   )
 
 if(APPLE)
@@ -91,17 +93,26 @@ set(vid_lib_sources
   ${vid_sd}/YUV420P.cpp
 )
 
+# The grid
+set(grid_lib_sources
+  ${grid_sd}/Grid.cpp
+  )
+
 # The mosaic visualizer (uses all of above)
 set(mosaic_lib_sources
   ${mos_sd}/Mosaic.cpp
   ${mos_sd}/Config.cpp
   ${mos_sd}/VideoInput.cpp
+  ${mos_sd}/ImageLoader.cpp
+  ${mos_sd}/DirWatcher.cpp
 )
 
 macro(create_test name)
-  add_executable(test_${name} ${bd}/projects/tests/test_${name}.cpp ${extern_source_dir}/glad.c)
-  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic videocapture)
-  #oadd_dependencies(test_${name} gfx fex vid mosaic videocapture)
+  add_executable(test_${name} 
+    ${bd}/projects/tests/test_${name}.cpp 
+    ${extern_source_dir}/glad.c
+    )
+  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture)
   install(TARGETS test_${name} DESTINATION bin)
 endmacro()
 
@@ -117,6 +128,10 @@ install(TARGETS fex ARCHIVE DESTINATION lib)
 add_library(vid ${vid_lib_sources})
 install(TARGETS vid ARCHIVE DESTINATION lib)
 
+# The grid library 
+add_library(grid ${grid_lib_sources})
+install(TARGETS grid ARCHIVE DESTINATION lib)
+
 # The mosaic library
 add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
@@ -129,6 +144,10 @@ create_test(video_stream_player)
 #create_test(offline_analyzer)
 #create_test(online_analyzer)
 #create_test(async_upload)
+#create_test(image_loader)
+create_test(grid)
+#create_test(png_rgba)
+
 
 
 

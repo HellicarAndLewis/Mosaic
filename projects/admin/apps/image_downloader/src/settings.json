@@ -1,0 +1,8 @@
+{
+  "queue_url": "http://localhost:3333/images/approved"
+  ,"limit": 10
+  ,"request_delay": 2000
+  ,"image_tmp_path": "/Sites/mosaic/projects/admin/apps/image_downloader/tmp/"
+  ,"image_save_path": "/Sites/mosaic/projects/admin/apps/image_downloader/images/"
+  ,"image_size": "standard_resolution"
+}

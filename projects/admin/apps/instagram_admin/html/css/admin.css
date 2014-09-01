@@ -17,47 +17,54 @@ figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
   
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-size: 100%;
-	font: inherit;
-	vertical-align: baseline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
 }
 
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
   
-	display: block;
+  display: block;
 }
 
 body {
   
-	line-height: 1;
+  line-height: 1;
 }
 
 ol, ul {
   
-	list-style: none;
+  list-style: none;
 }
 
 blockquote, q {
   
-	quotes: none;
+  quotes: none;
 }
 
 blockquote:before, blockquote:after,
 q:before, q:after {
   
-	content: '';
-	content: none;
+  content: '';
+  content: none;
 }
 
 table {
   
-	border-collapse: collapse;
-	border-spacing: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+div {
+  
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 
@@ -66,24 +73,85 @@ table {
  * Layout
  *
  ***********************************************************/
-.container {
+body {
+  
+  background: url(/admin/images/bg.png) top left;
+  background-size: 200px 200px;
+}
+
+div.container {
+  
   position: absolute;
-  top: 0;
-  bottom: 0;
-  background: #ccc;
+  top: 100px;
+  bottom: 250px;
+  background: url(/admin/images/dark_bg.png) top left;
+  background-size: 180px 180px;
   margin: 0;
   padding: 0;
   width: 100%;
-  max-width: 960px;
 }
 
-.instagram-images-container {
+div.instagram-images-container {
   
+  margin: 0;
+  padding: 0;
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
 
+#instagram-images-overlay {
+  
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.8);
+  z-index: 10;
+  color: #fff;
+  text-align: center;
+}
+
+#instagram-images-overlay .inner {
+  
+  position: absolute;
+  width: 100%;
+  height: 150px;
+  top: 50%;
+  margin-top: -75px;
+}
+
+#instagram-images-result {
+  
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 25px;
+  margin-bottom: 45px;
+  font-weight: bold;
+  padding: 15px;
+  color: #fff;
+  display: inline-block;
+  border-radius: 10px;
+}
+
+#instagram-images-loader {
+  
+  display: block;
+  clear: both;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+}
+
+#instagram-images-loading {
+  
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  margin-top: 15px;
+}
+
+/* Instagram images */
 ul#instagram-images {
   
   margin: 0;
@@ -95,21 +163,115 @@ ul#instagram-images {
 
 ul#instagram-images li {
   
-  display: inline-block;
+  display: block;
+  float: left;
+  margin: 0;
+  padding: 0;
   position: relative;
   width: 100%;
   height: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
-ul#instagram-images li img {
+ul#instagram-images li div.instagram-image-info {
   
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  display: block;
+  margin: 0;
+  padding: 10px;
   width: 100%;
-  height: 100%;
+  height: 40px;
+  background: rgba(0,0,0,.7);
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 2px 2px 2px rgba(0,0,0,.7);
+}
+
+/* Controls */
+div#controls {
+  
+  position: relative;
+  width: 100%;
+  height: 250px;
+}
+
+div#controls .inner {
+  
+  position: relative;
+  width: 100%;
+  height: 250px;
+  padding: 0;
+}
+
+div#controls div.control-btn {
+  
+  cursor: pointer;
+  color: #fff;
+  border-radius: 20px;
+  margin: 50px 5%;
+  width: 40%;
+  height: 150px;
+  font-size: 80px;
+  text-align: center;
+  padding-top: 25px;
+  float: left;
+  -moz-box-shadow:    3px 3px 5px 3px rgba(0,0,0,0.2);
+  -webkit-box-shadow: 3px 3px 5px 3px rgba(0,0,0,0.2);
+  box-shadow:         3px 3px 5px 3px rgba(0,0,0,0.2); 
+}
+
+div#controls div#approved-btn i {
+  
+  color: rgba(20,20,20, 0.8);
+  text-shadow: 1px 4px 6px #9dd53a, 0 0 0 #000, 1px 4px 6px #9dd53a;
+}
+
+div#controls div#declined-btn i {
+  
+  color: rgba(20,20,20, 0.8);
+  text-shadow: 1px 4px 6px #f85032, 0 0 0 #000, 1px 4px 6px #f85032;
+}
+
+div#controls div#approved-btn {
+  
+  background: #9dd53a; /* Old browsers */
+  background: -moz-linear-gradient(top,  #9dd53a 0%, #a1d54f 50%, #80c217 51%, #7cbc0a 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#9dd53a), color-stop(50%,#a1d54f), color-stop(51%,#80c217), color-stop(100%,#7cbc0a)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #9dd53a 0%,#a1d54f 50%,#80c217 51%,#7cbc0a 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #9dd53a 0%,#a1d54f 50%,#80c217 51%,#7cbc0a 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #9dd53a 0%,#a1d54f 50%,#80c217 51%,#7cbc0a 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #9dd53a 0%,#a1d54f 50%,#80c217 51%,#7cbc0a 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9dd53a', endColorstr='#7cbc0a',GradientType=0 ); /* IE6-9 */
+}
+
+div#controls div#declined-btn {
+  
+  background: #f85032; /* Old browsers */
+  background: -moz-linear-gradient(top,  #f85032 0%, #f16f5c 50%, #f6290c 51%, #f02f17 71%, #e73827 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f85032), color-stop(50%,#f16f5c), color-stop(51%,#f6290c), color-stop(71%,#f02f17), color-stop(100%,#e73827)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f85032', endColorstr='#e73827',GradientType=0 ); /* IE6-9 */
+}
+
+div#controls div#approved-btn.highlight,
+div#controls div#declined-btn.highlight {
+  
+  background: #fff;
+  filter: none;
+}
+
+div#controls div#approved-btn.highlight i,
+div#controls div#declined-btn.highlight i {
+  
+  color: rgba(20,20,20, 0.8);
+  text-shadow: 1px 4px 6px #fff, 0 0 0 #000, 1px 4px 6px #fff;
 }
 
 

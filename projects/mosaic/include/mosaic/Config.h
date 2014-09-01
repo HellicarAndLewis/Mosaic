@@ -10,17 +10,23 @@ namespace mos {
 
   /* --------------------------------------------------------------------------------- */
 
+  int load_config();
+  int save_config();
+
   class Config {
   public:
     Config();
     ~Config();
     void reset();
     int validateWebcam();              /* validate the webcam settings; only applicable with USE_WEBCAM_AS_INPUT has been set to 1 */
+    int validateWindowSize();          /* checks window_width, window_height; returns 0 on success else < 0 */
 
   public:
     int webcam_device;                 /* when USE_WEBCAM_AS_INPUT has been set to 1, this will be used by the VideoInput class */
     int webcam_width;
     int webcam_height;
+    int window_width;                  /* width of the window; can be used with glViewport for example */
+    int window_height;                 /* the height of the window. */
   };
 
   /* --------------------------------------------------------------------------------- */

@@ -47,3 +47,6 @@ fi
 #./test_offline_analyzer
 #./test_online_analyzer
 #./test_async_upload
+#./test_image_loader
+./test_grid
+#./test_png_rgba
