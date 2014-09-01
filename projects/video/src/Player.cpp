@@ -7,9 +7,9 @@ namespace vid {
   /* ---------------------------------------------------------------------------------- */
 
   static void* player_thread(void* user);
-  static void on_decoded_frame(AVFrame* frame, void* user);
-  static void on_play_frame(AVFrame* frame, void* user);
-  static void on_video_event(int event, void* user);
+  static void player_on_decoded_frame(AVFrame* frame, void* user);
+  static void player_on_play_frame(AVFrame* frame, void* user);
+  static void player_on_video_event(int event, void* user);
 
   /* ---------------------------------------------------------------------------------- */
 
@@ -65,10 +65,10 @@ namespace vid {
     url = surl;
     is_running = true;
     stream.user = this;
-    stream.on_frame = on_decoded_frame;
-    stream.on_event = on_video_event;
-    jitter.on_event = on_video_event;
-    jitter.on_frame = on_play_frame;
+    stream.on_frame = player_on_decoded_frame;
+    stream.on_event = player_on_video_event;
+    jitter.on_event = player_on_video_event;
+    jitter.on_frame = player_on_play_frame;
     jitter.user = this;
 
     /* start the thread */
@@ -210,7 +210,7 @@ namespace vid {
     return NULL;
   }
 
-  static void on_decoded_frame(AVFrame* frame, void* user) {
+  static void player_on_decoded_frame(AVFrame* frame, void* user) {
     
     /* get ref to the player. */
     Player* p = static_cast<Player*>(user);
@@ -232,7 +232,7 @@ namespace vid {
     p->unlock();
   }
 
-  static void on_play_frame(AVFrame* frame, void* user) {
+  static void player_on_play_frame(AVFrame* frame, void* user) {
 
     if (NULL == frame) {
       RX_ERROR("Invalid frame given");
@@ -259,7 +259,7 @@ namespace vid {
   }
 
   /* can be called from another thread, so we set flags that update the main/user thread. */
-  static void on_video_event(int event, void* user) {
+  static void player_on_video_event(int event, void* user) {
 
     /* get the player. */
     Player* p = static_cast<Player*>(user);
@@ -279,6 +279,12 @@ namespace vid {
     else if (VID_EVENT_TIMEOUT == event) {
       RX_VERBOSE("Received a VID_EVENT_TIMEOUT.");
       p->must_shutdown = true;
+    }
+    else if (VID_EVENT_INIT_SUCCESS == event) {
+      RX_VERBOSE("Received a VID_EVENT_INIT_SUCCES.");
+      if (p->on_event) {
+        p->on_event(p, event);
+      }
     }
   }
 

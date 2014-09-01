@@ -35,6 +35,11 @@
   <memory_pool_size>2000</memory_pool_size>
 
 <!--
+
+  <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+  <stream_width>640</stream_width>
+  <stream_height>360</stream_height>
+
   <stream_url>rtmp://localhost</stream_url>
   <stream_width>1280</stream_width>
   <stream_height>720</stream_height>
@@ -45,10 +50,10 @@
       with the `-DUSE_WEBCAM_AS_INPUT=0` flag. This width/height must match the
       stream otherwise unexpected behavior will occur. 
   -->
-  <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
-  <stream_width>640</stream_width>
-  <stream_height>360</stream_height>
- 
+  <stream_url>rtmp://localhost</stream_url>
+  <stream_width>1280</stream_width>
+  <stream_height>720</stream_height>
+
   <!--
       The `analyzer_width` and `analyzer_height` describe the size of the buffer 
       that is used by the GPU analyzer. This should have the same aspect

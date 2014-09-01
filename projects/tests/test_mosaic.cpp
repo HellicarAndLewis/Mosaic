@@ -24,6 +24,9 @@
 
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>
+
+#define RXP_PLAYER_GL_IMPLEMENTATION
+#include <rxp_player/PlayerGL.h>
  
 #include <featurex/Config.h>
 #include <mosaic/Mosaic.h>

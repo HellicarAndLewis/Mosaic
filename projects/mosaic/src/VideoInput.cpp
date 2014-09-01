@@ -179,6 +179,7 @@ namespace mos {
 
 
   /* --------------------------------------------------------------------------------- */
+  static void on_backup_player_video_frame(rxp::PlayerGL* gl, rxp_packet* pkt);
   static void on_video_frame(AVFrame* frame, void* user);
   static void on_player_event(vid::Player* player, int event);
   /* --------------------------------------------------------------------------------- */
@@ -188,6 +189,7 @@ namespace mos {
     ,is_init(false)
     ,restart_time(0)
     ,video_tex(0)
+    ,state(MOS_VID_STATE_NONE)
   {
 
   }
@@ -197,6 +199,9 @@ namespace mos {
     is_init = false;
     restart_time = 0;
     video_tex = 0;
+    state = MOS_VID_STATE_NONE;
+    backup_player.on_event = NULL;
+    backup_player.on_video_frame = NULL;
   }
 
   int VideoInput::init() {
@@ -212,10 +217,30 @@ namespace mos {
       return -1;
     }
 
+    backup_file = rx_to_data_path("video/backup.ogg");
+    if (false == rx_file_exists(backup_file)) {
+      RX_ERROR("Cannot find the backup file %s", backup_file.c_str());
+      return -101;
+    }
+
+    if (0 != backup_player.init(backup_file)) {
+      RX_ERROR("Cannot initialize the backup player.");
+      return -102;
+    }
+
+    if (0 != backup_player.play()) {
+      RX_ERROR("Cannot start the backup player.");
+      return -103;
+    }
+
+    backup_player.on_video_frame = on_backup_player_video_frame;
+    backup_player.user = this;
+
     RX_VERBOSE("Initialize the YUV420P shader with a resolution of %d x %d.", mos::config.stream_width, mos::config.stream_height);
 
     if (0 != yuv.init(mos::config.stream_width, mos::config.stream_height)) {
       RX_ERROR("Cannot initialize the yuv decoder");
+      backup_player.shutdown();
       return -2;
     }
 
@@ -224,15 +249,16 @@ namespace mos {
     if (r != 0) {
       RX_ERROR("Cannot initialize the FBO: %d", r);
       yuv.shutdown();
+      backup_player.shutdown();
       return -3;
     }
 
-    // video_tex = fbo.addTexture(GL_RGBA8, yuv.w, yuv.h, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
     video_tex = fbo.addTexture(GL_RGBA8, fbo.width, fbo.height, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0);
     if (0 != fbo.isComplete()) {
       RX_ERROR("FBO not complete");
       yuv.shutdown();
       fbo.shutdown();
+      backup_player.shutdown();
       return -4;
     }
 
@@ -246,11 +272,16 @@ namespace mos {
     }
 
     is_init = true;
-
+    state = MOS_VID_STATE_CONNECTING;
     return 0;
   }
 
   void VideoInput::update() {
+
+    if (false == is_init) {
+      return;
+    }
+
     if (0 == mos::config.window_width) {
       RX_ERROR("mos::config.window_width == 0... not good!");
       return;
@@ -267,13 +298,36 @@ namespace mos {
     }
 
     player.update();
-    
-    /* update the input texture */
-    if (is_init && needs_update) {
-      //      glViewport(0, 0, mos::config.stream_width, mos::config.stream_height);
+
+    if (MOS_VID_STATE_PLAYING == state) {
+      /* update the input texture from the rtmp stream. */
+      if (is_init && needs_update) {
+        glViewport(0, 0, fbo.width, fbo.height);
+        fbo.bind();
+          yuv.draw();
+        fbo.unbind();
+        glViewport(0, 0, mos::config.window_width, mos::config.window_height);
+      }
+
+      /* shutdown the backup player if it's still running. */
+      if (0 == backup_player.ctx.isInit()) {
+        backup_player.stop();
+        backup_player.shutdown();
+      }
+    }
+    else {
+
+      /* restart the backup player if necessary */
+      if (0 != backup_player.ctx.isInit()) {
+        backup_player.init(backup_file);
+        backup_player.play();
+      }
+
+      backup_player.update();
+      
       glViewport(0, 0, fbo.width, fbo.height);
       fbo.bind();
-         yuv.draw();
+      backup_player.draw();      
       fbo.unbind();
       glViewport(0, 0, mos::config.window_width, mos::config.window_height);
     }
@@ -281,7 +335,14 @@ namespace mos {
 
   void VideoInput::draw() {
     glViewport(0, 0, yuv.w >> 2, yuv.h >> 2);
-    yuv.draw();
+    {
+      if (MOS_VID_STATE_PLAYING == state) {
+        yuv.draw();
+      }
+      else {
+        backup_player.draw(0, 0, yuv.w >> 2, yuv.h >> 2);      
+      }
+    }
     glViewport(0, 0, mos::config.window_width, mos::config.window_height);
   }
 
@@ -297,14 +358,38 @@ namespace mos {
       RX_ERROR("Error while trying to shutdown the player.");
       r = -2;
     }
+
+    if (0 != backup_player.shutdown()) {
+      RX_ERROR("Error while trying to shutdown the backup player.");
+      r = -3;
+    }
     
     is_init = false;
+    state = MOS_VID_STATE_NONE;
 
     return r;
   }
 
   /* --------------------------------------------------------------------------------- */
 
+  /* gets called by the backup player when it gets a new frame. */
+  static void on_backup_player_video_frame(rxp::PlayerGL* gl, rxp_packet* pkt) {
+
+    if (NULL == gl) {
+      RX_ERROR("Invalid PlayerGL pointer.");
+      return;
+    }
+
+    VideoInput* vid = static_cast<VideoInput*>(gl->user);
+    if (NULL == vid) {
+      RX_ERROR("Cannot cast to VideoInput");
+      return;
+    }
+
+    vid->needs_update = true;
+  }
+
+  /* gets called by the video stream player when it gets a new frame. */
   static void on_video_frame(AVFrame* frame, void* user) {
 
     int r = 0;
@@ -361,6 +446,10 @@ namespace mos {
     if (VID_EVENT_SHUTDOWN == event || VID_EVENT_INIT_ERROR == event) {
       RX_VERBOSE("Received VID_EVENT_SHUTDOWN - restarting the stream.");
       vid->restart_time = time(NULL) + 5; /* start after a couple of seconds. */
+      vid->state = MOS_VID_STATE_CONNECTING;
+    }
+    else if (VID_EVENT_INIT_SUCCESS) {
+      vid->state = MOS_VID_STATE_PLAYING;
     }
     else {
       RX_VERBOSE("Unhandled player event: %d", event);
