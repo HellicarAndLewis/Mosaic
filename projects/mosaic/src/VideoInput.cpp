@@ -327,7 +327,7 @@ namespace mos {
       
       glViewport(0, 0, fbo.width, fbo.height);
       fbo.bind();
-      backup_player.draw();      
+         backup_player.draw();
       fbo.unbind();
       glViewport(0, 0, mos::config.window_width, mos::config.window_height);
     }

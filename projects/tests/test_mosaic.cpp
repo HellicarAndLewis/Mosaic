@@ -39,8 +39,6 @@ void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
 
-static void sigh(int s);
-
 int main() {
  
   glfwSetErrorCallback(error_callback);
@@ -82,8 +80,6 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-
-  signal(SIGPIPE, sigh);
 
   rx_log_init();
   mos::config.window_width = w;
@@ -193,6 +189,3 @@ void error_callback(int err, const char* desc) {
   printf("GLFW error: %s (%d)\n", desc, err);
 }
 
-static void sigh(int s) {
-  RX_VERBOSE("GOT SIGNAL!");
-}
