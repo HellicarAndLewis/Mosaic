@@ -157,6 +157,11 @@ namespace vid {
       return -11;
     }
 
+    /* we're successfully initialized! */
+    if (on_event) {
+      on_event(VID_EVENT_INIT_SUCCESS, user);
+    }
+
     return 0;
   }
   

@@ -24,6 +24,9 @@
 
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>
+
+#define RXP_PLAYER_GL_IMPLEMENTATION
+#include <rxp_player/PlayerGL.h>
  
 #include <featurex/Config.h>
 #include <mosaic/Mosaic.h>
@@ -35,8 +38,6 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods);
 void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
-
-static void sigh(int s);
 
 int main() {
  
@@ -79,8 +80,6 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-
-  signal(SIGPIPE, sigh);
 
   rx_log_init();
   mos::config.window_width = w;
@@ -190,6 +189,3 @@ void error_callback(int err, const char* desc) {
   printf("GLFW error: %s (%d)\n", desc, err);
 }
 
-static void sigh(int s) {
-  RX_VERBOSE("GOT SIGNAL!");
-}

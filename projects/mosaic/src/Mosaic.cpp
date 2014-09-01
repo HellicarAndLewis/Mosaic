@@ -70,6 +70,7 @@ namespace mos {
       featurex.match();
       
       if (NULL != featurex.mosaic_pixels) {
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mosaic_tex);
         async_upload.upload(featurex.mosaic_pixels);
       }
@@ -81,7 +82,6 @@ namespace mos {
     /* draw the result. */
     painter.clear();
     painter.texture(mosaic_tex, 0, mos::config.window_height, mos::config.window_width, -mos::config.window_height);
-    //painter.texture(mosaic_tex, 0, mos::config.analyzer_height, mos::config.analyzer_width, -mos::config.analyzer_height);
     painter.draw();
 
     /* draw a debug image. */

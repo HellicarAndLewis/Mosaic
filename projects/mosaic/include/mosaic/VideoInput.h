@@ -55,6 +55,12 @@ namespace mos {
 #include <video/YUV420P.h>
 #include <video/Player.h>
 #include <sys/time.h>
+#include <rxp_player/PlayerGL.h>
+#include <tinylib.h>
+
+#define MOS_VID_STATE_NONE 0x00
+#define MOS_VID_STATE_CONNECTING 0x01
+#define MOS_VID_STATE_PLAYING 0x02
 
 namespace mos {
 
@@ -70,10 +76,13 @@ namespace mos {
     int needsUpdate();                          /* checks if we updated a video frame; will reset the internal flag once called. */
 
   public:
+    int state;                                  /* used to keep track of the current state; and based on the state we show either a pre-recorded video or the live stream */
     bool is_init;
     bool needs_update;
     uint64_t restart_time;
     GLuint video_tex;
+    std::string backup_file;
+    rxp::PlayerGL backup_player;                /* when we get disconnection from the remote stream we use the backup player instead. */
     vid::Player player;
     vid::YUV420P yuv;
     gfx::FBO fbo;                               /* we write the decoded video to a FBO, RTT, and the texture is used by the GPU analyzer. */
@@ -84,7 +93,8 @@ namespace mos {
   }
 
   inline int VideoInput::needsUpdate() {
-    bool needs = needs_update;
+    bool needs = false;
+    needs = needs_update;
     needs_update = false; 
     return (needs) ? 0 : -1;
   }
@@ -95,3 +105,4 @@ namespace mos {
 #endif /* #if USE_WEBCAM_AS_INPUT */
 
 #endif /* ROXLU_MOSAIC_VIDEO_INPUT_H */
+

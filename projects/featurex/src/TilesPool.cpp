@@ -370,7 +370,7 @@ namespace fex {
         }
 
         /* load the image */
-        RX_VERBOSE("Filename: %s", tile_filepath.c_str());
+        //RX_VERBOSE("Filename: %s", tile_filepath.c_str());
 #if 1
         int curr_capacity = tile->capacity;
         int bytes_loaded = 0;
@@ -388,7 +388,7 @@ namespace fex {
         tile->nbytes = bytes_loaded;
         tile->descriptor_id = task->descriptor_id;
 
-        RX_VERBOSE("Loaded image: %s, bytes loaded: %d, width: %d, height: %d, channels: %d, capacity: %d", task->filename.c_str(), tile->nbytes, tile->width, tile->height, tile->nchannels, tile->capacity);
+        // RX_VERBOSE("Loaded image: %s, bytes loaded: %d, width: %d, height: %d, channels: %d, capacity: %d", task->filename.c_str(), tile->nbytes, tile->width, tile->height, tile->nchannels, tile->capacity);
 #endif
       }
       todo.clear();
