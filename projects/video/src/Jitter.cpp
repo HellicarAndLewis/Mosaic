@@ -93,11 +93,9 @@ namespace vid {
     /* not frame yet .. or played back everything */
     if (0 == frames.size()) {
       RX_VERBOSE("No frames left - we're restarting the playback buffer");
-#if 0
       first_pts = 0;
       curr_pts = 0;
       curr_buffer_ns = 0;
-#endif
       return 0;
     }
 
@@ -125,13 +123,9 @@ namespace vid {
       AVFrame* f = *it;
       pts = ((f->pkt_pts * time_base) * 1000llu * 1000llu * 1000llu) - first_pts;
      
-      //RX_VERBOSE("f->pkt_pts: %lld, curr_pts: %llu, frames: %lu", f->pkt_pts, curr_pts, frames.size());
-
       if (pts > curr_pts) {
         break;
       }
-
-      //RX_VERBOSE("Using frame pts: %lld", f->pkt_pts);
 
       /* call the callback */
       on_frame(f, user);
@@ -142,19 +136,9 @@ namespace vid {
     }
 
     if (0 == frames.size() && on_event && state == JITTER_STATE_PLAYING) {
-      RX_WARNING("No frames in the buffer anymore after playback started... do we need to stop? curr_pts: %llu, pts: %llu", curr_pts, pts);
-      RX_WARNING("We actually need to have a check if EOF has been found; if so we can assume we're ready, else the buffer is just empty!");
-      RX_WARNING("Current buffer ns: %llu, buffer_size_ns: %llu", curr_buffer_ns, buffer_size_ns);
-
       /* this will make sure we will buffer more frames. */
       first_pts = pts;
-
-#if 0
-      on_event(VID_EVENT_STOP_PLAYBACK, user);
-      state = JITTER_STATE_READY;
-#endif
     }
-
 
     return 0;
   }

@@ -50,7 +50,9 @@ extern "C" {
 namespace vid {
 
 
+  class Player;
   typedef void(*player_on_frame)(AVFrame* frame, void* user);
+  typedef void(*player_on_event)(Player* p, int event);
 
   class Player {
   public:
@@ -78,7 +80,7 @@ namespace vid {
 
     /* callback */
     player_on_frame on_frame;         /* gets called when a new video frame needs to be shown. */
-    video_on_event on_event;          /* gets called when the stream e.g. starts, stops, or eof is found. */
+    player_on_event on_event;         /* gets called when a event like shutdown happens */
     void* user;                       /* gets passed into on_frame */
   };
 

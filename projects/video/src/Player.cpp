@@ -49,6 +49,8 @@ namespace vid {
     must_shutdown = false;
     must_stop = true;
     is_running = false;
+    user = NULL;
+    on_event = NULL;
   }
 
   int Player::init(std::string surl) {
@@ -75,7 +77,7 @@ namespace vid {
       return -102;
     }
 
-    RX_VERBOSE("PTHREAD: %p", &thread);
+
     return 0;
   }
 
@@ -153,7 +155,11 @@ namespace vid {
     if (0 != stream.shutdown()) {
       RX_ERROR("Error while trying to shutdown the Stream");
     }
-
+   
+    /* notify user. */
+    if (NULL != on_event) {
+      on_event(this, VID_EVENT_SHUTDOWN);
+    }
     return 0;
   }
 
@@ -174,12 +180,23 @@ namespace vid {
     /* start the stream */
     r = p->stream.init(p->url);
     if (0 != r) {
-      RX_ERROR("Cannot init the stream");
+      p->is_running = false;
+      if (p->on_event) {
+        p->on_event(p, VID_EVENT_INIT_ERROR);
+      }
       return NULL;
     }
 
-    if (0 != p->jitter.init(p->stream.video_stream_timebase)) {
-      RX_ERROR("Cannot init jitter");
+    /* start the jitter buffer */
+    r = p->jitter.init(p->stream.video_stream_timebase);
+    if (0 != r) {
+      p->is_running = false;
+      if (0 != p->stream.shutdown()) {
+        RX_ERROR("Cannot init jitter, so also closing the stream, but that failed.");
+      }
+      if (p->on_event) {
+        p->on_event(p, VID_EVENT_INIT_ERROR);
+      }
       return NULL;
     }
 

@@ -64,7 +64,7 @@ namespace vid {
     /* open the stream */
     r = avformat_open_input(&fmt_ctx, url.c_str(), NULL, &options);
     if (r < 0) {
-      RX_ERROR("Trying to open the rtmp stream.");
+      RX_ERROR("Trying to open the rtmp stream failed, server not running?");
       return -4;
     }
     is_stream_open = 1;
@@ -262,7 +262,8 @@ namespace vid {
     
     /* timeout after 15 seconds */
     uint64_t dt = rx_hrtime() - s->timestamp;
-    if (dt > (15e9)) {
+    if (dt > (5e9)) {
+      RX_VERBOSE("TIMEOUT!");
       if (NULL != s->on_event) {
         s->on_event(VID_EVENT_TIMEOUT, s->user);
       }

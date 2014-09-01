@@ -48,6 +48,9 @@ void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
 
 static void on_video_frame(AVFrame* frame, void* user);
+static void on_player_event(vid::Player* p, int event);
+bool must_restart = false;
+uint64_t restart_time = 0;
 
 vid::Player* player_ptr = NULL;
 
@@ -102,10 +105,12 @@ int main() {
   vid::Player player;
   player_ptr = &player;
   player.on_frame = on_video_frame;
+  std::string url = "rtmp://localhost";
   //if (0 != player.init("rtmp://edge01.fms.dutchview.nl/botr/bunny.flv")) {
   //if (0 != player.init("rtmp://cp123195.live.edgefcs.net/live/topshop@27056")) {
-  if (0 != player.init("rtmp://localhost")) {
-    exit(0);
+  if (0 != player.init(url)) {
+    must_restart = true;
+    restart_time = rx_hrtime() + 5e9;
   }
 
 #if USE_TIMER 
@@ -115,10 +120,20 @@ int main() {
 
   vid::YUV420P yuv;
   player.user = (void*)&yuv;
+  player.on_event = on_player_event;
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (must_restart) {
+      uint64_t now = rx_hrtime();
+      if (now > restart_time) {
+        RX_VERBOSE("Restarting.");
+        player.init(url);
+        must_restart = false;
+      }
+    }
 
     if (0 != player.update()) {
       RX_VERBOSE("player.update() failed.");
@@ -199,6 +214,16 @@ void error_callback(int err, const char* desc) {
 
 
 /* ------------------------------------------------------------- */
+
+static void on_player_event(vid::Player* p, int event) {
+  if (VID_EVENT_SHUTDOWN == event
+      || VID_EVENT_INIT_ERROR == event) {
+    RX_VERBOSE("Received VID_EVENT_SHUTDOWN");
+    must_restart = true;
+    restart_time = rx_hrtime() + 10e9; /* start after 10s. */
+  }
+}
+
 static void on_video_frame(AVFrame* frame, void* user) {
 
   if (NULL == frame) { return; } 
