@@ -289,6 +289,7 @@ namespace mos {
     
     /* restart the player if necessary */
     if (0 != restart_time) {
+      RX_VERBOSE("check....:%llu", restart_time);
       uint64_t now = time(NULL);
       if (now > restart_time) {
         RX_VERBOSE("Restarting rtmp stream: %s", mos::config.stream_url.c_str());
@@ -296,6 +297,8 @@ namespace mos {
         restart_time = 0;
       }
     }
+
+    RX_VERBOSE("check....:%llu", restart_time);
 
     player.update();
 
@@ -452,6 +455,7 @@ namespace mos {
       RX_VERBOSE("Received VID_EVENT_SHUTDOWN - restarting the stream.");
       vid->restart_time = time(NULL) + 5; /* start after a couple of seconds. */
       vid->state = MOS_VID_STATE_CONNECTING;
+      RX_VERBOSE("RESTART TIME SET: %llu", vid->restart_time);
     }
     else if (VID_EVENT_INIT_SUCCESS) {
       vid->state = MOS_VID_STATE_PLAYING;
