@@ -67,7 +67,7 @@ namespace fex {
 
     id = rx_string_id(fname);
     filename = fname;
-    RX_VERBOSE("Descriptor: %llu", id);
+    // RX_VERBOSE("Descriptor: %llu", id);
   }
 
   inline std::string& Descriptor::getFilename() {

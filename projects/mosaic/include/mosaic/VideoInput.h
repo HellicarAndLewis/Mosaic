@@ -64,6 +64,8 @@ namespace mos {
 #define MOS_VID_STATE_CONNECTING 0x01
 #define MOS_VID_STATE_PLAYING 0x02
 
+#define USE_BACKUP_PLAYER 1
+
 namespace mos {
 
   class VideoInput {
@@ -87,8 +89,10 @@ namespace mos {
     uint64_t restart_time;
     GLuint video_tex;
     std::string backup_file;
-    rxp::PlayerGL backup_player;                /* when we get disconnection from the remote stream we use the backup player instead. */
     vid::Player player;
+#if USE_BACKUP_PLAYER
+    rxp::PlayerGL backup_player;                /* when we get disconnection from the remote stream we use the backup player instead. */
+#endif
     vid::YUV420P yuv;
     gfx::FBO fbo;                               /* we write the decoded video to a FBO, RTT, and the texture is used by the GPU analyzer. */
     pthread_mutex_t mutex;

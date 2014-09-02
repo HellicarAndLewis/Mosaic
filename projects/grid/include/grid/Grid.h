@@ -170,6 +170,7 @@ namespace grid {
     bool getUsableCell(size_t& dx, int currState, int newState);
 
   public:
+
     mos::ImageLoader img_loader;
     mos::DirWatcher dir_watcher;
 

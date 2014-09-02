@@ -1,6 +1,7 @@
 #ifndef MOSAIC_CONFIG_H
 #define MOSAIC_CONFIG_H
 
+/* @todo move to cmake */
 #define USE_WEBCAM_AS_INPUT 0         /* when set to 1 we will use a webcam feed as input for the mosaic generator. */
 
 #define ROXLU_USE_LOG
@@ -9,9 +10,6 @@
 namespace mos {
 
   /* --------------------------------------------------------------------------------- */
-
-  int load_config();
-  int save_config();
 
   class Config {
   public:

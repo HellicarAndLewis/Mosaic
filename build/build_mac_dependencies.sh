@@ -457,7 +457,7 @@ if [ ! -f ${bd}/lib/libtheora.a ] ; then
 fi
 
 # Compile rxp_player
-if [ ! -f {bd}/lib/rxp_player.a ] ; then
+if [ ! -f ${bd}/lib/rxp_player.a ] ; then
     cd ${sd}/rxp_player/build
     mkdir build.release
     cd build.release

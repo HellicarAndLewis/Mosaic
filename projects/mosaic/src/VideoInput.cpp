@@ -1,5 +1,6 @@
 #include <mosaic/Config.h>
 #include <mosaic/VideoInput.h>
+#include <uv.h> /* TMP for uv_thread_self() */
 
 #if USE_WEBCAM_AS_INPUT
 /* --------------------------------------------------------------------------------- */
@@ -203,8 +204,11 @@ namespace mos {
     restart_time = 0;
     video_tex = 0;
     state = MOS_VID_STATE_NONE;
+
+#if USE_BACKUP_PLAYER
     backup_player.on_event = NULL;
     backup_player.on_video_frame = NULL;
+#endif
 
     int r = pthread_mutex_destroy(&mutex);
     if (r != 0) {
@@ -230,7 +234,7 @@ namespace mos {
       RX_ERROR("Cannot find the backup file %s", backup_file.c_str());
       return -101;
     }
-
+#if USE_BACKUP_PLAYER
     if (0 != backup_player.init(backup_file)) {
       RX_ERROR("Cannot initialize the backup player.");
       return -102;
@@ -243,12 +247,14 @@ namespace mos {
 
     backup_player.on_video_frame = on_backup_player_video_frame;
     backup_player.user = this;
-
+#endif
     RX_VERBOSE("Initialize the YUV420P shader with a resolution of %d x %d.", mos::config.stream_width, mos::config.stream_height);
 
     if (0 != yuv.init(mos::config.stream_width, mos::config.stream_height)) {
       RX_ERROR("Cannot initialize the yuv decoder");
+#if USE_BACKUP_PLAYER
       backup_player.shutdown();
+#endif
       return -2;
     }
 
@@ -257,7 +263,9 @@ namespace mos {
     if (r != 0) {
       RX_ERROR("Cannot initialize the FBO: %d", r);
       yuv.shutdown();
+#if USE_BACKUP_PLAYER
       backup_player.shutdown();
+#endif
       return -3;
     }
 
@@ -266,7 +274,9 @@ namespace mos {
       RX_ERROR("FBO not complete");
       yuv.shutdown();
       fbo.shutdown();
+#if USE_BACKUP_PLAYER
       backup_player.shutdown();
+#endif
       return -4;
     }
 
@@ -281,6 +291,7 @@ namespace mos {
 
     is_init = true;
     state = MOS_VID_STATE_CONNECTING;
+
     return 0;
   }
 
@@ -323,9 +334,9 @@ namespace mos {
     }
 
     player.update();
-
+   
     if (MOS_VID_STATE_PLAYING == local_state) {
-      /* update the input texture from the rtmp stream. */
+
       if (is_init && needs_update) {
         glViewport(0, 0, fbo.width, fbo.height);
         fbo.bind();
@@ -335,15 +346,19 @@ namespace mos {
       }
 
       /* shutdown the backup player if it's still running. */
-      if (0 == backup_player.ctx.isInit()) {
+#if USE_BACKUP_PLAYER
+      if (0 == backup_player.isInit()) {
         backup_player.stop();
         backup_player.shutdown();
       }
+#endif
     }
     else {
 
+#if USE_BACKUP_PLAYER
       /* restart the backup player if necessary */
-      if (0 != backup_player.ctx.isInit()) {
+      if (0 != backup_player.isInit()) {
+        RX_VERBOSE("START PLAYING");
         backup_player.init(backup_file);
         backup_player.play();
       }
@@ -355,6 +370,7 @@ namespace mos {
          backup_player.draw();
       fbo.unbind();
       glViewport(0, 0, mos::config.window_width, mos::config.window_height);
+#endif
     }
   }
 
@@ -370,7 +386,9 @@ namespace mos {
           yuv.draw();
         }
         else {
+#if USE_BACKUP_PLAYER
           backup_player.draw(0, 0, yuv.w >> 2, yuv.h >> 2);      
+#endif
         }
       }
       glViewport(0, 0, mos::config.window_width, mos::config.window_height);
@@ -389,21 +407,25 @@ namespace mos {
       r = -2;
     }
 
+#if USE_BACKUP_PLAYER
     if (0 == backup_player.isPlaying()) {
+#if 0
       if (0 != backup_player.stop()) {
         RX_ERROR("Failed to stop the backup player.");
       }
+#endif
     }
+
     if (0 != backup_player.shutdown()) {
       RX_ERROR("Error while trying to shutdown the backup player.");
       r = -3;
     }
+#endif
 
     needs_update = false;
     is_init = false;
 
     lock();
-       RX_VERBOSE("SET TIME TIME 0");
        restart_time = 0;
        state = MOS_VID_STATE_NONE;
     unlock();

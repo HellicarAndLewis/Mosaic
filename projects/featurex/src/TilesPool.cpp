@@ -244,7 +244,7 @@ namespace fex {
 
     /* create a new one. */
     if (NULL == task) {
-      RX_VERBOSE("No free task found, creating a new one.");
+      //RX_VERBOSE("No free task found, creating a new one.");
 
       task = new TileTask();
       if (NULL == task) {
@@ -260,7 +260,8 @@ namespace fex {
 
       /* just give a working when we're creating many tasks */
       if (100 <= tasks.size()) {
-        RX_WARNING("We have %lu tasks in the task list; this is okay but make sure that we can process all tasks; maybe reduce some specs in the config.", tasks.size());
+        /* @todo batch the input! */
+        // RX_WARNING("We have %lu tasks in the task list; this is okay but make sure that we can process all tasks; maybe reduce some specs in the config.", tasks.size());
       }
     }
 

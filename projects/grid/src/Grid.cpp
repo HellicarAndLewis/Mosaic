@@ -37,7 +37,7 @@ namespace grid {
 
   Cell::~Cell() {
 
-    RX_VERBOSE("Destorying cell which has %d bytes allocated", capacity);
+    // RX_VERBOSE("Destorying cell which has %d bytes allocated", capacity);
 
     row = 0;
     col = 0;
@@ -226,8 +226,8 @@ namespace grid {
       exit(0);
     }
 
-    glUniform1f(glGetUniformLocation(prog, "u_scalex"), 1.0 / cols);
-    glUniform1f(glGetUniformLocation(prog, "u_scaley"), 1.0 / rows);
+    glUniform1f(glGetUniformLocation(prog, "u_scalex"), 1.0 / cols); /* texture scaling */
+    glUniform1f(glGetUniformLocation(prog, "u_scaley"), 1.0 / rows); /* texture scaling */
     glUniform1i(glGetUniformLocation(prog, "u_tex"), 0);
 
     /* create buffers. */
@@ -285,7 +285,7 @@ namespace grid {
     size_t dx;
     while (0 != sources.size() && getUsableCell(dx, CELL_STATE_NONE, CELL_STATE_RESERVED)) {
       Source& source = *sources.begin();
-      RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
+      //RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
       img_loader.load(source.filepath);
       sources.erase(sources.begin());
     }
@@ -314,7 +314,7 @@ namespace grid {
 
           cell.state = CELL_STATE_IN_USE;
 
-          RX_VERBOSE("Updating the texture for an image. ");
+          //RX_VERBOSE("Updating the texture for an image. ");
 
           /* upload the loaded texture into the correct position. */
           int x = cell.col * img_width;

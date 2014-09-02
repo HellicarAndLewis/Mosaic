@@ -12,12 +12,8 @@ namespace mos {
   }
 
   int Mosaic::init() {
-    int r;
 
-    if (0 != mos::load_config()) {
-      RX_ERROR("Cannot load config. stopping.");
-      return -99;
-    }
+    int r;
 
     /* get the texture sizes for the mosaic. */
     int mw = fex::config.getMosaicImageWidth();
@@ -63,7 +59,7 @@ namespace mos {
 
     /* update the input texture - is used by the gpu analyzer.*/
     video_input.update();
-    
+
     /* new input, update gpu analyzer. */
     if (video_input.needsUpdate()) {
       featurex.analyzeGPU();
@@ -78,17 +74,32 @@ namespace mos {
   }
 
   void Mosaic::draw() {
-    
+    draw(0, 0, mos::config.window_width, mos::config.window_height);
+  }
+
+  void Mosaic::draw(int x, int y, int w, int h) {
+
+#if !defined(NDEBUG)
+    if (0 == w || 0 == h) {
+      RX_ERROR("Invalid width or height: %d x %d", w, h);
+      exit(EXIT_FAILURE);
+    }
+#endif
+
     /* draw the result. */
     painter.clear();
-    painter.texture(mosaic_tex, 0, mos::config.window_height, mos::config.window_width, -mos::config.window_height);
+    painter.texture(mosaic_tex, x, y + h, w, -h);
     painter.draw();
 
+#if 1
     /* draw a debug image. */
     video_input.draw();
+#endif
+
   }
 
   int Mosaic::shutdown() {
+
     int r = 0;
     int result = 0;
 

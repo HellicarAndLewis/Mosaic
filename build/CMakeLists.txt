@@ -4,8 +4,8 @@ set(USE_OPENGL OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 set(fex_sd ${bd}/projects/featurex/src) 
@@ -13,6 +13,7 @@ set(gfx_sd ${bd}/projects/gfx/src)
 set(vid_sd ${bd}/projects/video/src)
 set(mos_sd ${bd}/projects/mosaic/src)
 set(grid_sd ${bd}/projects/grid/src)
+set(ts_sd ${bd}/projects/topshop/src)
 
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/../src
@@ -24,6 +25,7 @@ include_directories(
   ${bd}/projects/video/include
   ${bd}/projects/mosaic/include
   ${bd}/projects/grid/include
+  ${bd}/projects/topshop/include
   )
 
 if(APPLE)
@@ -117,12 +119,17 @@ set(mosaic_lib_sources
   ${mos_sd}/DirWatcher.cpp
 )
 
+set(topshop_lib_sources
+  ${ts_sd}/TopShop.cpp
+  ${ts_sd}/Config.cpp
+)
+
 macro(create_test name)
   add_executable(test_${name} 
     ${bd}/projects/tests/test_${name}.cpp 
     ${extern_source_dir}/glad.c
     )
-  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture)
+  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture shop)
   install(TARGETS test_${name} DESTINATION bin)
 endmacro()
 
@@ -146,8 +153,17 @@ install(TARGETS grid ARCHIVE DESTINATION lib)
 add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
+# The TopShop lib
+add_library(shop ${topshop_lib_sources})
+install(TARGETS shop ARCHIVE DESTINATION lib)
+
+# The final Mosaic application
+add_executable(TopShop ${ts_sd}/main.cpp  ${extern_source_dir}/glad.c)
+target_link_libraries(TopShop ${app_libs} gfx fex vid mosaic grid videocapture shop)
+install(TARGETS TopShop DESTINATION bin)
+
 # The tests used during development
-create_test(mosaic)
+#create_test(mosaic)
 #create_test(fex_load_image)
 #create_test(libav_rtmp)
 #create_test(video_stream_player)

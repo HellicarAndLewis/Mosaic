@@ -1,67 +1,242 @@
-<settings>
-  <webcam_device>0</webcam_device>
-  <webcam_width>640</webcam_width>
-  <webcam_height>480</webcam_height>
+<settings group="desktop">
 
-  <raw_filepath>input_raw/</raw_filepath>
-  <resized_filepath>input_resized/</resized_filepath>
-  <blurred_filepath>input_blurred/</blurred_filepath>
+  <group name="desktop">
+    <!-- GENERAL -->
+    <fullscreen>0</fullscreen>
+    <window_width>2560</window_width>
+    <window_height>1308</window_height> 
+  <!--  <window_height>1440</window_height> -->
+    <!-- WEBCAM -->
+    <webcam_device>0</webcam_device>
+    <webcam_width>640</webcam_width>
+    <webcam_height>480</webcam_height>
+    <!-- PATHS + MEMORY POOL-->
+    <raw_filepath>input_raw/</raw_filepath>
+    <resized_filepath>input_resized/</resized_filepath>
+    <blurred_filepath>input_blurred/</blurred_filepath>
+    <input_tile_size>10</input_tile_size>
+    <file_tile_width>64</file_tile_width>  
+    <file_tile_height>64</file_tile_height>
+    <memory_pool_size>2000</memory_pool_size>
+    <!-- STREAM -->
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
+    <!-- MOSAIC -->
+    <analyzer_width>720</analyzer_width>
+    <analyzer_height>360</analyzer_height>
+    <mosaic_width>1280</mosaic_width>
+    <mosaic_height>720</mosaic_height>
+    <mosaic_x>640</mosaic_x>
+    <mosaic_y>360</mosaic_y>
+    <!-- GRID -->
+    <grid_padding_x>10</grid_padding_x>
+    <grid_padding_y>9</grid_padding_y>
+    <grid_rows>10</grid_rows>
+    <grid_cols>10</grid_cols>
+    <left_grid_filepath>input_grid_left</left_grid_filepath>
+    <left_grid_x>640</left_grid_x> 
+    <left_grid_y>360</left_grid_x>
+    <right_grid_filepath>input_grid_right</right_grid_filepath>
+    <right_grid_x>1920</right_grid_x>
+    <right_grid_y>360</right_grid_y>
+  </group>
 
-  <!-- 
-       The `input_tile_size` is the size that is used to analyze 
-       the input. When the mosaic image is drawn using the same resolution
-       as `analyzer_width` and `analyzer_height` the pixels on screen 
-       match the `input_tile_size`.
-  --> 
-  <input_tile_size>16</input_tile_size>
+  <group name="tiny">
+    <!-- GENERAL -->
+    <fullscreen>0</fullscreen>
+    <window_width>1280</window_width>
+    <window_height>360</window_height> 
+    <!-- WEBCAM -->
+    <webcam_device>0</webcam_device>
+    <webcam_width>640</webcam_width>
+    <webcam_height>480</webcam_height>
+    <!-- PATHS + MEMORY POOL-->
+    <raw_filepath>input_raw/</raw_filepath>
+    <resized_filepath>input_resized/</resized_filepath>
+    <blurred_filepath>input_blurred/</blurred_filepath>
+    <input_tile_size>10</input_tile_size>
+    <file_tile_width>64</file_tile_width>  
+    <file_tile_height>64</file_tile_height>
+    <memory_pool_size>2000</memory_pool_size>
+    <!-- STREAM -->
+    <stream_url>rtmp://localhost</stream_url>
+    <stream_width>1280</stream_width>
+    <stream_height>720</stream_height>
+    <!--
 
-  <!-- 
-       The `file_tile_width` and `file_tile_height` describe the resolution
-       of the input images that we use to create the mosiac. During time of 
-       writing, these images are stored in input_resized (see above). Make sure
-       that the input images are square (so `file_tile_width` == `file_file_height`
-       for now). 
-
-       The `memory_pool_size` is the number of tiles that we can store in memory. We
-       will load the tiles from the `resized_filepath`. We allocate one huge buffer
-       that is the size of: `file_tile_width * file_tile_height * 4 * memory_pool_size`.
-       For optimization reasons we're using only 4 channels imaes.
-       
-       ITS EXTREMELLY IMPORTANT THAT ALL IMAGES ARE PNG AND HAVE 4 CHANNELS. 
-      
-  --> 
-  <file_tile_width>64</file_tile_width>  
-  <file_tile_height>64</file_tile_height>
-  <memory_pool_size>2000</memory_pool_size>
-
-<!--
-
-  <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
-  <stream_width>640</stream_width>
-  <stream_height>360</stream_height>
-
-  <stream_url>rtmp://localhost</stream_url>
-  <stream_width>1280</stream_width>
-  <stream_height>720</stream_height>
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
 -->
+    <!-- MOSAIC -->
+    <analyzer_width>720</analyzer_width>
+    <analyzer_height>360</analyzer_height>
+    <mosaic_width>640</mosaic_width>
+    <mosaic_height>360</mosaic_height>
+    <mosaic_x>320</mosaic_x>
+    <mosaic_y>0</mosaic_y>
+    <!-- GRID -->
+    <grid_padding_x>10</grid_padding_x>
+    <grid_padding_y>9</grid_padding_y>
+    <grid_rows>10</grid_rows>
+    <grid_cols>10</grid_cols>
+    <left_grid_filepath>input_grid_left</left_grid_filepath>
+    <left_grid_x>320</left_grid_x> 
+    <left_grid_y>0</left_grid_x>
+    <right_grid_filepath>input_grid_right</right_grid_filepath>
+    <right_grid_x>960</right_grid_x>
+    <right_grid_y>0</right_grid_y>
+  </group>
 
-  <!--
-      The `stream_url` is the RTMP url to which we connect when your compiling
-      with the `-DUSE_WEBCAM_AS_INPUT=0` flag. This width/height must match the
-      stream otherwise unexpected behavior will occur. 
-  -->
-  <stream_url>rtmp://localhost</stream_url>
-  <stream_width>1280</stream_width>
-  <stream_height>720</stream_height>
 
-  <!--
-      The `analyzer_width` and `analyzer_height` describe the size of the buffer 
-      that is used by the GPU analyzer. This should have the same aspect
-      ratio as the input resolution. Because we can use a webcam as input
-      or an rtmp video stream you need to adjust these two settings whenever
-      you change (`webcam_width`, `webcam_height`) or (`stream_width`, `stream_height`).
-  -->
-  <analyzer_width>720</analyzer_width>
-  <analyzer_height>360</analyzer_height>
+
+  <group name="demo">
+    <!-- 
+         fullscreen: 
+                     Set to 1 for fullscreen, otherwise 0. We depend on the OS to create a 
+                     window. The created window may be different. If this is the case we will
+                     stop the application and you need to adjust the size.
+
+         window_width:
+         window_height:
+                     The resolution for the openGL context and window.
+    -->
+    <fullscreen>0</fullscreen>
+    <window_width>2560</window_width>
+    <window_height>1308</window_height> 
+
+    <!--
+        webcam_device:  
+                     When you compiled with the -DUSE_WEBCAM_AS_INPUT=1, these settings are 
+                     used. The webcam_device is the device number that we need to use. When you're
+                     not sure what you device number is, just use a non-existing (e.g. 1000) and run 
+                     the application. It will show a list when the number is invalid. 
+
+        webcam_height:
+        webcam_width:                       
+                     The width/height of the image we retrieve from the webcam. We don't need one which has
+                     a extremelly large value. 640 will do. When it's not supported we will stop the 
+                     applcation.
+    -->
+    <webcam_device>0</webcam_device>
+    <webcam_width>640</webcam_width>
+    <webcam_height>480</webcam_height>
+
+    <!--
+        raw_filepath:
+                     This the directory from which images for the mosaic are gathered. When a new 
+                     image is added, it will be automatically resized to the correct tile size and
+                     stored into the `resized_filepath`.
+
+        resized_filepath:
+                      Once an image has been resized (from the `raw_filepath`), it will be stored 
+                      here, and used in the mosaic.
+
+        blurred_filepath:
+                      Not used at the time of writing. 
+    -->
+    <raw_filepath>input_raw/</raw_filepath>
+    <resized_filepath>input_resized/</resized_filepath>
+    <blurred_filepath>input_blurred/</blurred_filepath>
+
+    <!-- 
+         input_tile_size:
+                      The `input_tile_size` is the size that is used to analyze 
+                      the input. When the mosaic image is drawn using the same resolution
+                      as `analyzer_width` and `analyzer_height` the pixels on screen 
+                      match the `input_tile_size`.
+    --> 
+    <input_tile_size>10</input_tile_size>
+
+    <!-- 
+         The `file_tile_width` and `file_tile_height` describe the resolution
+         of the input images that we use to create the mosiac. During time of 
+         writing, these images are stored in input_resized (see above). Make sure
+         that the input images are square (so `file_tile_width` == `file_file_height`
+         for now). 
+
+The `memory_pool_size` is the number of tiles that we can store in memory. We
+will load the tiles from the `resized_filepath`. We allocate one huge buffer
+that is the size of: `file_tile_width * file_tile_height * 4 * memory_pool_size`.
+For optimization reasons we're using only 4 channels imaes.
+
+ITS EXTREMELLY IMPORTANT THAT ALL IMAGES ARE PNG AND HAVE 4 CHANNELS. 
+
+    --> 
+    <file_tile_width>64</file_tile_width>  
+    <file_tile_height>64</file_tile_height>
+    <memory_pool_size>2000</memory_pool_size>
+
+    <!--
+
+<stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+<stream_width>640</stream_width>
+<stream_height>360</stream_height>
+
+<stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+<stream_width>854</stream_width>
+<stream_height>480</stream_height>
+
+<stream_url>rtmp://localhost</stream_url>
+<stream_width>1280</stream_width>
+<stream_height>720</stream_height>
+    -->
+
+    <!--
+        stream_url:
+        stream_width:
+        stream_height:
+                The `stream_url` is the RTMP url to which we connect when your compiling
+                with the `-DUSE_WEBCAM_AS_INPUT=0` flag. This width/height must match the
+                stream otherwise unexpected behavior will occur. 
+    -->
+
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
+
+    <!--
+        analyzer_width:
+        analyzer_height:
+                The `analyzer_width` and `analyzer_height` describe the size of the buffer 
+                that is used by the GPU analyzer. This should have the same aspect
+                ratio as the input resolution. Because we can use a webcam as input
+                or an rtmp video stream you need to adjust these two settings whenever
+                you change (`webcam_width`, `webcam_height`) or (`stream_width`, `stream_height`).
+    -->
+    <analyzer_width>720</analyzer_width>
+    <analyzer_height>360</analyzer_height>
+
+    <!-- Mosaic settings -->
+    <mosaic_width>1280</mosaic_width>
+    <mosaic_height>720</mosaic_height>
+    <mosaic_x>640</mosaic_x>
+    <mosaic_y>360</mosaic_y>
+
+    <!-- 
+         left_grid_x:  
+                      For the left grid, the 'x' position means the right
+                      edge to which we align. 
+
+         grid_padding_x: 
+         grid_padding_y:
+
+                      The horizontal and vertical padding between the images
+                      in the left and right sliding panes.
+
+
+    -->
+    <grid_padding_x>10</grid_padding_x>
+    <grid_padding_y>9</grid_padding_y>
+    <grid_rows>10</grid_rows>
+    <grid_cols>10</grid_cols>
+    <left_grid_filepath>input_grid_left</left_grid_filepath>
+    <left_grid_x>640</left_grid_x> 
+    <left_grid_y>360</left_grid_x>
+    <right_grid_filepath>input_grid_right</right_grid_filepath>
+    <right_grid_x>1920</right_grid_x>
+    <right_grid_y>360</right_grid_y>
+  </group> <!-- default -->
 
 </settings>

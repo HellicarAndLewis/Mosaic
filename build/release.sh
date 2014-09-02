@@ -11,6 +11,8 @@ fi
 #     cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
 # fi
 
+./build_mac_dependencies.sh
+
 cd build.release
 cmake -DCMAKE_BUILD_TYPE=Release ../ 
 #cmake -DCMAKE_BUILD_TYPE=Debug ../ 
@@ -42,7 +44,7 @@ fi
 #./test_fex_load_image
 #./test_libav_rtmp
 #./test_video_stream_player
-./test_mosaic
+#./test_mosaic
 #./test_offline_analyzer
 #./test_online_analyzer
 #./test_async_upload
@@ -50,3 +52,5 @@ fi
 #./test_grid
 #./test_png_rgba
 #./test_ogg_player
+
+./TopShop

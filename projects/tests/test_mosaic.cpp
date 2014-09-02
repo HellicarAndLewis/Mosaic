@@ -31,6 +31,7 @@
 #include <featurex/Config.h>
 #include <mosaic/Mosaic.h>
 #include <mosaic/Config.h>
+#include <topshop/Config.h>
 
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
@@ -84,6 +85,8 @@ int main() {
   rx_log_init();
   mos::config.window_width = w;
   mos::config.window_height = h;
+
+  top::load_config();
 
 #if 0
   /* mosaic settings. */

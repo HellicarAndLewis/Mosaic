@@ -23,7 +23,7 @@ namespace mos {
 
   ImageTask::~ImageTask() {
 
-    RX_VERBOSE("Freeing image task, with %d allocated bytes.", capacity);
+    //RX_VERBOSE("Freeing image task, with %d allocated bytes.", capacity);
 
     reset();
 
@@ -203,7 +203,7 @@ namespace mos {
 
       /* just give some feedback. */
       if (100 < num_tasks) {
-        RX_ERROR("Already created %lu tasks, maybe you need to process more or adjust the number of tasks.", num_tasks);
+        // RX_ERROR("Already created %lu tasks, maybe you need to process more or adjust the number of tasks.", num_tasks);
       }
 
       task->is_free = false;
