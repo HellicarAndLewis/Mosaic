@@ -12,8 +12,8 @@
     ,"request_delay": 2000
   }
   ,"http": {
-    "host": "77.248.89.153"
-    ,"port": 3333
+    "host": "localhost"
+    ,"port": 80
   }
   ,"mongodb": {
     "host": "localhost"
