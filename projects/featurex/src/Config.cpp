@@ -108,6 +108,21 @@ namespace fex {
       return false;
     }
 
+    if (false == rx_is_dir(resized_filepath)) {
+      RX_ERROR("%s is not a path", resized_filepath.c_str());
+      return false;
+    }
+
+    if (false == rx_is_dir(raw_filepath)) {
+      RX_ERROR("%s is not a path", raw_filepath.c_str());
+      return false;
+    }
+
+    if (false == rx_is_dir(blurred_filepath)) {
+      RX_ERROR("%s is not a path", blurred_filepath.c_str());
+      return false;
+    }
+
     return true;
   }
 
