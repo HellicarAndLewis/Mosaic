@@ -8,8 +8,8 @@ var MosaicInstagramAdmin = Class.extend({
   
   options: {
     http: {
-      host: '80.85.84.140'
-      ,port: '80'
+      host: ''
+      ,port: ''
     }
   }
   
@@ -17,11 +17,14 @@ var MosaicInstagramAdmin = Class.extend({
   
   // Constructor
   // --------------------------------------------------------
-  ,init: function(msgType) {
+  ,init: function(msgType, host, port) {
     
     var self = this;
     
     this.messageType = msgType;
+    
+    this.options.http.host = host;
+    this.options.http.port = port;
     
     $('#instagram-images-overlay').fadeOut(0);
     $('#controls').hide();

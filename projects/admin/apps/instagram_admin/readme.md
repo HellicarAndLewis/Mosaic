@@ -44,6 +44,24 @@ $ cd ./src
 $ node server.js --help
 ```
 
+Start with forever
+----
+
+Install forever
+
+```sh
+$ sudo npm install forever -g
+```
+
+Start the server with forever
+
+```sh
+$ cd ./src
+$ forever start server.js -s settings_your_name.json
+```
+
+for more info on forever see: http://blog.nodejitsu.com/keep-a-nodejs-server-up-with-forever/
+
 Users admin
 ----
 

@@ -87,11 +87,13 @@ var Admin = new Class({
     this.router.use('/admin/images', Express.static(__dirname + '/../html/images'));
     this.router.use('/admin/fonts', Express.static(__dirname + '/../html/fonts'));
     
+    // Modules
     this.router.use(MethodOverride());
     this.router.use(CookieParser());
     this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD'}));
     this.router.use(BodyParser.urlencoded({extended: false}));
     
+    // Login form
     this.router.get('/login', function(req, res) {
       self.app.iaid = ObjectID();
       req.session.iaid = '';
@@ -100,6 +102,7 @@ var Admin = new Class({
       });
     });
     
+    // Login form post
     this.router.post('/login', function(req, res) {
       
       if(req.body.username == self.app.options.admin.username 
@@ -115,42 +118,54 @@ var Admin = new Class({
       }
     });
     
+    // Redirect after login
     this.router.get('/', this.validate.bind(this), function(req, res) {
       
       res.redirect('/admin/tags');
     });
     
+    // Redirect after login
     this.router.get('/admin', this.validate.bind(this), function(req, res) {
       
       res.redirect('/admin/tags');
     });
     
+    // Tags route
     this.router.get('/admin/tags', this.validate.bind(this), function(req, res) {
       
       // Unlock images older than x ms
       self.unlockImages(function() {
         
         // Return index.html
-        
         Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
           
           var tpl = Dot.template(text);
-          res.send(tpl({msg_type: 'tag'}));
+          res.send(tpl({
+            msg_type: 'tag'
+            ,auto_approve_users: self.app.options.instagram.auto_approve_users
+            ,host: self.app.options.http.host
+            ,port: self.app.options.http.port
+          }));
         });
       }, (30*60*1000));
     });
     
+    // Users route
     this.router.get('/admin/users', this.validate.bind(this), function(req, res) {
       
       // Unlock images older than x ms
       self.unlockImages(function() {
         
         // Return index.html
-        
         Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
           
           var tpl = Dot.template(text);
-          res.send(tpl({msg_type: 'user', auto_approve_users: self.app.options.instagram.auto_approve_users}));
+          res.send(tpl({
+            msg_type: 'user'
+            ,auto_approve_users: self.app.options.instagram.auto_approve_users
+            ,host: self.app.options.http.host
+            ,port: self.app.options.http.port
+          }));
         });
       }, (30*60*1000));
     });
@@ -161,9 +176,14 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(req.session.iaid == this.app.iaid && (req.session.iaid != undefined && this.app.iaid != undefined)) {
+    if(req.session.iaid == this.app.iaid 
+       && (req.session.iaid != undefined 
+           && this.app.iaid != undefined)) {
+      
       next();
+      
     } else {
+      
       res.redirect('/login');
     }
   }
@@ -345,7 +365,8 @@ var Images = new Class({
     
     // Create post route (update)
     this.router.post('/images/update', function(req, res) {
- 
+      
+      // Check for id
       if(req.body.id) {
         
         var collection = self.app.db.collection('instagram');  
@@ -366,11 +387,8 @@ var Images = new Class({
           ,function() {
             res.json({updated:true});
         });
-        
       }
-      
     });
-  
   }
 });
 

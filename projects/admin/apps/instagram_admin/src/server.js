@@ -60,6 +60,7 @@ var Server = new Class({
       .option('-t, --polltags', 'Start with tag media polling')
       .option('-u, --pollusers', 'Start with users media polling')
       .option('-c, --clear', 'Clear all instagram subscriptions')
+      .option('-d, --debug', 'Force debug console output')
       .parse(process.argv);
     
     
@@ -76,9 +77,12 @@ var Server = new Class({
       // Include project file
       var settings = require(file);
       
+      Console.DEBUG = settings.debug;
+      
+      if(Program.debug) { Console.DEBUG = true; }
+      
       Console.status('Started with settings ' + file);
       
-      Console.DEBUG = settings.debug;
       
       // Set options
       this.setOptions(settings);
