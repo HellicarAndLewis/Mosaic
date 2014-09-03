@@ -8,8 +8,8 @@ var MosaicInstagramAdmin = Class.extend({
   
   options: {
     http: {
-      host: 'localhost'
-      ,port: '3333'
+      host: '80.85.84.140'
+      ,port: '80'
     }
   }
   
