@@ -1,10 +1,14 @@
-<settings group="desktop">
+<settings group="laptop">
 
   <group name="desktop">
     <!-- GENERAL -->
     <fullscreen>0</fullscreen>
+    <window_width>1676</window_width>
+    <window_height>1006</window_height>
+    <!--
     <window_width>2560</window_width>
     <window_height>1308</window_height> 
+    -->
     <!--  <window_height>1440</window_height> -->
     <!-- WEBCAM -->
     <webcam_device>0</webcam_device>
@@ -44,6 +48,52 @@
     <right_grid_filepath>input_grid_right</right_grid_filepath>
     <right_grid_x>1920</right_grid_x>
     <right_grid_y>360</right_grid_y>
+  </group>
+
+
+  <group name="laptop">
+    <!-- GENERAL -->
+    <fullscreen>0</fullscreen>
+    <window_width>1676</window_width>
+    <window_height>1006</window_height>
+    <!-- WEBCAM -->
+    <webcam_device>0</webcam_device>
+    <webcam_width>640</webcam_width>
+    <webcam_height>480</webcam_height>
+    <!-- PATHS + MEMORY POOL-->
+    <raw_filepath>raw_mosaic</raw_filepath>
+    <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>
+    <raw_right_grid_filepath>raw_right</raw_right_grid_filepath>
+    <resized_filepath>input_mosaic/</resized_filepath>
+    <blurred_filepath>input_blurred/</blurred_filepath>
+    <input_tile_size>10</input_tile_size>
+    <file_tile_width>64</file_tile_width>  
+    <file_tile_height>64</file_tile_height>
+    <memory_pool_size>2000</memory_pool_size>
+    <!-- STREAM -->
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
+    <!-- MOSAIC -->
+    <analyzer_width>720</analyzer_width>
+    <analyzer_height>360</analyzer_height>
+    <mosaic_width>720</mosaic_width>
+    <mosaic_height>360</mosaic_height>
+    <mosaic_x>478</mosaic_x>
+    <mosaic_y>323</mosaic_y>
+    <!-- GRID -->
+    <grid_padding_x>10</grid_padding_x>
+    <grid_padding_y>10</grid_padding_y>
+    <grid_rows>5</grid_rows>
+    <grid_cols>7</grid_cols>
+    <grid_file_width>64</grid_file_width>
+    <grid_file_height>64</grid_file_height>
+    <left_grid_filepath>input_grid_left</left_grid_filepath>
+    <left_grid_x>477</left_grid_x> 
+    <left_grid_y>323</left_grid_x>
+    <right_grid_filepath>input_grid_right</right_grid_filepath>
+    <right_grid_x>1198</right_grid_x>
+    <right_grid_y>323</right_grid_y>
   </group>
 
   <group name="tiny">
