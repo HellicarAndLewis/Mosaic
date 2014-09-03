@@ -62,6 +62,7 @@ var Server = new Class({
       .option('-c, --clear', 'Clear all instagram subscriptions')
       .parse(process.argv);
     
+    Console.DEBUG = false;
     
     var file = './settings.json';
     
