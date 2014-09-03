@@ -23,6 +23,7 @@ var ImageDownloader = new Class({
     this.args = Program
       .version('0.0.1')
       .option('-s, --settings [path]', 'Start with custom settings file')
+      .option('-d, --debug', 'Force debug console output')
       .parse(process.argv);
     
     
@@ -34,15 +35,22 @@ var ImageDownloader = new Class({
     if(Program.settings) {
       file = Path.normalize(process.cwd() + '/' + Program.settings);
     }
-   
+    
+    
+    
     // Check if file exists...
     if(Fs.existsSync(file)) {
     
       // Include project file
       self.settings = require(file);
       
+      if(Program.debug) { this.settings.debug = true; }
+      
       self.log('Started with settings ' + file);
       
+      self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
+      self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
+      self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
       
       // Check if tmp dir exists
       Fs.ensureDir(self.settings.image_tmp_path, function() {
@@ -50,7 +58,8 @@ var ImageDownloader = new Class({
       });
 
       // Check if save dir exists
-      Fs.ensureDir(self.settings.image_save_path_users, function() {
+      Fs.ensureDir(self.settings.image_save_path_users, function(err) {
+       
         self.log('Checking users dir ' + self.settings.image_save_path_users);
       });
       
@@ -59,9 +68,7 @@ var ImageDownloader = new Class({
       });
       
       
-      self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
-      self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
-      self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
+      
       
       self.start();
       
@@ -129,7 +136,7 @@ var ImageDownloader = new Class({
           var dest_file_users = self.settings.image_save_path_users + img._id + '.jpg';
           var dest_file_tags = self.settings.image_save_path_tags + img._id + '.jpg';
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
-          
+          self.log(dest_file);
           var file_exists = Fs.existsSync(dest_file);
           if(!file_exists) {
             

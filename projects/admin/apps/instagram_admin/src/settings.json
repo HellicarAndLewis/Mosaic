@@ -7,8 +7,8 @@
   "instagram": {
     "client_id": "6b04ff5067f14628916e57ecba150edd"
     ,"client_secret": "b696e197298c400b92e10a303a07d797"
-    ,"hashtags": []
-    ,"users": ["vanillaicebucket"]
+    ,"hashtags": ["fashion"]
+    ,"users": []
     ,"auto_approve_users": true
     ,"request_delay": 2000
   }
