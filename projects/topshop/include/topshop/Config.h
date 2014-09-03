@@ -17,7 +17,9 @@ namespace top {
     int validate();  /* returns 0 on success else < 0 */
 
   public:
-    int is_fullscreen;  /* 1 = yes, 0 = no */
+    int is_fullscreen;                       /* 1 = yes, 0 = no */
+    int is_debug_draw;                       /* 1 = yes, 0 = no */
+    int log_level;                           /* any of the RX_LOG_LEVEL values, 0-4 */
     int window_width;
     int window_height;
     int mosaic_width;

@@ -1,8 +1,9 @@
-<settings group="desktop">
+<settings group="tiny">
 
   <group name="desktop">
     <!-- GENERAL -->
     <fullscreen>0</fullscreen>
+    <log_level>4</log_level>
     <window_width>2560</window_width>
     <window_height>1308</window_height> 
     <!--  <window_height>1440</window_height> -->
@@ -49,6 +50,7 @@
   <group name="tiny">
     <!-- GENERAL -->
     <fullscreen>0</fullscreen>
+    <log_level>1</log_level>
     <window_width>1280</window_width>
     <window_height>360</window_height> 
     <!-- WEBCAM -->
@@ -106,11 +108,18 @@
                      window. The created window may be different. If this is the case we will
                      stop the application and you need to adjust the size.
 
+         log_level:
+                     The log level. 
+                     0 - none
+                     1 - only errors
+                     2 - warnings too
+                     3 - verbose 
          window_width:
          window_height:
                      The resolution for the openGL context and window.
     -->
     <fullscreen>0</fullscreen>
+    <log_level>4</log_level>
     <window_width>2560</window_width>
     <window_height>1308</window_height> 
 

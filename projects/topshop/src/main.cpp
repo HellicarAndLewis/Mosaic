@@ -52,9 +52,13 @@ int main() {
     return -99;
   }
 
+  rx_log_set_level(top::config.log_level);
+
   if (0 != top::config.validate()) {
     return -100;
   }
+
+
 
   /* --------------------------------------------------------------------- */
 
@@ -164,11 +168,15 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
  
   switch(key) {
      case GLFW_KEY_1: {
-       tmp_shutdown = true;
+       //tmp_shutdown = true;
        break;
      }
     case GLFW_KEY_2: {
-      tmp_start = true;
+      // tmp_start = true;
+      break;
+    }
+    case GLFW_KEY_D: {
+      top::config.is_debug_draw = (1 == top::config.is_debug_draw) ? 0 : 1;
       break;
     }
     case GLFW_KEY_L: {

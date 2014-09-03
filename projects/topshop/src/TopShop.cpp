@@ -134,9 +134,12 @@ namespace top {
     left_grid.draw();
     right_grid.draw();
 #endif
-    mosaic.draw(top::config.mosaic_x, top::config.mosaic_y, top::config.mosaic_width, top::config.mosaic_height);
-    //   mosaic.draw();
 
+    mosaic.draw(top::config.mosaic_x, top::config.mosaic_y, top::config.mosaic_width, top::config.mosaic_height);
+
+    if (1 == top::config.is_debug_draw) {
+      mosaic.debugDraw();
+    }
   }
 
   /* ------------------------------------------------------------------------- */
