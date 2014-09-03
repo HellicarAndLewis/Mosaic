@@ -19,27 +19,30 @@ function Console() {
 
 Console.prototype = {
   
+  DEBUG: true
+  
   //--------------------------------------------------------------
-  addSpace: function(v) {
+  ,addSpace: function(v) {
   
     return ' ' + v + ' ';
   }
   
   //--------------------------------------------------------------
   ,clear: function() {
-  
+    
+    if(!this.DEBUG) return;
     console.log(clc.reset);
   }
   
   //--------------------------------------------------------------
   ,log: function(v) {
-  
+    if(!this.DEBUG) return;
     console.log(v);
   }
   
   //--------------------------------------------------------------
   ,error: function(v) {
-    
+    if(!this.DEBUG) return;
     var d = new Date();
     var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
     console.error(this.clc_error(this.addSpace(t+v)));
@@ -47,19 +50,19 @@ Console.prototype = {
   
   //--------------------------------------------------------------
   ,warn: function(v) {
-    
+    if(!this.DEBUG) return;
     console.warn(this.clc_warn(v));
   }
   
   //--------------------------------------------------------------
   ,notice: function(v) {
-    
+    if(!this.DEBUG) return;
     console.info(this.clc_notice(this.addSpace(v)));
   }
   
   //--------------------------------------------------------------
   ,status: function(v) {
-    
+    if(!this.DEBUG) return;
     var d = new Date();
     var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
     console.info(this.clc_status(t+v));
@@ -67,25 +70,25 @@ Console.prototype = {
   
   //--------------------------------------------------------------
   ,start: function(v) {
-    
+    if(!this.DEBUG) return;
     console.info(this.clc_start(this.addSpace(v)));
   }
   
   //--------------------------------------------------------------
   ,end: function(v) {
-    
+    if(!this.DEBUG) return;
     console.info(this.clc_end(v));
   }
   
   //--------------------------------------------------------------
   ,empty: function() {
-    
+    if(!this.DEBUG) return;
     console.log('');
   }
   
   //--------------------------------------------------------------
   ,info: function(v) {
-    
+    if(!this.DEBUG) return;
     var d = new Date();
     var t = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > ';
     console.info(this.clc_info(this.addSpace(t+v)));
