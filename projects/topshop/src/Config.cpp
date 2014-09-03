@@ -268,9 +268,9 @@ namespace top {
       mos::config.analyzer_height =  read_xml_int(cfg, "analyzer_height", 0);
             
       /* feature extractor and matcher */
-      fex::config.raw_filepath = rx_to_data_path(read_xml_str(cfg, "raw_filepath", "input_raw/"));
-      fex::config.resized_filepath = rx_to_data_path(read_xml_str(cfg, "resized_filepath", "input_resized/"));
-      fex::config.blurred_filepath = rx_to_data_path(read_xml_str(cfg, "blurred_filepath", "input_blurred/"));
+      fex::config.raw_filepath = read_xml_str(cfg, "raw_filepath", "");
+      fex::config.resized_filepath = read_xml_str(cfg, "resized_filepath", "");
+      fex::config.blurred_filepath = read_xml_str(cfg, "blurred_filepath", "");
       fex::config.input_tile_size = read_xml_int(cfg, "input_tile_size", 16);
       fex::config.file_tile_width = read_xml_int(cfg, "file_tile_width", 64);
       fex::config.file_tile_height = read_xml_int(cfg, "file_tile_height", 64);
@@ -279,6 +279,17 @@ namespace top {
       fex::config.input_image_height = mos::config.analyzer_height;
       fex::config.cols = (fex::config.input_image_width / fex::config.input_tile_size);
       fex::config.rows = (fex::config.input_image_height / fex::config.input_tile_size);
+
+      /* convert dirs to paths. */
+      if (0 != fex::config.raw_filepath.size()) {
+        fex::config.raw_filepath = rx_to_data_path(fex::config.raw_filepath);
+      }
+      if (0 != fex::config.resized_filepath.size()) {
+        fex::config.resized_filepath = rx_to_data_path(fex::config.resized_filepath);
+      }
+      if (0 != fex::config.blurred_filepath.size()) {
+        fex::config.blurred_filepath = rx_to_data_path(fex::config.blurred_filepath);
+      }
     }
     catch (...) {
       RX_ERROR("Caught XML exception, check if the settings xml is valid.");
