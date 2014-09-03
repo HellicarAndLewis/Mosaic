@@ -62,7 +62,7 @@ var Server = new Class({
       .option('-c, --clear', 'Clear all instagram subscriptions')
       .parse(process.argv);
     
-    Console.DEBUG = false;
+    
     
     var file = './settings.json';
     
@@ -78,6 +78,8 @@ var Server = new Class({
       
       Console.status('Started with settings ' + file);
       
+      Console.DEBUG = settings.debug;
+      
       // Set options
       this.setOptions(settings);
       
@@ -88,6 +90,7 @@ var Server = new Class({
     
       // No file found
       Console.error('Could not find settings file at ' + file);
+      process.exit(0);
     }
 
   }
