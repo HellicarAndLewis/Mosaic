@@ -47,6 +47,8 @@ namespace mos {
     void draw(int x, int y, int w, int h);           /* draw using the given coordinates; 0,0 is bottom left. */
     int shutdown();                                  /* destory and free all allocated objects so init() could be called again. */
 
+    int analyzeCPU(std::string filepath);            /* wrapper around featurex::analyzeCPU. */
+
   public:
     fex::Featurex featurex;                          /* the feature extractor library. */
     gfx::AsyncUpload async_upload;                   /* used to upload the mosaic texture */
@@ -54,6 +56,10 @@ namespace mos {
     Painter painter;                                 /* @todo - we my replace this with a custom shader, but for testing the result of the mosaic we use this. */
     VideoInput video_input;                          /* the webcam or rtmp input. */
   };
+
+  inline int Mosaic::analyzeCPU(std::string filepath) {
+    return featurex.analyzeCPU(filepath);
+  }
 
 } /* namespace mos */
 

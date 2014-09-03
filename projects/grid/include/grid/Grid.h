@@ -80,11 +80,12 @@ namespace grid {
     "  vec2(0.5,  -0.5)   "
     ");"
 
+    /* we have to use this somewhat `odd` texture coordinates because else you'll get overlapping between columns. */
     " const vec2[] tex = vec2[4]( "
-    "   vec2(0.0, 0.0),  "
-    "   vec2(0.0, 1.0),  "
-    "   vec2(1.0, 0.0),  "
-    "   vec2(1.0, 1.0)   "
+    "   vec2(0.01, 0.01),  "
+    "   vec2(0.01, 0.99),  "
+    "   vec2(0.99, 0.01),  "
+    "   vec2(0.99, 0.99)   "
     ");"
 
     "void main() {"

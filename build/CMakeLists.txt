@@ -4,8 +4,8 @@ set(USE_OPENGL OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 set(bd ${CMAKE_CURRENT_LIST_DIR}/../)
 set(fex_sd ${bd}/projects/featurex/src) 
@@ -122,6 +122,8 @@ set(mosaic_lib_sources
 set(topshop_lib_sources
   ${ts_sd}/TopShop.cpp
   ${ts_sd}/Config.cpp
+  ${ts_sd}/ImageCollector.cpp
+  ${ts_sd}/ImageProcessor.cpp
 )
 
 macro(create_test name)

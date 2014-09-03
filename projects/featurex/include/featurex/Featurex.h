@@ -54,7 +54,7 @@ namespace fex {
     AnalyzerCPU analyzer_cpu;
     AnalyzerGPU analyzer_gpu;
     Comparator comp;
-    TilesPool tiles;
+    TilesPool tiles;                         /* the tiles pool contains the images that make up the mosiac. */
     unsigned char* mosaic_pixels; 
   };
 

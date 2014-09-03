@@ -11,9 +11,9 @@
     <webcam_width>640</webcam_width>
     <webcam_height>480</webcam_height>
     <!-- PATHS + MEMORY POOL-->
-    <raw_filepath>input_raw/</raw_filepath>
-    <resized_filepath>input_resized/</resized_filepath>
-    <blurred_filepath>input_blurred/</blurred_filepath>
+    <raw_filepath>raw_mosaic</raw_filepath>
+    <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>
+    <raw_right_grid_filepath>raw_right</raw_right_grid_filepath>
     <input_tile_size>10</input_tile_size>
     <file_tile_width>64</file_tile_width>  
     <file_tile_height>64</file_tile_height>
@@ -34,6 +34,8 @@
     <grid_padding_y>9</grid_padding_y>
     <grid_rows>10</grid_rows>
     <grid_cols>10</grid_cols>
+    <grid_file_width>64</grid_file_width>
+    <grid_file_height>64</grid_file_height>
     <left_grid_filepath>input_grid_left</left_grid_filepath>
     <left_grid_x>640</left_grid_x> 
     <left_grid_y>360</left_grid_x>
@@ -52,8 +54,10 @@
     <webcam_width>640</webcam_width>
     <webcam_height>480</webcam_height>
     <!-- PATHS + MEMORY POOL-->
-    <raw_filepath>input_raw/</raw_filepath>
-    <resized_filepath>input_resized/</resized_filepath>
+    <raw_filepath>raw_mosaic</raw_filepath>
+    <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>
+    <raw_right_grid_filepath>raw_right</raw_right_grid_filepath>
+    <resized_filepath>input_mosaic/</resized_filepath>
     <blurred_filepath>input_blurred/</blurred_filepath>
     <input_tile_size>10</input_tile_size>
     <file_tile_width>64</file_tile_width>  
@@ -63,12 +67,6 @@
     <stream_url>rtmp://localhost</stream_url>
     <stream_width>1280</stream_width>
     <stream_height>720</stream_height>
-    <!--
-
-    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
-    <stream_width>854</stream_width>
-    <stream_height>480</stream_height>
--->
     <!-- MOSAIC -->
     <analyzer_width>720</analyzer_width>
     <analyzer_height>360</analyzer_height>
@@ -81,6 +79,8 @@
     <grid_padding_y>9</grid_padding_y>
     <grid_rows>10</grid_rows>
     <grid_cols>10</grid_cols>
+    <grid_file_width>64</grid_file_width>
+    <grid_file_height>64</grid_file_height>
     <left_grid_filepath>input_grid_left</left_grid_filepath>
     <left_grid_x>320</left_grid_x> 
     <left_grid_y>0</left_grid_x>
@@ -89,6 +89,12 @@
     <right_grid_y>0</right_grid_y>
   </group>
 
+
+    <!--
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
+    -->
 
 
   <group name="demo">
@@ -135,9 +141,17 @@
 
         blurred_filepath:
                       Not used at the time of writing. 
+
+        raw_left_grid_filepath:
+        raw_right_grid_filepath:
+                      We're watching these directories. When someone adds a file to this directory 
+                      we add it to a list that will be processed. The `raw` files are copied to e.g.
+                      `left_grid_filepath` and `right_grid_filepath`
     -->
     <raw_filepath>input_raw/</raw_filepath>
-    <resized_filepath>input_resized/</resized_filepath>
+    <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>
+    <raw_right_grid_filepath>raw_left</raw_left_right_filepath>
+    <resized_filepath>input_mosaic/</resized_filepath>
     <blurred_filepath>input_blurred/</blurred_filepath>
 
     <!-- 

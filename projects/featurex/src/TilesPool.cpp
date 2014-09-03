@@ -261,7 +261,7 @@ namespace fex {
       /* just give a working when we're creating many tasks */
       if (100 <= tasks.size()) {
         /* @todo batch the input! */
-        // RX_WARNING("We have %lu tasks in the task list; this is okay but make sure that we can process all tasks; maybe reduce some specs in the config.", tasks.size());
+        RX_WARNING("We have %lu tasks in the task list; this is okay but make sure that we can process all tasks; maybe reduce some specs in the config.", tasks.size());
       }
     }
 

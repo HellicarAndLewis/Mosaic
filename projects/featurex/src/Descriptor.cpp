@@ -1,6 +1,7 @@
 #include <sstream>
 #include <fstream>
 #include <featurex/Descriptor.h>
+#include <featurex/Config.h>
 
 #define ROXLU_USE_LOG
 #include <tinylib.h>
@@ -49,6 +50,7 @@ namespace fex {
           << " " << desc.average_color[1]
           << " " << desc.average_color[2]
           << "\n";
+
     }
 
     ofs.close();
@@ -68,17 +70,26 @@ namespace fex {
     Descriptor desc;
     std::string line;
     std::string fname;
+    std::string filepath;
 
     while(std::getline(ifs, line)) {
 
       std::stringstream ss(line);
 
+      /* create the descriptor. */
       ss >> fname 
          >> desc.average_color[0]
          >> desc.average_color[1]
          >> desc.average_color[2];
 
       desc.setFilename(fname);
+
+      /* check if the file still exists. */
+      filepath = fex::config.resized_filepath +"/" +fname;
+      if (false == rx_file_exists(filepath)) {
+        RX_ERROR("File seems to be removed, skipping descriptor: %s", fname.c_str());
+        continue;
+      }
 
       descriptors.push_back(desc);
     }

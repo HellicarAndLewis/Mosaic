@@ -3,6 +3,9 @@
 d=${PWD}
 magickdir=${d}/../imagemagick/
 infile=${1}
+tile_width=${2}
+tile_height=${3}
+output_dir=${4}
 
 function log {
     dat=$(date +%Y.%m.%d.%H.%M.%S)
@@ -19,22 +22,31 @@ filename=$(basename "$infile")
 extension="${filename##*.}"
 filename="${filename%.*}"
 
-resized_filepath=${d}/data/input_resized/${filename}.png
-blur_filepath=${d}/data/input_blurred/${filename}.png
+#resized_filepath=${d}/data/input_resized/${filename}.png
+resized_filepath=${output_dir}/${filename}.png
 
 # Resize 
 ${magickdir}/convert ${infile} \
-    -resize 64x64^ \
+    -resize ${tile_width}x${tile_height}^ \
     -gravity center \
-    -extent 64x64 \
+    -extent ${tile_width}x${tile_height} \
     -colors 256 \
     PNG8:${resized_filepath}
 
-# Blur resized image
-${magickdir}/convert ${resized_filepath} \
-    -blur 0x5 \
-    -colors 256 \
-    PNG8:${blur_filepath}
+# ${magickdir}/convert ${infile} \
+#     -resize 64x64^ \
+#     -gravity center \
+#     -extent 64x64 \
+#     -colors 256 \
+#     PNG8:${resized_filepath}
+
+
+# Blur resized image (not used atm).
+# blur_filepath=${d}/data/input_blurred/${filename}.png
+# ${magickdir}/convert ${resized_filepath} \
+#     -blur 0x5 \
+#     -colors 256 \
+#     PNG8:${blur_filepath}
 
 
 

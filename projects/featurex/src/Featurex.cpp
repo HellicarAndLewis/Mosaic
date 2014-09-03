@@ -4,6 +4,12 @@
 
 namespace fex {
 
+  /* -------------------------------------------------------------------------- */
+
+  static void on_cpu_analyzed(Descriptor& desc, void* user);                      /* this is called when the cpu analyzer is ready with analyzing an image; this is done in a separate thread; and this function is called from that thread. */
+
+  /* -------------------------------------------------------------------------- */
+
   Featurex::Featurex() 
     :mosaic_pixels(NULL)
   {
@@ -52,14 +58,19 @@ namespace fex {
       return r;
     }
 
+    /* set the analyzed callback */
+    analyzer_cpu.on_analyzed = on_cpu_analyzed;
+    analyzer_cpu.user = this;
+
     /* BEGIN TESTING - LOAD FILES */                                
     /* -------------------------------------------------------------------------- */
+
     for (size_t i = 0; i < analyzer_cpu.descriptors.size(); ++i) {
       tiles.loadDescriptorTile(analyzer_cpu.descriptors[i]);
     }
+
     /* -------------------------------------------------------------------------- */
     /* END TESTING - LOAD FILES */
-
     
     /* create the surface that will hold the mosaic pixels. */
     int nbytes = (fex::config.getMosaicImageWidth() * fex::config.getMosaicImageHeight()) * 4; 
@@ -208,6 +219,26 @@ namespace fex {
     }
     frame++;
 #endif
+  }
+
+  /* -------------------------------------------------------------------------- */
+  static void on_cpu_analyzed(Descriptor& desc, void* user) {
+
+    if (NULL == user) {
+      RX_ERROR("The user variable is invalid.");
+      return;
+    }
+
+    Featurex* fex = static_cast<Featurex*>(user);
+    if (NULL == fex) {
+      RX_ERROR("Cannot cast user variable to Featurex.");
+      return;
+    }
+
+    if (0 != fex->tiles.loadDescriptorTile(desc)) {
+      RX_ERROR("The tiles pool returned an error. See messages above.");
+    }
+
   }
 
 } /* namespace fex */

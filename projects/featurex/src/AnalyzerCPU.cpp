@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <sstream>
 #include <featurex/Config.h>
 #include <featurex/AnalyzerCPU.h>
 
@@ -278,6 +279,13 @@ namespace fex {
    */
   int AnalyzerCPU::executeAnalyzeTask(AnalyzerTask* task) {
 
+#if !defined(NDEBUG)
+    if (0 == fex::config.file_tile_width || 0 == fex::config.file_tile_height) {
+      RX_ERROR("Either the file_tile_width or file_tile_height is invalid");
+      ::exit(EXIT_FAILURE);
+    }
+#endif
+
     std::string ext;
     int ret; 
     int i, j, dx;
@@ -299,7 +307,16 @@ namespace fex {
     std::string filename = rx_strip_file_ext(rx_strip_dir(task->filepath)) +".png";
     std::string basename = rx_strip_file_ext(filename);
     std::string resized_filepath = fex::config.resized_filepath +basename +".png";
-    std::string command = "./preprocess.sh " +task->filepath ;
+
+    /* create the command line the preprocess task.*/
+    std::stringstream ss;
+    ss << "./preprocess.sh " << task->filepath 
+       << " " << fex::config.file_tile_width 
+       << " " << fex::config.file_tile_height
+       << " " << fex::config.resized_filepath;
+
+    std::string command = ss.str();
+                                
 
     if (0 == filename.size()) {
       RX_ERROR("Filename is invalid.");
@@ -380,11 +397,22 @@ namespace fex {
 
   int AnalyzerCPU::loadDescriptors() {
 
-    /* first clear the current descriptors */
-    descriptors.clear();
+    int r = 0;
+    std::string outfile;
 
-    std::string outfile = rx_to_data_path("descriptors.txt");
-    return load_descriptors(outfile, descriptors);
+    outfile  = rx_to_data_path("descriptors.txt");
+
+    /* first clear the current descriptors then load them*/
+    descriptors.clear();
+    r =  load_descriptors(outfile, descriptors);
+    if (0 != r) {
+      return r;
+    }
+
+    /* make sure that we don't load too many */
+    descriptors.resize(std::min<size_t>(fex::config.memory_pool_size, descriptors.size()));
+    
+    return 0;
   }
 
   /* ---------------------------------------------------------------------------------- */
@@ -415,7 +443,7 @@ namespace fex {
       
       /* must stop? */
       if (ana->must_stop) {
-        RX_VERBOSE("Analyzer thread was asked to stop");
+        RX_VERBOSE("Analyzer thread was asked to stop - shouldn't we free the todo tasks here?");
         break;
       }
 

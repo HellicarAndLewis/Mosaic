@@ -105,11 +105,17 @@ namespace fex {
   /* ---------------------------------------------------------------------------------- */
 
   inline void AnalyzerCPU::lock() {
-    pthread_mutex_lock(&mutex);
+    int r = pthread_mutex_lock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Lock failed: %s", strerror(r));
+    }
   }
 
   inline void AnalyzerCPU::unlock() {
-    pthread_mutex_unlock(&mutex);
+    int r = pthread_mutex_unlock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Unlock failed: %s", strerror(r));
+    }
   }
 
 

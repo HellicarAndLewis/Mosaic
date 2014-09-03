@@ -143,6 +143,14 @@ namespace grid {
       return -105;
     }
 
+    /* we allocate a temp buffer for the grid texture so it has some color when we start. */
+    unsigned char* tmp_pixels = new unsigned char[(tex_width * tex_height * 4)];
+    if (NULL == tmp_pixels) {
+      RX_ERROR("Cannot allocate a temp buffer for the grid pixels");
+      return -130; 
+    }
+    memset(tmp_pixels, 0x00, (tex_width * tex_height * 4));
+
     /* initialize the image loader. */
     if (0 != img_loader.init()) {
       RX_ERROR("Cannot init the image loader");
@@ -157,15 +165,21 @@ namespace grid {
       return -102;
     }
 
+
     /* create a texture */
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex_width, tex_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex_width, tex_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, tmp_pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    delete[] tmp_pixels;
+    tmp_pixels = NULL;
 
     /* create the cells and vertices */
     cells.resize(rows * cols);
@@ -381,7 +395,8 @@ namespace grid {
        would be positioned into the previous one which will change the
        cell contents of a cell which is currently visible.
     */
-    col_hidden = (abs(int(pos_a.x)) / img_width) - 1;
+    int scroll_width = img_width + padding.x;
+    col_hidden = (abs(int(pos_a.x)) / scroll_width) - 1;
 
     if (col_hidden >= 0 && col_hidden != prev_col_hidden) {
       lock();
@@ -565,14 +580,29 @@ namespace grid {
       return;
     }
 
-    /* copy the image data into our buffer and keep track of it. */
+    /* find a free cell. */
+    int found_cell = 0;
     size_t cdx = 0;
-    if (false == grid->getUsableCell(cdx, CELL_STATE_RESERVED, CELL_STATE_LOADED)) {
-      RX_ERROR("Cannot find a cell that we need to fill");
+    int tries = 0;
+    int max_tries = 3;
+    while (tries < max_tries) {
+      if (false == grid->getUsableCell(cdx, CELL_STATE_RESERVED, CELL_STATE_LOADED)) {
+        RX_ERROR("Cannot find a cell that we need to fill");
+      }
+      else {
+        found_cell = 1;
+        break;
+      }
+      RX_VERBOSE("Waiting for a free cell");
+      usleep(10e3); /* sleep 10 millis */
+      tries++;
+    }
+    if (0 == found_cell) {
+      RX_ERROR("After %d tries we couldn't find a free cell. Maybe increase the number of tries?", max_tries);
       return;
     }
 
-    /* copy the pixels */
+    /* copy the image data into our buffer and keep track of it. */
     grid->lock();
     {
       Cell& cell = grid->cells.at(cdx);
