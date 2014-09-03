@@ -6,7 +6,7 @@
 
 require('mootools');
 
-var Fs = require('fs');
+var Fs = require('fs-extra');
 var Request = require('request');
 var Program = require('commander');
 var Path = require('path');
@@ -41,17 +41,35 @@ var ImageDownloader = new Class({
       // Include project file
       self.settings = require(file);
       
-      console.log('Started with settings ' + file);
+      self.log('Started with settings ' + file);
+      
+      
+      // Check if tmp dir exists
+      Fs.ensureDir(self.settings.image_tmp_path, function() {
+        self.log('Checking tmp dir ' + self.settings.image_tmp_path);
+      });
+
+      // Check if save dir exists
+      Fs.ensureDir(self.settings.image_save_path_users, function() {
+        self.log('Checking users dir ' + self.settings.image_save_path_users);
+      });
+      
+      Fs.ensureDir(self.settings.image_save_path_tags, function() {
+        self.log('Checking tags dir ' + self.settings.image_save_path_tags);
+      });
+      
       
       self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
-      self.settings.image_save_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path);
+      self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
+      self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
       
       self.start();
       
     } else {
     
       // No file found
-      console.log('Could not find settings file at ' + file);
+      self.log('Could not find settings file at ' + file);
+      process.exit(0);
     }
 
     
@@ -64,7 +82,7 @@ var ImageDownloader = new Class({
     var self = this;
     var url = this.settings.queue_url + '/all/' +  this.lastModIdMin + '/' + this.lastModIdMax + '/' + this.settings.limit + '/';
     
-    console.log('Get new results - ' + url);
+    self.log('Get new results - ' + url);
 
     // Start request
     Request({
@@ -89,8 +107,6 @@ var ImageDownloader = new Class({
           return;
         }
         
-        
-        
         if(self.lastModIdMax == '0') {
           self.lastModIdMax = images[0].queue_id; 
         }
@@ -110,21 +126,9 @@ var ImageDownloader = new Class({
           var img = queue.pop();
           
           var tmp_file = self.settings.image_tmp_path + img._id + '.jpg';
-          var dest_file = self.settings.image_save_path + img._id + '.jpg';
-          
-          // Check if tmp dir exists
-          if(!Fs.existsSync(self.settings.image_tmp_path)) {
-            
-            console.log('Creating tmp dir ' + self.settings.image_tmp_path);
-            Fs.mkdirSync(self.settings.image_tmp_path);
-          }
-          
-          // Check if save dir exists
-          if(!Fs.existsSync(self.settings.image_save_path)) {
-            
-            console.log('Creating save dir ' + self.settings.image_save_path);
-            Fs.mkdirSync(self.settings.image_save_path);
-          }
+          var dest_file_users = self.settings.image_save_path_users + img._id + '.jpg';
+          var dest_file_tags = self.settings.image_save_path_tags + img._id + '.jpg';
+          var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
           
           var file_exists = Fs.existsSync(dest_file);
           if(!file_exists) {
@@ -137,12 +141,13 @@ var ImageDownloader = new Class({
               
               if(size < 1000) {
                 Fs.unlink(tmp_file, function() {
-                  console.log('Image size invalid. ' + size + ' bytes received, removed tmp file ' + tmp_file);
+                  self.log('Image size invalid. ' + size + ' bytes received, removed tmp file ' + tmp_file);
                   dl_img(queue);
                 });
               } else {
               
                 // Move image from tmp to save dir
+                
                 Fs.rename(tmp_file, dest_file, function() {
                   dl_img(queue);
                 });
@@ -162,7 +167,7 @@ var ImageDownloader = new Class({
         
       } else {
         
-        console.log('Failed to load ' + url);
+        self.log('Failed to load ' + url);
         
         this.lastModIdMin = 0;
         this.lastModIdMax = 0;
@@ -173,6 +178,13 @@ var ImageDownloader = new Class({
         return;
       }
     });
+  }
+  
+  ,log: function(s) {
+    
+    if(this.settings.debug) {
+      console.log(s);
+    }
   }
   
   // 

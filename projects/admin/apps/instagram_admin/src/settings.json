@@ -1,19 +1,20 @@
 {
+  "debug": true,
   "admin": {
     "username": "admin",
     "password": "admin"
   },
   "instagram": {
-    "client_id": "8357c3f32006446f9fd97d907e1a2954"
-    ,"client_secret": "d20bc262654f47c0a90ecda76af22120"
-    ,"hashtags": ["fashion"]
+    "client_id": "6b04ff5067f14628916e57ecba150edd"
+    ,"client_secret": "b696e197298c400b92e10a303a07d797"
+    ,"hashtags": []
     ,"users": ["vanillaicebucket"]
     ,"auto_approve_users": true
     ,"request_delay": 2000
   }
   ,"http": {
     "host": "localhost"
-    ,"port": 80
+    ,"port": 3333
   }
   ,"mongodb": {
     "host": "localhost"
