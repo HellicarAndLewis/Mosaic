@@ -176,9 +176,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(req.session.iaid == this.app.iaid 
-       && (req.session.iaid != undefined 
-           && this.app.iaid != undefined)) {
+    if(req.session.iaid && (req.session.iaid != undefined)) {
       
       next();
       
