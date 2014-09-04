@@ -83,6 +83,15 @@ body {
   overflow: hidden;
 }
 
+@media screen and (max-width: 480px) {
+
+  body {
+  
+    width: 480px;
+  }
+
+}
+
 div.container {
   
   position: absolute;
