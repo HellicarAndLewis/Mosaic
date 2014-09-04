@@ -94,7 +94,7 @@ int main() {
   for (int i = 0; i < monitor_list.size(); ++i) {
     int xa, ya;
     glfwGetMonitorPos(monitor_list[i], &xa, &ya);
-    RX_VERBOSE("Monitor %d: %d x %d\n", i, xa, ya);
+    RX_VERBOSE("Monitor %d: %d x %d", i, xa, ya);
   }
 
 #if defined(APP_GRID_LEFT)

@@ -282,6 +282,43 @@ fi
 #     git clone https://code.google.com/p/gperftools/ .
 # fi
 
+# Download pkg-config
+if [ ! -d ${sd}/pkgconfig ] ; then 
+    cd ${sd}
+    curl -o pkg.tar.gz http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz
+    tar -zxvf pkg.tar.gz
+    mv pkg-config-0.28 pkgconfig
+fi
+
+# Download pixman 
+if [ ! -d ${sd}/pixman ] ; then
+    cd ${sd}
+    git clone git://anongit.freedesktop.org/git/pixman.git
+fi 
+
+# Download cairo 
+if [ ! -d ${sd}/gettext ] ; then
+    cd ${sd}
+    curl -o gettext.tar.gz http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.2.tar.xz
+    tar -zxvf gettext.tar.gz 
+    mv gettext-0.19.2 gettext
+fi 
+
+# Download cairo
+if [ ! -d ${sd}/cairo ] ; then 
+    cd ${sd}
+   # curl -o cairo.tar.gz http://cairographics.org/releases/rcairo-1.12.9.tar.gz
+   # tar -zxvf cairo.tar.gz
+   # mv rcairo-1.12.9 cairo
+    git clone git://anongit.freedesktop.org/git/cairo
+fi 
+
+# Download freetype
+if [ ! -d ${sd}/freetype ] ; then
+    cd ${sd}
+    git clone git://git.sv.nongnu.org/freetype/freetype2.git
+fi
+
 # Cleanup some files we don't need anymore.
 if [ -f ${sd}/autoconf.tar.gz ] ; then
     rm ${sd}/autoconf.tar.gz
@@ -320,6 +357,16 @@ fi
 if [ -f ${sd}/vorbis.tar.gz ] ; then
     rm ${sd}/vorbis.tar.gz
 fi
+if [ -f ${sd}/opencv.zip ] ; then
+    rm ${sd}/opencv.zip
+fi 
+if [ -f ${sd}/gettext.tar.gz ] ; then
+    rm ${sd}/gettext.tar.gz
+fi
+if [ -f ${sd}/pkg.tar.gz ] ; then
+    rm ${sd}/pkg.tar.gz 
+fi
+
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
 # ----------------------------------------------------------------------- #
@@ -546,6 +593,41 @@ if [ ! -f ${bd}/lib/libopencv_core.a ] ; then
     cmake --build . --target install
 fi
 
+# Compile freetype
+if [ ! -f ${bd}/lib/libfreetype.a ] ; then
+    export PATH=${bd}/bin/:${sd}/gyp/:${PATH}
+    export CFLAGS="-I${bd}/include"
+    export LDFLAGS="-L${bd}/lib"
+
+    cd ${bd}/bin
+    ln -s libtoolize glibtoolize
+    cd ${sd}/freetype2
+    ./autogen.sh
+    ./configure --prefix=${bd}
+    make
+    make install
+fi
+
+# Compile pkg config
+cd ${sd}/pkgconfig
+./configure --prefix=${bd} --with-internal-glib
+make
+make install
+
+# Compile gettext
+if [ ! -f ${bd}/lib/libintl.a ] ; then
+    cd ${sd}/gettext
+    ./configure --prefix=${bd} --enable-static=yes
+    make 
+    make install
+fi
+
+exit
+cd ${sd}/cairo
+if [ ! -f ./configure ] ; then
+    ./autogen.sh
+fi
+
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then
 #     cd ${sd}/tcmalloc
@@ -554,3 +636,7 @@ fi
 #     make
 #     make install
 # fi
+
+# Compile pixman
+#cd ${sd}/pixman
+#./autogen.sh
