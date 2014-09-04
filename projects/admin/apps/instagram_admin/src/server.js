@@ -307,7 +307,7 @@ var Server = new Class({
       
       // 503 error
       if(err) {
-     
+        
         // Check for 503 status code
         if(err.status_code == 503) {
           Console.error('503 Service Unavailable. No server is available to handle this request.');
@@ -396,7 +396,9 @@ var Server = new Class({
               // is available
               if(pagination) { 
                 if(pagination.next) { 
-                  pagination.next(rm_callback); 
+                  setTimeout(function() {
+                    pagination.next(rm_callback); 
+                  }, self.options.instagram.request_delay);
                 } else { 
                   retry(); 
                 }
