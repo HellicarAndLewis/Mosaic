@@ -310,6 +310,9 @@ namespace fex {
 
   static void* tilespool_thread(void* user) {
 
+    RX_VERBOSE("TEST");
+    ::exit(0);
+
     /* get our TilesPool ptr */
     TilesPool* pool = static_cast<TilesPool*>(user);
     if (NULL == pool) {
@@ -359,6 +362,7 @@ namespace fex {
 
         /* does it still exist on disk? */
         std::string tile_filepath = fex::config.resized_filepath +"/" +task->filename;
+        RX_VERBOSE("? %s", tile_filepath.c_str());
         if (false == rx_file_exists(tile_filepath)) {
           RX_ERROR("Cannot find: %s", tile_filepath.c_str());
           continue;

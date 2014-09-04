@@ -6,7 +6,7 @@ if [ ! -d build.release ] ; then
     mkdir build.release
 fi
 
-# Make sure the tinylib.h files are in sync.
+
 # if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
 #     cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
 # fi
@@ -60,5 +60,4 @@ fi
 #./test_grid
 #./test_png_rgba
 #./test_ogg_player
-
 ./TopShop
