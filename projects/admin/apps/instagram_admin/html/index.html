@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
-  <title>Mosaic Instagram Admin</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Hellicar & Lewis + Apollo">
+  <title>Mosaic Instagram Admin</title>
+  
 
-  <link rel="stylesheet" href="css/admin.css">
-  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="stylesheet" href="/admin/css/font-awesome.min.css">
 
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -15,6 +17,13 @@
 </head>
 
 <body>
+  <div class="logo"></div>
+  <ul class="menu {{? it.auto_approve_users == true }}one-item{{?}}">
+    <li id="instagram-menu-tags" {{? it.msg_type == "tag" }}class="selected"{{?}}><a href="/admin/tags"><i class="fa fa-tags"></i>Tags</a></li>
+    {{? it.auto_approve_users == false }}
+    <li id="instagram-menu-users" {{? it.msg_type == "user" }}class="selected"{{?}}><a href="/admin/users"><i class="fa fa-users"></i>Users</a></li>
+    {{?}}
+  </ul>
   <div class="container">
     <div class="instagram-images-container">
       <div id="instagram-images-overlay">
@@ -39,6 +48,8 @@
   </div>
   <script src="/admin/js/libs/jquery-2.1.1.min.js"></script>
   <script src="/admin/js/libs/jquery.class.js"></script>
+  <script src="/admin/js/libs/hammer.min.js"></script>
+  <script src="/admin/js/libs/jquery.hammer.js"></script>
   <script src="/admin/js/admin.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
