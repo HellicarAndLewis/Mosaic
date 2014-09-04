@@ -61,6 +61,6 @@ fi
 #./test_png_rgba
 #./test_ogg_player
 #./test_tracker
-./AppMosaic
-#./AppGridLeft
+#./AppMosaic
+./AppGridLeft
 #./AppGridRight

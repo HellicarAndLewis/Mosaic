@@ -91,6 +91,12 @@ int main() {
 
   GLFWmonitor* monitor = NULL;
 
+  for (int i = 0; i < monitor_list.size(); ++i) {
+    int xa, ya;
+    glfwGetMonitorPos(monitor_list[i], &xa, &ya);
+    printf("%d x %d\n", xa, ya);
+  }
+
 #if defined(APP_GRID_LEFT)
 
   if (top::config.grid_left_monitor >= monitor_list.size()) {
@@ -107,6 +113,7 @@ int main() {
   }
   monitor = monitor_list[top::config.grid_right_monitor];
 
+  
 #else
 # error Unsupported direction
 #endif
