@@ -29,6 +29,11 @@ namespace top {
 
   void Config::reset() {
     is_fullscreen = -1;
+    is_debug_draw = 0;
+    grid_left_monitor = -1;
+    grid_right_monitor = -1;
+    mosaic_monitor = -1;
+    log_level = 4;
     window_width = -1;
     window_height = -1;
     mosaic_width = -1;
@@ -52,6 +57,18 @@ namespace top {
     if (-1 == is_fullscreen) {
       RX_ERROR("Invalid fullscreen.");
       return -99;
+    }
+    if (-1 == grid_left_monitor) {
+      RX_ERROR("grid_left_monitor setting not found");
+      return -150;
+    }
+    if (-1 == grid_right_monitor) {
+      RX_ERROR("grid_right_monitor setting not found");
+      return -151;
+    }
+    if (-1 == mosaic_monitor) {
+      RX_ERROR("mosaic_monitor setting not found");
+      return -152;
     }
     if (-1 == window_width) {
       RX_ERROR("Invalid window width");
@@ -152,8 +169,7 @@ namespace top {
     if (false == ifs.is_open()) {
       RX_ERROR("Cannot open the configuration file.");
       return -2;
-   
- }
+    }
 
     std::string xml_str;
     xml_str.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
@@ -223,6 +239,10 @@ namespace top {
 
       /* topshop */
       top::config.is_fullscreen = read_xml_int(cfg, "fullscreen", -1);
+      top::config.log_level = read_xml_int(cfg, "log_level", 4);
+      top::config.grid_left_monitor = read_xml_int(cfg, "grid_left_monitor", -1);
+      top::config.grid_right_monitor = read_xml_int(cfg, "grid_right_monitor", -1);
+      top::config.mosaic_monitor = read_xml_int(cfg, "mosaic_monitor", -1);
       top::config.window_width = read_xml_int(cfg, "window_width", -1);
       top::config.window_height = read_xml_int(cfg, "window_height", -1);
       top::config.mosaic_width = read_xml_int(cfg, "mosaic_width", -1);

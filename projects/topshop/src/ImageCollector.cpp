@@ -7,9 +7,7 @@ namespace top {
 
   /* ------------------------------------------------------------------------- */
   static ImageCollector* validate_new_file(std::string dir, std::string filename, void* user);    /* validates the input in the dir watcher callback(s) */
-  static void raw_dir_on_rename(std::string dir, std::string filename, void* user);               /* gets called when a new file is stored in the raw filepath */
-  static void raw_left_dir_on_rename(std::string dir, std::string filename, void* user);          /* gets called when a new file is stored in the raw left grid filepath */
-  static void raw_right_dir_on_rename(std::string dir, std::string filename, void* user);         /* gets called when a new file is stored in the raw right grid filepath */
+  static void on_rename(std::string dir, std::string filename, void* user);                       /* gets called when a new file is stored in the raw filepath */
   static void limit_collected_files(std::deque<CollectedFile>& files, size_t maxfiles);           /* will make sure that the lists with files will not become to big; it will remote the oldest when the list is full */
   /* ------------------------------------------------------------------------- */
   
@@ -32,145 +30,76 @@ namespace top {
 
   ImageCollector::ImageCollector() 
     :user(NULL)
-    ,on_raw_file(NULL)
-    ,on_left_grid_file(NULL)
-    ,on_right_grid_file(NULL)
-    ,raw_timestamp(0)
-    ,left_grid_timestamp(0)
-    ,right_grid_timestamp(0)
-    ,raw_delay(300e6)
-    ,left_grid_delay(300e6)
-    ,right_grid_delay(300e6)
+    ,on_file(NULL)
+    ,timestamp(0)
+    ,delay(300e6)
   {
   }
 
   ImageCollector::~ImageCollector() {
     user = NULL;
-    on_raw_file = NULL;
-    on_left_grid_file = NULL;
-    on_right_grid_file = NULL;
-
-    raw_files.clear();
-    left_grid_files.clear();
-    right_grid_files.clear();
-
-    raw_timestamp = 0;
-    left_grid_timestamp = 0;
-    right_grid_timestamp = 0;
-    
-    raw_delay = 0;
-    left_grid_delay = 0;
-    right_grid_delay = 0;
+    on_file = NULL;
+    files.clear();
+    timestamp = 0;
+    delay = 0;
   }
 
-  int ImageCollector::init() {
+  int ImageCollector::init(std::string filepath) {
 
-    if (0 != raw_dir_watcher.init(fex::config.raw_filepath, raw_dir_on_rename, this)) {
+    if (0 != dir_watcher.init(filepath, on_rename, this)) {
       RX_ERROR("Cannot init the raw dir watcher.");
       return -1;
     }
     
-    if (0 != left_dir_watcher.init(top::config.raw_left_grid_filepath, raw_left_dir_on_rename, this)) {
-      RX_ERROR("Cannot init the left grid dir watcher.");
-      return -2;
-    }
-
-    if (0 != right_dir_watcher.init(top::config.raw_right_grid_filepath, raw_right_dir_on_rename, this)) {
-      RX_ERROR("Cannot init the rght grid dir watcher.");
-      return -2;
-    }
-    
-
     return 0;
   }
   
   void ImageCollector::update() {
 
 #if !defined(NDEBUG)
-    if (NULL == on_raw_file)        {  RX_ERROR("No on_raw_file callback set.");          ::exit(EXIT_FAILURE);  }
-    if (NULL == on_left_grid_file)  {  RX_ERROR("No on_left_grid_file callback set.");    ::exit(EXIT_FAILURE);  }
-    if (NULL == on_right_grid_file) {  RX_ERROR("No on_right_grid_file callback set.");   ::exit(EXIT_FAILURE);  }
+    if (NULL == on_file) { 
+      RX_ERROR("No on_raw_file callback set.");          
+      ::exit(EXIT_FAILURE); 
+    }
 #endif
 
-    raw_dir_watcher.update();
-    left_dir_watcher.update();
-    right_dir_watcher.update();
+    dir_watcher.update();
     
     uint64_t now = rx_hrtime();
 
     /* check if we have raw files. */
-    if (now >= raw_timestamp && NULL != on_raw_file) {
-      raw_timestamp = now + raw_delay;
-      if (0 != raw_files.size()) {
-        CollectedFile cfile = raw_files.front();
-        on_raw_file(this, cfile);
-        raw_files.pop_front();
-      }
-    }
-
-    /* check if we have new left grid files. */
-    if (now >= left_grid_timestamp && NULL != on_left_grid_file) {
-      left_grid_timestamp = now + left_grid_delay;
-      if (0 != left_grid_files.size()) {
-        CollectedFile cfile = left_grid_files.front();
-        on_left_grid_file(this, cfile);
-        left_grid_files.pop_front();
-      }
-    }
-
-    /* check if we have new right grid files. */
-    if (now >= right_grid_timestamp && NULL != on_right_grid_file) {
-      right_grid_timestamp = now + right_grid_delay;
-      if (0 != right_grid_files.size()) {
-        CollectedFile cfile = right_grid_files.front();
-        on_right_grid_file(this, cfile);
-        right_grid_files.pop_front();
+    if (now >= timestamp && NULL != on_file) {
+      timestamp = now + delay;
+      if (0 != files.size()) {
+        CollectedFile cfile = files.front();
+        on_file(this, cfile);
+       files.pop_front();
       }
     }
 
     /* make sure the list with files will not become too large. */
     size_t max_files = 5000;
-    limit_collected_files(raw_files, max_files);
-    limit_collected_files(left_grid_files, max_files);
-    limit_collected_files(right_grid_files, max_files);
+    limit_collected_files(files, max_files);
+ 
   }
 
   int ImageCollector::shutdown() {
     int r = 0;
 
-    r = raw_dir_watcher.shutdown();
+    r = dir_watcher.shutdown();
     if (0 != r) {
       RX_ERROR("Failed to cleanly shutdown the raw dir watcher: %d", r);
     }
     
-    r = left_dir_watcher.shutdown();
-    if (0 != r) {
-      RX_ERROR("Failed to cleanly shutdown the left dir watcher: %d", r);
-    }
-
-    r = right_dir_watcher.shutdown();
-    if (0 != r) {
-      RX_ERROR("Failed to cleanly shutdown the right dir watcher: %d", r);
-    }
-
-    raw_files.clear();
-    left_grid_files.clear();
-    right_grid_files.clear();
-
-    raw_timestamp = 0;
-    left_grid_timestamp = 0;
-    right_grid_timestamp = 0;
-    
-    raw_delay = 0;
-    left_grid_delay = 0;
-    right_grid_delay = 0;
-
+    files.clear();
+    timestamp = 0;
+     
     return 0;
   }
 
   /* ------------------------------------------------------------------------- */
 
-  static void raw_dir_on_rename(std::string dir, std::string filename, void* user) {
+  static void on_rename(std::string dir, std::string filename, void* user) {
 
     /* validate + get the handle to our image collector. */
     ImageCollector* collector = validate_new_file(dir, filename, user);
@@ -179,36 +108,11 @@ namespace top {
     }
     
     CollectedFile cfile;
-    cfile.type = COL_FILE_TYPE_RAW;
     cfile.dir = dir;
     cfile.filename = filename;
     cfile.timestamp = rx_hrtime();
 
-    collector->raw_files.push_back(cfile);
-  }
-
-  /* add a new file for the left grid */
-  static void raw_left_dir_on_rename(std::string dir, std::string filename, void* user) {
-    ImageCollector* collector = validate_new_file(dir, filename, user);
-    if (NULL == collector) { return;  }
-    CollectedFile cfile;
-    cfile.type = COL_FILE_TYPE_LEFT_GRID;
-    cfile.dir = dir;
-    cfile.filename = filename;
-    cfile.timestamp = rx_hrtime();
-    collector->left_grid_files.push_back(cfile);
-  }
-
-  /* add a new file for the right grid */
-  static void raw_right_dir_on_rename(std::string dir, std::string filename, void* user) {
-    ImageCollector* collector = validate_new_file(dir, filename, user);
-    if (NULL == collector) { return;  }
-    CollectedFile cfile;
-    cfile.type = COL_FILE_TYPE_RIGHT_GRID;
-    cfile.dir = dir;
-    cfile.filename = filename;
-    cfile.timestamp = rx_hrtime();
-    collector->right_grid_files.push_back(cfile);
+    collector->files.push_back(cfile);
   }
 
   /* validates the given parameters and returns the ImageCollector* that we cast from a event handler */

@@ -23,6 +23,7 @@
 #include <grid/Grid.h>
 #include <topshop/ImageCollector.h>
 #include <topshop/ImageProcessor.h>
+#include <tracking/Tracking.h>
 
 #define USE_GRID 1
 
@@ -38,7 +39,6 @@ namespace top {
     void draw();
 
   public:
-
     mos::Mosaic mosaic;
 
 #if USE_GRID
@@ -46,9 +46,8 @@ namespace top {
     grid::Grid right_grid;
 #endif
 
-    ImageCollector img_collector;                       /* watches a couple of directories for new files */
-    ImageProcessor img_processor;                       /* this will process images in a separate for the left and right grids.*/
-
+    ImageCollector img_collector;                       /* watches a directory for new files */
+    //track::Tracking tracking;                         /* responsible for the interactive/tracking part of the mosaic. */
   };
 
 } /* namespace top */

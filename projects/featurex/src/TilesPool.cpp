@@ -358,7 +358,8 @@ namespace fex {
         }
 
         /* does it still exist on disk? */
-        std::string tile_filepath = fex::config.resized_filepath +task->filename;
+        std::string tile_filepath = fex::config.resized_filepath +"/" +task->filename;
+
         if (false == rx_file_exists(tile_filepath)) {
           RX_ERROR("Cannot find: %s", tile_filepath.c_str());
           continue;

@@ -3,7 +3,7 @@
 namespace mos {
 
   Mosaic::Mosaic()
-    :mosaic_tex(0)
+   :mosaic_tex(0)
   {
   }
 
@@ -90,12 +90,10 @@ namespace mos {
     painter.clear();
     painter.texture(mosaic_tex, x, y + h, w, -h);
     painter.draw();
+  }
 
-#if 1
-    /* draw a debug image. */
+  void Mosaic::debugDraw() {
     video_input.draw();
-#endif
-
   }
 
   int Mosaic::shutdown() {

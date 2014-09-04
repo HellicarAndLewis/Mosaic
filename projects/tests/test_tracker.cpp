@@ -9,8 +9,8 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+ 
 #include <glad/glad.h>
-#include <signal.h>
 #include <GLFW/glfw3.h>
 
 #define ROXLU_IMPLEMENTATION
@@ -23,14 +23,10 @@
 #include <tinylib.h>
 
 #define VIDEO_CAPTURE_IMPLEMENTATION
-#include <videocapture/CaptureGL.h>
+#include <videocapture/CaptureGL.h>  
 
-#define RXP_PLAYER_GL_IMPLEMENTATION
-#include <rxp_player/PlayerGL.h>
- 
-
-#include <Topshop/Config.h>
-#include <TopShop/TopShop.h>
+#include <topshop/Config.h>
+#include <tracking/Tracking.h>
 
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
@@ -39,25 +35,12 @@ void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
 
-bool tmp_shutdown = false;
-bool tmp_start = false;
+track::Tracking tracking;
 
 int main() {
 
   rx_log_init();
  
-  /* load all the configuration */
-  if (0 != top::load_config()) {
-    RX_ERROR("Cannot load config. stopping.");
-    return -99;
-  }
-
-  if (0 != top::config.validate()) {
-    return -100;
-  }
-
-  /* --------------------------------------------------------------------- */
-
   glfwSetErrorCallback(error_callback);
  
   if(!glfwInit()) {
@@ -72,17 +55,10 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   
   GLFWwindow* win = NULL;
-  int w = top::config.window_width;
-  int h = top::config.window_height;
-  int used_w = 0;
-  int used_h = 0;
+  int w = 1280;
+  int h = 720;
  
-  if (1 == top::config.is_fullscreen) {
-   win = glfwCreateWindow(w, h, "TopShop", glfwGetPrimaryMonitor(), NULL);
-  }
-  else {
-    win = glfwCreateWindow(w, h, "TopShop", NULL, NULL);
-  }
+  win = glfwCreateWindow(w, h, "//_ - tracker test - //__ ", NULL, NULL);
   if(!win) {
     glfwTerminate();
     exit(EXIT_FAILURE);
@@ -105,49 +81,30 @@ int main() {
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
 
-  /* make sure the created window has the resolution we want it to be */
-  glfwGetWindowSize(win, &used_w, &used_h);
-  if (used_w != w || used_h != h) {
-    RX_VERBOSE("The used window size is not the same as you asked for (%d x %d), we're using %d x %d. This is probably because you're not running fullscreen on Mac", w, h, used_w, used_h);
-    exit(EXIT_FAILURE);
-  }
+  #if 0
+  GLint t;
+  glGetIntegerv(GL_UNPACK_ALIGNMENT, &t);
+  printf("t: %d\n", t);
+  ::exit(0);
+  #endif 
 
-  mos::config.window_width = w;
-  mos::config.window_height = h;
-  top::TopShop topshop;
-
-  if (0 != topshop.init()) {
-    RX_ERROR("Cannot start the topshop application, check error messages");
+  if (0 != tracking.init(0, 320, 240)) {
     exit(EXIT_FAILURE);
   }
 
   while(!glfwWindowShouldClose(win)) {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if (tmp_shutdown) {
-      tmp_shutdown = false;
-      topshop.mosaic.video_input.backup_player.shutdown();
-    }
-    if (tmp_start) {
-      topshop.mosaic.video_input.backup_player.init(rx_to_data_path("video/backup.ogg"));
-      topshop.mosaic.video_input.backup_player.play();
-      RX_VERBOSE("Restarted");
-      tmp_start = false;
-    }
-
-    double n = rx_hrtime();
-    topshop.update();
-    topshop.draw();
-    double dt = double(rx_hrtime() - n) / 1e9;
-    //RX_VERBOSE("FRAME: %f", dt);
+    
+    tracking.update();
+    tracking.draw();
 
     glfwSwapBuffers(win);
     glfwPollEvents();
   }
 
-  topshop.shutdown();
-
+  tracking.shutdown();
+  
   glfwTerminate();
  
   return EXIT_SUCCESS;
@@ -161,26 +118,8 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   if(action != GLFW_PRESS) {
     return;
   }
- 
-  switch(key) {
-     case GLFW_KEY_1: {
-       tmp_shutdown = true;
-       break;
-     }
-    case GLFW_KEY_2: {
-      tmp_start = true;
-      break;
-    }
-    case GLFW_KEY_L: {
-      break;
-    }
-    case GLFW_KEY_T: {
-      break;
-    }
 
-    case GLFW_KEY_3: {
-      break;
-    }
+  switch(key) {
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;

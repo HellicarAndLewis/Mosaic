@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 set(USE_OPENGL OFF)
 include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../extern/tracker/build/CMakeLists.txt)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
@@ -14,6 +15,7 @@ set(vid_sd ${bd}/projects/video/src)
 set(mos_sd ${bd}/projects/mosaic/src)
 set(grid_sd ${bd}/projects/grid/src)
 set(ts_sd ${bd}/projects/topshop/src)
+set(track_sd ${bd}/projects/tracking/src)
 
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/../src
@@ -26,6 +28,7 @@ include_directories(
   ${bd}/projects/mosaic/include
   ${bd}/projects/grid/include
   ${bd}/projects/topshop/include
+  ${bd}/projects/tracking/include
   )
 
 if(APPLE)
@@ -59,7 +62,12 @@ if(APPLE)
     ${extern_lib_dir}/libvorbis.a
     ${extern_lib_dir}/libogg.a
 
-
+    # for the tracking
+    ${extern_lib_dir}libopencv_core.a
+    ${extern_lib_dir}libopencv_imgproc.a
+    ${extern_lib_dir}libopencv_video.a
+    ${extern_lib_dir}libopencv_features2d.a
+    
     ${fr_corefoundation}               # uv
     ${fr_cocoa}                        # uv
     ${fr_iokit}                        # uv
@@ -67,6 +75,7 @@ if(APPLE)
     ${fr_corevideo}                    # glfw
     ${fr_avfoundation}                 # videocapture
     ${fr_coremedia}                    # videocapture
+    ${fr_opencl}                       # tracking
 
     bz2 
     )
@@ -119,11 +128,18 @@ set(mosaic_lib_sources
   ${mos_sd}/DirWatcher.cpp
 )
 
+# The tracking related code (and visualisations)
+set(tracking_lib_sources
+  ${track_sd}/Tracking.cpp
+)
+
+# The TopShop application - "main application"
 set(topshop_lib_sources
   ${ts_sd}/TopShop.cpp
   ${ts_sd}/Config.cpp
   ${ts_sd}/ImageCollector.cpp
   ${ts_sd}/ImageProcessor.cpp
+  ${ts_sd}/GridApp.cpp
 )
 
 macro(create_test name)
@@ -131,7 +147,7 @@ macro(create_test name)
     ${bd}/projects/tests/test_${name}.cpp 
     ${extern_source_dir}/glad.c
     )
-  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture shop)
+  target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture shop tracker tracking)
   install(TARGETS test_${name} DESTINATION bin)
 endmacro()
 
@@ -155,14 +171,30 @@ install(TARGETS grid ARCHIVE DESTINATION lib)
 add_library(mosaic ${mosaic_lib_sources})
 install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
-# The TopShop lib
+# The tracking library
+add_library(tracking ${tracking_lib_sources})
+install(TARGETS tracking ARCHIVE DESTINATION lib)
+
+# The TopShop library
 add_library(shop ${topshop_lib_sources})
 install(TARGETS shop ARCHIVE DESTINATION lib)
 
 # The final Mosaic application
-add_executable(TopShop ${ts_sd}/main.cpp  ${extern_source_dir}/glad.c)
-target_link_libraries(TopShop ${app_libs} gfx fex vid mosaic grid videocapture shop)
-install(TARGETS TopShop DESTINATION bin)
+add_executable(AppMosaic ${ts_sd}/app_mosaic.cpp  ${extern_source_dir}/glad.c)
+target_link_libraries(AppMosaic ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+install(TARGETS AppMosaic DESTINATION bin)
+
+# The final left grid  application
+add_executable(AppGridLeft ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
+target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+install(TARGETS AppGridLeft DESTINATION bin)
+
+add_executable(AppGridRight ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
+target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+install(TARGETS AppGridRight DESTINATION bin)
+
 
 # The tests used during development
 #create_test(mosaic)
@@ -176,6 +208,7 @@ install(TARGETS TopShop DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
+#create_test(tracker)
 
 
 

@@ -258,6 +258,22 @@ if [ ! -d ${sd}/rxp_player ] ; then
     git clone git@github.com:roxlu/rxp_player.git
 fi 
 
+# Download the tracker lib
+if [ ! -d ${d}/../extern/tracker ] ; then 
+    cd ${d}/../extern/
+    git clone git@github.com:roxlu/tracker.git
+fi 
+
+# Download opencv for block tracking
+if [ ! -d ${sd}/opencv ] ; then 
+    cd ${sd}
+    if [ ! -f opencv.zip ] ; then
+        curl -L -o opencv.zip https://github.com/Itseez/opencv/archive/3.0.0-alpha.zip
+    fi
+    unzip opencv.zip
+    mv opencv-3.0.0-alpha opencv
+fi
+  
 # Download tcmalloc
 # if [ ! -d ${sd}/tcmalloc ] ; then
 #     cd ${sd}
@@ -465,7 +481,70 @@ if [ ! -f ${bd}/lib/rxp_player.a ] ; then
     cmake --build . --target install
 fi
 
+# Compile opencv
+if [ ! -f ${bd}/lib/libopencv_core.a ] ; then 
+    cd ${sd}/opencv
+    if [ ! -d build.release ] ; then
+        mkdir build.release
+    fi
+    cd build.release
+    cmake -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=${bd} \
+        -DBUILD_SHARED_LIBS=0 \
+        -DBUILD_PACKAGE=0 \
+        -DBUILD_PERF_TESTS=0 \
+        -DBUILD_PNG=0 \
+        -DBUILD_TBB=0 \
+        -DBUILD_TESTS=0 \
+        -DBUILD_TIFF=0 \
+        -DBUILD_WITH_DEBUG_INFO=0 \
+        -DBUILD_ZLIB=0 \
+        -DBUILD_EXAMPLES=1 \
+        -DBUILD_opencv_apps=0 \
+        -DBUILD_opencv_bioinspired=0 \
+        -DBUILD_opencv_calib3d=0 \
+        -DBUILD_opencv_contrib=0 \
+        -DBUILD_opencv_core=1 \
+        -DBUILD_opencv_cuda=0, \
+        -DBUILD_opencv_features2d=1 \
+        -DBUILD_opencv_flann=1 \
+        -DBUILD_opencv_highgui=0 \
+        -DBUILD_opencv_imgproc=1 \
+        -DBUILD_opencv_legacy=0 \
+        -DBUILD_opencv_ml=1 \
+        -DBUILD_opencv_nonfree=0 \
+        -DBUILD_opencv_objdetect=1 \
+        -DBUILD_opencv_ocl=1 \
+        -DBUILD_opencv_optim=1 \
+        -DBUILD_opencv_photo=1 \
+        -DBUILD_opencv_python=0 \
+        -DBUILD_opencv_python2=0 \
+        -DBUILD_opencv_shape=0 \
+        -DBUILD_opencv_softcascade=0 \
+        -DBUILD_opencv_stitching=0 \
+        -DBUILD_opencv_video=1 \
+        -DBUILD_opencv_videostab=0 \
+        -DBUILD_opencv_world=0 \
+        -DWITH_CUDA=0 \
+        -DWITH_CUFFT=0 \
+        -DWITH_EIGEN=0 \
+        -DWITH_JPEG=0 \
+        -DWITH_JASPER=0 \
+        -DWITH_LIBV4L=0 \
+        -DWITH_OPENCL=1 \
+        -DWITH_OPENEXR=0 \
+        -DWITH_PNG=0 \
+        -DWITH_TIFF=0 \
+        -DWITH_V4L=0 \
+        -DWITH_WEBP=0 \
+        -DWITH_QT=0 \
+        -DWITH_FFMPEG=0 \
+        -DWITH_VTK=0 \
+        -DWITH_IPP=0 \
+        ..
 
+    cmake --build . --target install
+fi
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then

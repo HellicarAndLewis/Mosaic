@@ -45,6 +45,7 @@ namespace mos {
     void update();                                   /* call this often; will process any input/output data. */
     void draw();                                     /* draw all visuals using mos::config.window_width/height */
     void draw(int x, int y, int w, int h);           /* draw using the given coordinates; 0,0 is bottom left. */
+    void debugDraw();                                /* show debug info. */
     int shutdown();                                  /* destory and free all allocated objects so init() could be called again. */
 
     int analyzeCPU(std::string filepath);            /* wrapper around featurex::analyzeCPU. */
