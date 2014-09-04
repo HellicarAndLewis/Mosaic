@@ -256,13 +256,18 @@ var Server = new Class({
       
       self.instagram.getUser(username, function(err, users) {
         
-        if(users.length > 0) {
-          self.users.push(users[0]);
+        if(users) {
+          if(users.length > 0) {
+            self.users.push(users[0]);
+          } else {
+            Console.error('Could not find user ' + username); 
+          }
+
+          get_user(queue, cb);
         } else {
           Console.error('Could not find user ' + username); 
+          get_user(queue, cb);
         }
-        
-        get_user(queue, cb);
         
       });
     };
