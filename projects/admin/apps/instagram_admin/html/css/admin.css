@@ -392,7 +392,6 @@ div.login-container {
   left: 50%;
   margin-top: -100px;
   margin-left: -100px;
-  max-width: 100%;
 }
 
 div.login-container form label {
@@ -436,7 +435,7 @@ div.login-container input[type=submit] {
   background: #fff;
   color: #000;
   width: 100px;
-  margin-left: 50px;
+  margin-left: 0;
   margin-top: 50px;
   border: none;
   font-size: 18px;
