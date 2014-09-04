@@ -127,6 +127,8 @@ var ImageDownloader = new Class({
           self.lastModIdMin = images[images.length-1].queue_id;
         } else {
           setTimeout(function() {
+            self.lastModIdMin = 0;
+            self.lastModIdMax = 0;
             self.start();
           }, self.settings.request_delay);
           return;
