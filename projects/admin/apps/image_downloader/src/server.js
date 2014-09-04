@@ -57,18 +57,32 @@ var ImageDownloader = new Class({
       }
       
       // Check if tmp dir exists
-      Fs.ensureDir(self.settings.image_tmp_path, function() {
+      Fs.ensureDir(self.settings.image_tmp_path, function(err) {
+        
         self.log('Checking tmp dir ' + self.settings.image_tmp_path);
+        
+        if(err) {
+          self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
+        }
       });
 
       // Check if save dir exists
       Fs.ensureDir(self.settings.image_save_path_users, function(err) {
        
         self.log('Checking users dir ' + self.settings.image_save_path_users);
+        
+        if(err) {
+          self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
+        }
       });
       
-      Fs.ensureDir(self.settings.image_save_path_tags, function() {
+      Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
+        
         self.log('Checking tags dir ' + self.settings.image_save_path_tags);
+        
+        if(err) {
+          self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
+        }
       });
       
       
@@ -161,8 +175,8 @@ var ImageDownloader = new Class({
               } else {
               
                 // Move image from tmp to save dir
-                
                 Fs.rename(tmp_file, dest_file, function() {
+                  self.log('Image ' + dest_file + ' saved');
                   dl_img(queue);
                 });
               }
