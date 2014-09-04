@@ -161,8 +161,8 @@ var ImageDownloader = new Class({
               } else {
               
                 // Move image from tmp to save dir
-                
                 Fs.rename(tmp_file, dest_file, function() {
+                  self.log('Image ' + dest_file + ' saved');
                   dl_img(queue);
                 });
               }
