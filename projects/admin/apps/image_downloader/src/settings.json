@@ -1,7 +1,7 @@
 {
   "debug": true
   ,"queue_url": "http://80.85.84.140/images/approved"
-  ,"limit": 100
+  ,"limit": 10
   ,"request_delay": 4000
   ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/tmp/"
   ,"image_save_path_users": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/images/users/"

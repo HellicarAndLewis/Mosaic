@@ -154,16 +154,21 @@ var ImageDownloader = new Class({
           // Pop last image
           var img = queue.pop();
           
+          var d = Date.now();
+          
           var tmp_file = self.settings.image_tmp_path + img.media_id + '.jpg';
           var dest_file_users = self.settings.image_save_path_users + img.media_id + '.jpg';
           var dest_file_tags = self.settings.image_save_path_tags + img.media_id + '.jpg';
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
          
-          var file_exists = Fs.existsSync(dest_file);
+          //var file_exists = Fs.existsSync(dest_file);
+          var file_exists = Fs.existsSync(tmp_file);
           
           if(!file_exists) {
             
             // Download image
+            self.log('Trying to download ' + img.images[self.settings.image_size].url);
+            
             self.download(img.images[self.settings.image_size].url, tmp_file, function(err) {
               
               var stats = Fs.statSync(tmp_file)
@@ -179,10 +184,13 @@ var ImageDownloader = new Class({
               } else {
               
                 // Move image from tmp to save dir
-                Fs.rename(tmp_file, dest_file, function() {
+                Fs.copy(tmp_file, dest_file);
+                self.log('Image ' + dest_file + ' saved');
+                dl_img(queue);
+                /*Fs.rename(tmp_file, dest_file, function() {
                   self.log('Image ' + dest_file + ' saved');
                   dl_img(queue);
-                });
+                });*/
               }
               
             }, function() {
