@@ -197,8 +197,8 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_RIGHT);
-  app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
+  top::GridApp app(GRID_DIR_LEFT);
+  app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
 
 #elif defined(APP_GRID_RIGHT)
@@ -211,9 +211,10 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_LEFT); 
-  app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
+  top::GridApp app(GRID_DIR_RIGHT); 
+  app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
+
 
 #endif
 

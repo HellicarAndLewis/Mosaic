@@ -299,7 +299,7 @@ namespace grid {
     size_t dx;
     while (0 != sources.size() && getUsableCell(dx, CELL_STATE_NONE, CELL_STATE_RESERVED)) {
       Source& source = *sources.begin();
-      //RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
+      RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
       img_loader.load(source.filepath);
       sources.erase(sources.begin());
     }
@@ -383,10 +383,10 @@ namespace grid {
 
     /* move into the correct direction. */
     if (GRID_DIR_LEFT == direction) {
-      pos_a.x -= 1.5;
+      pos_a.x -= 3.5; // 1.5
     }
     else {
-      pos_a.x += 1.5;
+      pos_a.x += 3.5; // 1.5
     }
 
     /* Detect which column is hidden, because the hidden column 
@@ -580,6 +580,8 @@ namespace grid {
       return;
     }
 
+    RX_VERBOSE("Image loaded: %s", task->filepath.c_str());
+
     /* find a free cell. */
     int found_cell = 0;
     size_t cdx = 0;
@@ -630,6 +632,7 @@ namespace grid {
     }
   
     /* add the new source. */
+    RX_VERBOSE("Dir changed, adding: %s", filename.c_str());
     grid->sources.push_back(source);
     std::sort(grid->sources.begin(), grid->sources.end(), source_sorter);
 

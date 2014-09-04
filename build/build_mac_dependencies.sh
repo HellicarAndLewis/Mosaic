@@ -609,10 +609,12 @@ if [ ! -f ${bd}/lib/libfreetype.a ] ; then
 fi
 
 # Compile pkg config
-cd ${sd}/pkgconfig
-./configure --prefix=${bd} --with-internal-glib
-make
-make install
+if [ ! -f ${bd}/bin/pkg-config ] ; then 
+    cd ${sd}/pkgconfig
+    ./configure --prefix=${bd} --with-internal-glib
+    make
+    make install
+fi
 
 # Compile gettext
 if [ ! -f ${bd}/lib/libintl.a ] ; then
@@ -622,7 +624,6 @@ if [ ! -f ${bd}/lib/libintl.a ] ; then
     make install
 fi
 
-exit
 cd ${sd}/cairo
 if [ ! -f ./configure ] ; then
     ./autogen.sh
