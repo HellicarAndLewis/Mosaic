@@ -297,7 +297,7 @@ namespace grid {
 
     /* as long as we can fill cells, load the image in another thread. */
     size_t dx;
-    while (0 != sources.size() && getUsableCell(dx, CELL_STATE_NONE, CELL_STATE_RESERVED)) {
+    while (0 != sources.size() && true == getUsableCell(dx, CELL_STATE_NONE, CELL_STATE_RESERVED)) {
       Source& source = *sources.begin();
       RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
       img_loader.load(source.filepath);
@@ -580,7 +580,7 @@ namespace grid {
       return;
     }
 
-    RX_VERBOSE("Image loaded: %s", task->filepath.c_str());
+    //RX_VERBOSE("Image loaded: %s", task->filepath.c_str());
 
     /* find a free cell. */
     int found_cell = 0;
@@ -632,7 +632,8 @@ namespace grid {
     }
   
     /* add the new source. */
-    RX_VERBOSE("Dir changed, adding: %s", filename.c_str());
+    RX_VERBOSE("Dir changed, dir: %s, adding: %s", dir.c_str(), filename.c_str());
+
     grid->sources.push_back(source);
     std::sort(grid->sources.begin(), grid->sources.end(), source_sorter);
 

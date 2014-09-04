@@ -31,7 +31,8 @@ ${magickdir}/convert ${infile} \
     -gravity center \
     -extent ${tile_width}x${tile_height} \
     -colors 256 \
-    PNG8:${grid_filepath}
+    PNG8:tmp.png
 
+mv tmp.png ${grid_filepath}
 
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}

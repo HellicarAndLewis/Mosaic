@@ -164,7 +164,7 @@ namespace top {
       /* do the work. */
       for (size_t i = 0; i < todo.size(); ++i) {
         CollectedFile& file = todo[i]->file;
-        RX_VERBOSE("Processing: %s", file.filename.c_str());
+        // RX_VERBOSE("Processing: %s", file.filename.c_str());
         if ( 0 != image_processor_process_file(file)) {
           RX_ERROR("Processing went wrong; see above log");
         }
