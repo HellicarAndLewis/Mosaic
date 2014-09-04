@@ -14,7 +14,7 @@ fi
 ./build_mac_dependencies.sh
 
 cd build.release
-cmake -DCMAKE_BUILD_TYPE=Release ../ 
+cmake -DCMAKE_BUILD_TYPE=Release -DOPT_BUILD_TRACKER_LIB=On ../ 
 #cmake -DCMAKE_BUILD_TYPE=Debug ../ 
 cmake --build . --target install
 
@@ -60,4 +60,7 @@ fi
 #./test_grid
 #./test_png_rgba
 #./test_ogg_player
-./TopShop
+#./test_tracker
+./AppMosaic
+#./AppGridLeft
+#./AppGridRight

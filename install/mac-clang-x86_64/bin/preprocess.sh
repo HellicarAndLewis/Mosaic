@@ -31,7 +31,7 @@ ${magickdir}/convert ${infile} \
     -gravity center \
     -extent ${tile_width}x${tile_height} \
     -colors 256 \
-    PNG8:${resized_filepath}
+    PNG24:${resized_filepath}
 
 # ${magickdir}/convert ${infile} \
 #     -resize 64x64^ \

@@ -306,7 +306,7 @@ namespace fex {
     /* we're only using .png when analyzing; the preprocess.sh file converts the images to png. */
     std::string filename = rx_strip_file_ext(rx_strip_dir(task->filepath)) +".png";
     std::string basename = rx_strip_file_ext(filename);
-    std::string resized_filepath = fex::config.resized_filepath +basename +".png";
+    std::string resized_filepath = fex::config.resized_filepath +"/" +basename +".png";
 
     /* create the command line the preprocess task.*/
     std::stringstream ss;

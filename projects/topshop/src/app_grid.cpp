@@ -22,15 +22,10 @@
 #define ROXLU_USE_OPENGL
 #include <tinylib.h>
 
-#define VIDEO_CAPTURE_IMPLEMENTATION
-#include <videocapture/CaptureGL.h>
-
-#define RXP_PLAYER_GL_IMPLEMENTATION
-#include <rxp_player/PlayerGL.h>
- 
-
-#include <Topshop/Config.h>
-#include <TopShop/TopShop.h>
+#include <mosaic/Config.h>
+#include <topshop/Config.h>
+#include <topshop/GridApp.h>
+#include <grid/Grid.h>
 
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);
@@ -39,8 +34,7 @@ void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
 
-bool tmp_shutdown = false;
-bool tmp_start = false;
+static int sort_monitors(GLFWmonitor* a, GLFWmonitor* b);
 
 int main() {
 
@@ -58,8 +52,6 @@ int main() {
     return -100;
   }
 
-
-
   /* --------------------------------------------------------------------- */
 
   glfwSetErrorCallback(error_callback);
@@ -68,7 +60,66 @@ int main() {
     printf("Error: cannot setup glfw.\n");
     exit(EXIT_FAILURE);
   }
- 
+
+  /* --------------------------------------------------------------------- */
+
+  /* Find monitors */
+  std::vector<GLFWmonitor*> monitor_list;
+  int count = 0;
+  GLFWmonitor** monitors = glfwGetMonitors(&count);
+  int monitor_x;
+  int monitor_y;
+
+  if (NULL == monitors) {
+    RX_ERROR("Monitors == NULL.");
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < count; ++i) {
+    if (NULL == monitors[i]) {
+      RX_ERROR("The returned monitor list is invalid.");
+      exit(EXIT_FAILURE);
+    }
+    monitor_list.push_back(monitors[i]);
+  }
+
+  std::sort(monitor_list.begin(), monitor_list.end(), sort_monitors);
+  if (0 == monitor_list.size()) {
+    RX_ERROR("monitor list is invalid. not supposed to happen.");
+    exit(EXIT_FAILURE);
+  }
+
+  GLFWmonitor* monitor = NULL;
+
+#if defined(APP_GRID_LEFT)
+
+  if (top::config.grid_left_monitor >= monitor_list.size()) {
+    RX_ERROR("The left monitor setting is invalid.");
+    exit(EXIT_FAILURE);
+  }
+  monitor = monitor_list[top::config.grid_left_monitor];
+
+#elif defined(APP_GRID_RIGHT)
+
+  if (top::config.grid_right_monitor >= monitor_list.size()) {
+    RX_ERROR("The right monitor setting is invalid.");
+    exit(EXIT_FAILURE);
+  }
+  monitor = monitor_list[top::config.grid_right_monitor];
+
+#else
+# error Unsupported direction
+#endif
+
+  if (NULL == monitor) {
+    RX_ERROR("No monitor selected");
+    exit(EXIT_FAILURE);
+  }
+
+  glfwGetMonitorPos(monitor, &monitor_x, &monitor_y);
+
+  /* --------------------------------------------------------------------- */
+
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -76,16 +127,17 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   
   GLFWwindow* win = NULL;
-  int w = top::config.window_width;
-  int h = top::config.window_height;
+  int w = 1920;
+  int h = 1080;
   int used_w = 0;
   int used_h = 0;
  
   if (1 == top::config.is_fullscreen) {
-   win = glfwCreateWindow(w, h, "TopShop", glfwGetPrimaryMonitor(), NULL);
+   win = glfwCreateWindow(w, h, "AppGrid", monitor, NULL);
   }
   else {
-    win = glfwCreateWindow(w, h, "TopShop", NULL, NULL);
+    win = glfwCreateWindow(w, h, "AppGrid", NULL, NULL);
+    glfwSetWindowPos(win, monitor_x, 0);
   }
   if(!win) {
     glfwTerminate();
@@ -116,41 +168,69 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  int r = 0;
   mos::config.window_width = w;
   mos::config.window_height = h;
-  top::TopShop topshop;
 
-  if (0 != topshop.init()) {
-    RX_ERROR("Cannot start the topshop application, check error messages");
+#if defined(APP_GRID_LEFT)  
+
+  top::GridAppSettings cfg;
+  cfg.image_path = top::config.left_grid_filepath;
+  cfg.watch_path = top::config.raw_left_grid_filepath;
+  cfg.image_width = top::config.grid_file_width;
+  cfg.image_height = top::config.grid_file_height;
+  cfg.grid_rows = top::config.grid_rows;
+  cfg.grid_cols = top::config.grid_cols;
+
+  top::GridApp app(GRID_DIR_LEFT);
+  app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
+  app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
+
+#elif defined(APP_GRID_RIGHT)
+
+  top::GridAppSettings cfg;
+  cfg.image_path = top::config.right_grid_filepath;
+  cfg.watch_path = top::config.raw_right_grid_filepath;
+  cfg.image_width = top::config.grid_file_width;
+  cfg.image_height = top::config.grid_file_height;
+  cfg.grid_rows = top::config.grid_rows;
+  cfg.grid_cols = top::config.grid_cols;
+
+  top::GridApp app(GRID_DIR_RIGHT); 
+  app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
+  app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
+
+#endif
+
+  r = app.init(cfg);
+  if (r != 0) {
+    RX_ERROR("Cannot start the grid app");
     exit(EXIT_FAILURE);
   }
+
+
+
+  /*
+  r = app_grid.init(top::config.left_grid_filepath, 
+                     top::config.grid_file_width, 
+                     top::config.grid_file_height, 
+                     top::config.grid_rows, 
+                     top::config.grid_cols);
+
+  app_grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
+  app_grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
+  */
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (tmp_shutdown) {
-      tmp_shutdown = false;
-      topshop.mosaic.video_input.backup_player.shutdown();
-    }
-    if (tmp_start) {
-      topshop.mosaic.video_input.backup_player.init(rx_to_data_path("video/backup.ogg"));
-      topshop.mosaic.video_input.backup_player.play();
-      RX_VERBOSE("Restarted");
-      tmp_start = false;
-    }
-
-    double n = rx_hrtime();
-    topshop.update();
-    topshop.draw();
-    double dt = double(rx_hrtime() - n) / 1e9;
-    //RX_VERBOSE("FRAME: %f", dt);
+    app.update();
+    app.draw();
 
     glfwSwapBuffers(win);
     glfwPollEvents();
   }
-
-  topshop.shutdown();
 
   glfwTerminate();
  
@@ -209,3 +289,19 @@ void error_callback(int err, const char* desc) {
   printf("GLFW error: %s (%d)\n", desc, err);
 }
 
+
+static int sort_monitors(GLFWmonitor* a, GLFWmonitor* b) {
+
+  if (NULL == a || NULL == b) {
+    RX_ERROR("sort monitors received an invalid monitor pointer.");
+    return 0;
+  }
+
+  int xa = 0, xb = 0;
+  int ya = 0, yb = 0;
+
+  glfwGetMonitorPos(a, &xa, &ya);
+  glfwGetMonitorPos(b, &xb, &yb);
+
+  return xa < xb;
+}

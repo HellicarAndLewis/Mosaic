@@ -49,17 +49,19 @@
 #include <mosaic/DirWatcher.h>
 #include <deque>
 
+
 #define COL_FILE_TYPE_NONE 0x00
 #define COL_FILE_TYPE_RAW 0x01
 #define COL_FILE_TYPE_LEFT_GRID 0x02
 #define COL_FILE_TYPE_RIGHT_GRID 0x03
+
 
 namespace top {
 
   /* ------------------------------------------------------------------------- */
   class ImageCollector;
   class CollectedFile;
-  typedef void (*image_collector_callback)(ImageCollector* col, const CollectedFile& file);
+  typedef void (*image_collector_callback)(ImageCollector* col, CollectedFile& file);
 
   /* ------------------------------------------------------------------------- */
 
@@ -70,7 +72,7 @@ namespace top {
     void reset();
 
   public:
-    int type;
+    int type; 
     std::string dir;
     std::string filename;
     uint64_t timestamp;
@@ -82,30 +84,17 @@ namespace top {
   public:
     ImageCollector();
     ~ImageCollector();
-    int init();
+    int init(std::string filepath);
     void update();
     int shutdown();
 
   public:
-    mos::DirWatcher raw_dir_watcher;              /* watches the raw_filepath directory. */
-    mos::DirWatcher left_dir_watcher;
-    mos::DirWatcher right_dir_watcher;             /* watches for new files in the dir for the left grid */
-    std::deque<CollectedFile> raw_files;
-    std::deque<CollectedFile> left_grid_files;
-    std::deque<CollectedFile> right_grid_files;
-
-    uint64_t raw_timestamp;
-    uint64_t left_grid_timestamp;
-    uint64_t right_grid_timestamp;
-
-    uint64_t raw_delay;
-    uint64_t left_grid_delay;
-    uint64_t right_grid_delay;
-
+    mos::DirWatcher dir_watcher;              /* watches the raw_filepath directory. */
+    std::deque<CollectedFile> files;
+    uint64_t timestamp;
+    uint64_t delay;
     void* user;
-    image_collector_callback on_raw_file;
-    image_collector_callback on_left_grid_file;
-    image_collector_callback on_right_grid_file;
+    image_collector_callback on_file;
   };
 
 } /* namespace top */

@@ -19,6 +19,9 @@ namespace top {
   public:
     int is_fullscreen;                       /* 1 = yes, 0 = no */
     int is_debug_draw;                       /* 1 = yes, 0 = no */
+    int grid_left_monitor;
+    int grid_right_monitor;
+    int mosaic_monitor;
     int log_level;                           /* any of the RX_LOG_LEVEL values, 0-4 */
     int window_width;
     int window_height;
