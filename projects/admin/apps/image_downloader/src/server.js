@@ -24,6 +24,7 @@ var ImageDownloader = new Class({
       .version('0.0.1')
       .option('-s, --settings [path]', 'Start with custom settings file')
       .option('-d, --debug', 'Force debug console output')
+      .option('-h, --homedir', 'Use homedir as base folder')
       .parse(process.argv);
     
     
@@ -48,9 +49,12 @@ var ImageDownloader = new Class({
       
       self.log('Started with settings ' + file);
       
-      self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
-      self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
-      self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
+      if(Program.homedir) {
+        
+        self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
+        self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
+        self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
+      }
       
       // Check if tmp dir exists
       Fs.ensureDir(self.settings.image_tmp_path, function() {
