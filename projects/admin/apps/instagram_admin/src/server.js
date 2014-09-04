@@ -256,13 +256,18 @@ var Server = new Class({
       
       self.instagram.getUser(username, function(err, users) {
         
-        if(users.length > 0) {
-          self.users.push(users[0]);
+        if(users) {
+          if(users.length > 0) {
+            self.users.push(users[0]);
+          } else {
+            Console.error('Could not find user ' + username); 
+          }
+
+          get_user(queue, cb);
         } else {
           Console.error('Could not find user ' + username); 
+          get_user(queue, cb);
         }
-        
-        get_user(queue, cb);
         
       });
     };
@@ -302,7 +307,7 @@ var Server = new Class({
       
       // 503 error
       if(err) {
-     
+        
         // Check for 503 status code
         if(err.status_code == 503) {
           Console.error('503 Service Unavailable. No server is available to handle this request.');
@@ -391,7 +396,9 @@ var Server = new Class({
               // is available
               if(pagination) { 
                 if(pagination.next) { 
-                  pagination.next(rm_callback); 
+                  setTimeout(function() {
+                    pagination.next(rm_callback); 
+                  }, self.options.instagram.request_delay);
                 } else { 
                   retry(); 
                 }

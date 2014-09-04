@@ -77,13 +77,27 @@ body {
   
   background: url(/admin/images/bg.png) top left;
   background-size: 200px 200px;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@media screen and (max-width: 480px) {
+
+  body {
+  
+    width: 480px;
+    height: 400px;
+  }
+
 }
 
 div.container {
   
   position: absolute;
   top: 50px;
-  bottom: 150px;
+  bottom: 75px;
   background: url(/admin/images/dark_bg.png) top left;
   background-size: 180px 180px;
   margin: 0;
@@ -278,7 +292,7 @@ ul#instagram-images li div.instagram-image-info {
   background: rgba(0,0,0,.85);
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 25px;
+  font-size: 18px;
   text-transform: uppercase;
   color: #fff;
   text-shadow: 2px 2px 2px #000;
@@ -290,14 +304,14 @@ div#controls {
   
   position: relative;
   width: 100%;
-  height: 150px;
+  height: 75px;
 }
 
 div#controls .inner {
   
   position: relative;
   width: 100%;
-  height: 150px;
+  height: 75px;
   padding: 0;
 }
 
@@ -306,12 +320,12 @@ div#controls div.control-btn {
   cursor: pointer;
   color: #fff;
   border-radius: 20px;
-  margin: 15px 5%;
+  margin: 12px 5%;
   width: 40%;
-  height: 120px;
-  font-size: 70px;
+  height: 50px;
+  font-size: 30px;
   text-align: center;
-  padding-top: 20px;
+  padding-top: 10px;
   float: left;
   -moz-box-shadow:    3px 3px 5px 3px rgba(0,0,0,0.2);
   -webkit-box-shadow: 3px 3px 5px 3px rgba(0,0,0,0.2);
@@ -375,9 +389,10 @@ div.login-container {
   height: 300px;
   position: absolute;
   top: 50%;
-  margin-top: -150px;
   left: 50%;
+  margin-top: -150px;
   margin-left: -150px;
+  max-width: 100%;
 }
 
 div.login-container form label {
@@ -398,9 +413,9 @@ div.login-container .form-row {
 }
 
 div.login-container .form-row input[type=text],
-div.login-container .form-row input[type=password]{
+div.login-container .form-row input[type=password] {
   
-  width: 100%;
+  width: 290px;
   border: none;
   font-size: 18px;
   padding: 10px;
@@ -410,7 +425,8 @@ div.login-container .form-row input[type=password]{
 }
 
 div.login-container .form-row input[type=text]:focus,
-div.login-container .form-row input[type=password]:focus{
+div.login-container .form-row input[type=password]:focus {
+  
   outline: none;
 }
 

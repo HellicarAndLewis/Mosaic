@@ -136,8 +136,9 @@ var ImageDownloader = new Class({
           var dest_file_users = self.settings.image_save_path_users + img._id + '.jpg';
           var dest_file_tags = self.settings.image_save_path_tags + img._id + '.jpg';
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
-          self.log(dest_file);
+         
           var file_exists = Fs.existsSync(dest_file);
+          
           if(!file_exists) {
             
             // Download image
@@ -147,10 +148,12 @@ var ImageDownloader = new Class({
               var size = stats["size"];
               
               if(size < 1000) {
+                
                 Fs.unlink(tmp_file, function() {
                   self.log('Image size invalid. ' + size + ' bytes received, removed tmp file ' + tmp_file);
                   dl_img(queue);
                 });
+                
               } else {
               
                 // Move image from tmp to save dir
@@ -176,8 +179,8 @@ var ImageDownloader = new Class({
         
         self.log('Failed to load ' + url);
         
-        this.lastModIdMin = 0;
-        this.lastModIdMax = 0;
+        self.lastModIdMin = 0;
+        self.lastModIdMax = 0;
         
         setTimeout(function() {
           self.start();
