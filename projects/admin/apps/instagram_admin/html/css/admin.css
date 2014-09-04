@@ -393,6 +393,7 @@ div.login-container {
   margin-top: -150px;
   margin-left: -150px;
   max-width: 100%;
+  padding: 20px;
 }
 
 div.login-container form label {
@@ -415,7 +416,7 @@ div.login-container .form-row {
 div.login-container .form-row input[type=text],
 div.login-container .form-row input[type=password] {
   
-  width: 290px;
+  width: 100%;
   border: none;
   font-size: 18px;
   padding: 10px;
