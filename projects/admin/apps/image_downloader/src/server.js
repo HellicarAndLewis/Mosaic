@@ -25,6 +25,7 @@ var ImageDownloader = new Class({
       .option('-s, --settings [path]', 'Start with custom settings file')
       .option('-d, --debug', 'Force debug console output')
       .option('-h, --homedir', 'Use homedir as base folder')
+      .option('-c, --compare', 'Compare db with local files')
       .parse(process.argv);
     
     
@@ -36,9 +37,7 @@ var ImageDownloader = new Class({
     if(Program.settings) {
       file = Path.normalize(process.cwd() + '/' + Program.settings);
     }
-    
-    
-    
+
     // Check if file exists...
     if(Fs.existsSync(file)) {
     
@@ -64,32 +63,29 @@ var ImageDownloader = new Class({
         if(err) {
           self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
         }
-      });
+        
+        // Check if save dir exists
+        Fs.ensureDir(self.settings.image_save_path_users, function(err) {
 
-      // Check if save dir exists
-      Fs.ensureDir(self.settings.image_save_path_users, function(err) {
-       
-        self.log('Checking users dir ' + self.settings.image_save_path_users);
+          self.log('Checking users dir ' + self.settings.image_save_path_users);
+
+          if(err) {
+            self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
+          }
+        });
         
-        if(err) {
-          self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
-        }
+        Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
+
+          self.log('Checking tags dir ' + self.settings.image_save_path_tags);
+
+          if(err) {
+            self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
+          }
+          
+          self.start();
+        });
       });
-      
-      Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
-        
-        self.log('Checking tags dir ' + self.settings.image_save_path_tags);
-        
-        if(err) {
-          self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
-        }
-      });
-      
-      
-      
-      
-      self.start();
-      
+ 
     } else {
     
       // No file found
@@ -106,8 +102,10 @@ var ImageDownloader = new Class({
     
     var self = this;
     var url = this.settings.queue_url + '/all/' +  this.lastModIdMin + '/' + this.lastModIdMax + '/' + this.settings.limit + '/';
+
     
     self.log('Get new results - ' + url);
+    self.rechecked = false;
 
     // Start request
     Request({
@@ -124,9 +122,13 @@ var ImageDownloader = new Class({
         });
 
         if(images.length > 0) {
-          self.lastModIdMin = images[images.length-1].queue_id;
+          if(Program.compare) {
+            self.lastModIdMin = images[images.length-1].queue_id;
+          }
         } else {
+          
           setTimeout(function() {
+            
             self.lastModIdMin = 0;
             self.lastModIdMax = 0;
             self.start();
@@ -134,7 +136,7 @@ var ImageDownloader = new Class({
           return;
         }
         
-        if(self.lastModIdMax == '0') {
+        if(self.lastModIdMax == 0 && Program.compare) {
           self.lastModIdMax = images[0].queue_id; 
         }
         
@@ -152,9 +154,9 @@ var ImageDownloader = new Class({
           // Pop last image
           var img = queue.pop();
           
-          var tmp_file = self.settings.image_tmp_path + img._id + '.jpg';
-          var dest_file_users = self.settings.image_save_path_users + img._id + '.jpg';
-          var dest_file_tags = self.settings.image_save_path_tags + img._id + '.jpg';
+          var tmp_file = self.settings.image_tmp_path + img.media_id + '.jpg';
+          var dest_file_users = self.settings.image_save_path_users + img.media_id + '.jpg';
+          var dest_file_tags = self.settings.image_save_path_tags + img.media_id + '.jpg';
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
          
           var file_exists = Fs.existsSync(dest_file);
