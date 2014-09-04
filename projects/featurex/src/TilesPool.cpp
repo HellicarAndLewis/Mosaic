@@ -310,9 +310,6 @@ namespace fex {
 
   static void* tilespool_thread(void* user) {
 
-    RX_VERBOSE("TEST");
-    ::exit(0);
-
     /* get our TilesPool ptr */
     TilesPool* pool = static_cast<TilesPool*>(user);
     if (NULL == pool) {

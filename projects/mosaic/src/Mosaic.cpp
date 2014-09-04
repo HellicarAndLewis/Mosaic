@@ -3,7 +3,7 @@
 namespace mos {
 
   Mosaic::Mosaic()
-    :mosaic_tex(0)
+   :mosaic_tex(0)
   {
   }
 

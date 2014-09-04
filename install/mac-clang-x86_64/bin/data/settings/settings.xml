@@ -4,7 +4,7 @@
     <fullscreen>0</fullscreen>
     <window_width>1280</window_width>
     <window_height>360</window_height> 
-    <log_level>1</log_level>
+    <log_level>4</log_level>
     <!-- WEBCAM -->
     <webcam_device>0</webcam_device>
     <webcam_width>640</webcam_width>
