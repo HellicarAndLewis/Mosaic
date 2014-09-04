@@ -77,6 +77,10 @@ body {
   
   background: url(/admin/images/bg.png) top left;
   background-size: 200px 200px;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 div.container {
@@ -398,9 +402,9 @@ div.login-container .form-row {
 }
 
 div.login-container .form-row input[type=text],
-div.login-container .form-row input[type=password]{
+div.login-container .form-row input[type=password] {
   
-  width: 100%;
+  width: 290px;
   border: none;
   font-size: 18px;
   padding: 10px;
@@ -410,7 +414,8 @@ div.login-container .form-row input[type=password]{
 }
 
 div.login-container .form-row input[type=text]:focus,
-div.login-container .form-row input[type=password]:focus{
+div.login-container .form-row input[type=password]:focus {
+  
   outline: none;
 }
 
