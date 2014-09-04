@@ -3,6 +3,7 @@
   ,"queue_url": "http://80.85.84.140/images/approved"
   ,"limit": 10
   ,"request_delay": 4000
+  ,"request_timeout_restart": 30000
   ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/tmp/"
   ,"image_save_path_users": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/images/users/"
   ,"image_save_path_tags": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/images/tags/"
