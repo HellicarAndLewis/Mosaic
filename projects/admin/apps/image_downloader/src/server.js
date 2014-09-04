@@ -163,9 +163,6 @@ var ImageDownloader = new Class({
           
           // Pop last image
           var img = queue.pop();
-          
-          var d = Date.now();
-          
           var tmp_file = self.settings.image_tmp_path + img.media_id + '.jpg';
           var dest_file_users = self.settings.image_save_path_users + img.media_id + '.jpg';
           var dest_file_tags = self.settings.image_save_path_tags + img.media_id + '.jpg';

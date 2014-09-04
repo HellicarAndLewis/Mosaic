@@ -47,7 +47,7 @@ var MosaicInstagramAdmin = Class.extend({
       });
       
       // Touch
-      
+      /*
       // Approve
       $('#instagram-images').hammer().bind('swipeleft', function() {
         
@@ -65,6 +65,7 @@ var MosaicInstagramAdmin = Class.extend({
           self.updateImage($('#instagram-images li:first-child'), false);
         }
       });
+      */
       
       $(document).keyup(function(e) {
         
