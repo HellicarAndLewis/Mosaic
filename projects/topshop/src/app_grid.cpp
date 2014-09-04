@@ -94,7 +94,7 @@ int main() {
   for (int i = 0; i < monitor_list.size(); ++i) {
     int xa, ya;
     glfwGetMonitorPos(monitor_list[i], &xa, &ya);
-    printf("%d x %d\n", xa, ya);
+    RX_VERBOSE("Monitor %d: %d x %d\n", i, xa, ya);
   }
 
 #if defined(APP_GRID_LEFT)
@@ -168,6 +168,14 @@ int main() {
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
 
+  const GLubyte* renderer = glGetString(GL_RENDERER);
+  if (NULL == renderer) {
+    RX_ERROR("Cannot get the renderer type: %s", renderer);
+  }
+  else {
+    RX_VERBOSE("Renderer: %s", renderer);
+  }
+
   /* make sure the created window has the resolution we want it to be */
   glfwGetWindowSize(win, &used_w, &used_h);
   if (used_w != w || used_h != h) {
@@ -189,8 +197,8 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_LEFT);
-  app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
+  top::GridApp app(GRID_DIR_RIGHT);
+  app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
 
 #elif defined(APP_GRID_RIGHT)
@@ -203,8 +211,8 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_RIGHT); 
-  app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
+  top::GridApp app(GRID_DIR_LEFT); 
+  app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
 
 #endif
