@@ -389,9 +389,10 @@ div.login-container {
   height: 300px;
   position: absolute;
   top: 50%;
-  margin-top: -150px;
   left: 50%;
+  margin-top: -150px;
   margin-left: -150px;
+  max-width: 100%;
 }
 
 div.login-container form label {
