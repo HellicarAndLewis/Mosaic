@@ -26,15 +26,23 @@ if [ "$(uname)" == "Darwin" ] ; then
     if [ ! -d ${id}/bin/log ] ; then 
         mkdir ${id}/bin/log
     fi
-
-    # Create input image dir for resized images
-    if [ ! -d ${id}/bin/data/input_resized ] ; then 
-        mkdir -p ${id}/bin/data/input_resized
-    fi
-
-    # Create input image dir for blurred images
     if [ ! -d ${id}/bin/data/input_blurred ] ; then 
         mkdir -p ${id}/bin/data/input_blurred
+    fi
+    if [ ! -d ${id}/bin/data/input_grid_left ] ; then 
+        mkdir -p ${id}/bin/data/input_grid_left
+    fi
+    if [ ! -d ${id}/bin/data/input_grid_right ] ; then 
+        mkdir -p ${id}/bin/data/input_grid_right
+    fi
+    if [ ! -d ${id}/bin/data/raw_left ] ; then 
+        mkdir -p ${id}/bin/data/raw_left
+    fi
+    if [ ! -d ${id}/bin/data/raw_right ] ; then 
+        mkdir -p ${id}/bin/data/raw_right
+    fi
+    if [ ! -d ${id}/bin/data/raw_mosaic ] ; then 
+        mkdir -p ${id}/bin/data/raw_mosaic
     fi
 
 else
