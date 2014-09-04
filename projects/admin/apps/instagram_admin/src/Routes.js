@@ -196,6 +196,7 @@ var Admin = new Class({
       
       // Find all images that are locked
       var result = collection.find({
+ 
         locked: true
         ,approved: false
         ,reviewed: false

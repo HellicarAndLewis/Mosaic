@@ -46,10 +46,31 @@ var MosaicInstagramAdmin = Class.extend({
         }
       });
       
+      // Touch
+      
+      // Approve
+      $('#instagram-images').hammer().bind('swipeleft', function() {
+        
+        if(!self.locked) {
+          $('div#approved-btn').addClass('highlight');
+          self.updateImage($('#instagram-images li:first-child'), true);
+        }
+      });
+      
+      // Decline
+      $('#instagram-images').hammer().bind('swiperight', function() {
+        
+        if(!self.locked) {
+          $('div#declined-btn').addClass('highlight');
+          self.updateImage($('#instagram-images li:first-child'), false);
+        }
+      });
+      
       $(document).keyup(function(e) {
         
         // Approve (arrow up)
         if(e.keyCode == 38) {
+          
           if(!self.locked) {
             $('div#approved-btn').addClass('highlight');
             self.updateImage($('#instagram-images li:first-child'), true);
@@ -58,6 +79,7 @@ var MosaicInstagramAdmin = Class.extend({
         
         // Decline (arrow down)
         if(e.keyCode == 40) {
+          
           if(!self.locked) {
             $('div#declined-btn').addClass('highlight');
             self.updateImage($('#instagram-images li:first-child'), false);
@@ -84,8 +106,7 @@ var MosaicInstagramAdmin = Class.extend({
       + type
       + '/0/0/'
       + limit
-      
-      ,function(images) {
+    ).done(function(images) {
         
         // Check for images
         if(images.length == 0) {
@@ -110,7 +131,19 @@ var MosaicInstagramAdmin = Class.extend({
         // Add images
         self.addImages(images, callback);
       }
-    );
+    ).error(function() {
+      
+      $('#controls').hide();
+      $('#instagram-images').fadeOut(100, function() {
+        $('#instagram-images').empty();
+        self.retryRequest(type, limit, function() {
+
+          $('#instagram-images-overlay').fadeOut(100);
+          $('#instagram-images').fadeIn(100);
+          callback();
+        });
+      });
+    });
   }
   
   // 
@@ -256,6 +289,16 @@ var MosaicInstagramAdmin = Class.extend({
           });
         });
       });
-    })
+    }).error(function() {
+      self.retryRequest(self.messageType, 1, function() {
+        
+        el.remove();
+        $('#instagram-images-overlay').fadeOut(100);
+        $('#instagram-images').fadeIn(100, function() {
+          self.locked = false; 
+          $('.control-btn').removeClass('highlight');
+        });
+      });
+    });
   }
 });

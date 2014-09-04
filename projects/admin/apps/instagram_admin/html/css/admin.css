@@ -82,8 +82,8 @@ body {
 div.container {
   
   position: absolute;
-  top: 100px;
-  bottom: 250px;
+  top: 50px;
+  bottom: 150px;
   background: url(/admin/images/dark_bg.png) top left;
   background-size: 180px 180px;
   margin: 0;
@@ -91,6 +91,84 @@ div.container {
   width: 100%;
 }
 
+/* Header */
+div.logo {
+  
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+ul.menu {
+  
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 260px;
+  margin-left: -130px;
+}
+
+ul.menu.one-item {
+  
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 130px;
+  margin-left: -65px;
+}
+
+ul.menu li {
+  
+  width: 120px;
+  float: left;
+  height: 40px;
+  margin-right: 10px;
+}
+
+ul.menu li a {
+  
+  display: block;
+  width: 120px;
+  height: 40px;
+  padding-top: 10px;
+  border-radius: 10px 10px 0px 0px;
+  background: #000;
+  text-align: center;
+  text-decoration: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  color: #828282;
+  
+  background: rgb(226,226,226); /* Old browsers */
+  background: -moz-linear-gradient(top, rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(226,226,226,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(51%,rgba(209,209,209,1)), color-stop(100%,rgba(254,254,254,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* IE10+ */
+  background: linear-gradient(to bottom, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+}
+
+ul.menu li.selected a {
+  
+  background: rgb(59,103,158); /* Old browsers */
+  background: -moz-linear-gradient(top,  rgba(59,103,158,1) 0%, rgba(43,136,217,1) 50%, rgba(32,124,202,1) 51%, rgba(125,185,232,1) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(59,103,158,1)), color-stop(50%,rgba(43,136,217,1)), color-stop(51%,rgba(32,124,202,1)), color-stop(100%,rgba(125,185,232,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  rgba(59,103,158,1) 0%,rgba(43,136,217,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  rgba(59,103,158,1) 0%,rgba(43,136,217,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  rgba(59,103,158,1) 0%,rgba(43,136,217,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  rgba(59,103,158,1) 0%,rgba(43,136,217,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
+  color: #fff;
+
+}
+
+ul.menu li a i {
+  
+  margin-right: 5px;
+}
+
+/* Images */
 div.instagram-images-container {
   
   margin: 0;
@@ -101,7 +179,7 @@ div.instagram-images-container {
   overflow: hidden;
 }
 
-#instagram-images-overlay {
+div#instagram-images-overlay {
   
   position: absolute;
   width: 100%;
@@ -112,8 +190,8 @@ div.instagram-images-container {
   text-align: center;
 }
 
-#instagram-images-overlay .inner-update,
-#instagram-images-overlay .inner-error {
+div#instagram-images-overlay .inner-update,
+div#instagram-images-overlay .inner-error {
   
   position: absolute;
   width: 100%;
@@ -132,12 +210,12 @@ div.instagram-images-container {
   margin-top: 25px;
 }
 
-#instagram-images-overlay .inner-error strong {
+div#instagram-images-overlay .inner-error strong {
   
   font-weight: bold;
 }
 
-#instagram-images-result {
+div#instagram-images-result {
   
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
@@ -163,7 +241,7 @@ div.instagram-images-container {
   
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 18px;
   margin-top: 15px;
 }
 
@@ -197,14 +275,14 @@ ul#instagram-images li div.instagram-image-info {
   margin: 0;
   padding: 10px;
   width: 100%;
-  height: 40px;
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,.85);
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 20px;
+  font-size: 25px;
   text-transform: uppercase;
   color: #fff;
-  text-shadow: 2px 2px 2px rgba(0,0,0,.7);
+  text-shadow: 2px 2px 2px #000;
+  word-break: break-all;
 }
 
 /* Controls */
@@ -212,14 +290,14 @@ div#controls {
   
   position: relative;
   width: 100%;
-  height: 250px;
+  height: 150px;
 }
 
 div#controls .inner {
   
   position: relative;
   width: 100%;
-  height: 250px;
+  height: 150px;
   padding: 0;
 }
 
@@ -228,12 +306,12 @@ div#controls div.control-btn {
   cursor: pointer;
   color: #fff;
   border-radius: 20px;
-  margin: 50px 5%;
+  margin: 15px 5%;
   width: 40%;
-  height: 150px;
-  font-size: 80px;
+  height: 120px;
+  font-size: 70px;
   text-align: center;
-  padding-top: 25px;
+  padding-top: 20px;
   float: left;
   -moz-box-shadow:    3px 3px 5px 3px rgba(0,0,0,0.2);
   -webkit-box-shadow: 3px 3px 5px 3px rgba(0,0,0,0.2);
@@ -290,4 +368,77 @@ div#controls div#declined-btn.highlight i {
   text-shadow: 1px 4px 6px #fff, 0 0 0 #000, 1px 4px 6px #fff;
 }
 
+/* Login */
+div.login-container {
+  
+  width: 300px;
+  height: 300px;
+  position: absolute;
+  top: 50%;
+  margin-top: -150px;
+  left: 50%;
+  margin-left: -150px;
+}
 
+div.login-container form label {
+  
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+  color: #fff;
+  display: block;
+  margin-bottom: 5px;
+}
+
+div.login-container .form-row {
+  
+  display: block;
+  width: 300px;
+  margin-bottom: 20px;
+}
+
+div.login-container .form-row input[type=text],
+div.login-container .form-row input[type=password]{
+  
+  width: 100%;
+  border: none;
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  display: block;
+}
+
+div.login-container .form-row input[type=text]:focus,
+div.login-container .form-row input[type=password]:focus{
+  outline: none;
+}
+
+div.login-container input[type=submit] {
+  
+  cursor: pointer;
+  background: #fff;
+  color: #000;
+  width: 100px;
+  margin-left: 100px;
+  margin-top: 50px;
+  border: none;
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  display: block;
+  
+}
+
+div.login-container input[type=submit]:focus {
+ 
+  outline: none;
+}
+
+div.login-container input[type=submit]:hover,
+div.login-container input[type=submit]:active {
+  
+  background: #333333;
+  color: #ffffff;
+}
