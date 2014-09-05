@@ -106,6 +106,16 @@ var ImageDownloader = new Class({
     
     self.log('Get new results - ' + url);
     self.rechecked = false;
+    
+    clearTimeout(self.reqTimeout);
+    
+    self.reqTimeout = setTimeout(function() {
+            
+      self.lastModIdMin = 0;
+      self.lastModIdMax = 0;
+      self.start();
+      
+    }, self.settings.request_timeout_restart);
 
     // Start request
     Request({
@@ -209,10 +219,11 @@ var ImageDownloader = new Class({
         
         self.log('Failed to load ' + url);
         
-        self.lastModIdMin = 0;
-        self.lastModIdMax = 0;
+        
         
         setTimeout(function() {
+          self.lastModIdMin = 0;
+          self.lastModIdMax = 0;
           self.start();
         }, self.settings.request_delay);
         return;

@@ -131,10 +131,10 @@ namespace top {
     RX_VERBOSE("Got a new file: %s", file.filename.c_str());
 
     if (GRID_DIR_RIGHT == app->grid.direction) {
-      file.type = COL_FILE_TYPE_RIGHT_GRID;
+      file.type = COL_FILE_TYPE_LEFT_GRID;
     }
     else if (GRID_DIR_LEFT == app->grid.direction) {
-      file.type = COL_FILE_TYPE_LEFT_GRID;
+      file.type = COL_FILE_TYPE_RIGHT_GRID;
     }
     else {
       RX_ERROR("Unhanded grid direction.Ignoring file: %s", file.filename.c_str());

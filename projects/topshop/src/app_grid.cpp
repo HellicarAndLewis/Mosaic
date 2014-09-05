@@ -134,11 +134,11 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   
   GLFWwindow* win = NULL;
-  int w = 1920;
-  int h = 1080;
+  int w = top::config.window_width;
+  int h = top::config.window_height;
   int used_w = 0;
   int used_h = 0;
- 
+
   if (1 == top::config.is_fullscreen) {
    win = glfwCreateWindow(w, h, "AppGrid", monitor, NULL);
   }
@@ -184,8 +184,7 @@ int main() {
   }
 
   int r = 0;
-  mos::config.window_width = w;
-  mos::config.window_height = h;
+  
 
 #if defined(APP_GRID_LEFT)  
 
@@ -197,7 +196,7 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_LEFT);
+  top::GridApp app(GRID_DIR_RIGHT);
   app.grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
 
@@ -211,10 +210,9 @@ int main() {
   cfg.grid_rows = top::config.grid_rows;
   cfg.grid_cols = top::config.grid_cols;
 
-  top::GridApp app(GRID_DIR_RIGHT); 
+  top::GridApp app(GRID_DIR_LEFT); 
   app.grid.offset.set(top::config.right_grid_x, top::config.right_grid_y);
   app.grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
-
 
 #endif
 

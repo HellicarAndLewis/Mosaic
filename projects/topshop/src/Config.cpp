@@ -70,11 +70,11 @@ namespace top {
       RX_ERROR("mosaic_monitor setting not found");
       return -152;
     }
-    if (-1 == window_width) {
+    if (0 > window_width) {
       RX_ERROR("Invalid window width");
       return -100;
     }
-    if (-1 == window_height) {
+    if (0 > window_height) {
       RX_ERROR("Invalid window height.");
       return -101;
     }
@@ -281,6 +281,8 @@ namespace top {
       mos::config.webcam_device = read_xml_int(cfg, "webcam_device", 0);
       mos::config.webcam_width = read_xml_int(cfg, "webcam_width", 640);
       mos::config.webcam_height = read_xml_int(cfg, "webcam_height", 480);
+      mos::config.window_width = read_xml_int(cfg, "window_width", -1);
+      mos::config.window_height = read_xml_int(cfg, "window_height", -1);
       mos::config.stream_url = read_xml_str(cfg, "stream_url", "");
       mos::config.stream_width = read_xml_int(cfg, "stream_width", 0);
       mos::config.stream_height = read_xml_int(cfg, "stream_height", 0);
