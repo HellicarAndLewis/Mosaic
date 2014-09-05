@@ -9,7 +9,7 @@ output_dir=${4}
 
 function log {
     dat=$(date +%Y.%m.%d.%H.%M.%S)
-    echo "${dat}: ${1}" >> log/preprocess.log
+    echo "${dat}: ${1}" >> data/log/preprocess.log
 }
 
 # Make sure the file exists.

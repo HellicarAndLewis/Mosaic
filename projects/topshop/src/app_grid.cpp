@@ -38,7 +38,7 @@ static int sort_monitors(GLFWmonitor* a, GLFWmonitor* b);
 
 int main() {
 
-  rx_log_init();
+  rx_log_init(rx_to_data_path("log"));
  
   /* load all the configuration */
   if (0 != top::load_config()) {

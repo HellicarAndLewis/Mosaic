@@ -10,7 +10,7 @@ raw_mosaic_dir=${5}
 
 function log {
     dat=$(date +%Y.%m.%d.%H.%M.%S)
-    echo "${dat}: ${1}" >> log/preprocess.log
+    echo "${dat}: ${1}" >> data/log/preprocess_right.log
 }
 
 # Make sure the file exists.
