@@ -25,8 +25,6 @@
 #include <topshop/ImageProcessor.h>
 #include <tracking/Tracking.h>
 
-#define USE_GRID 1
-
 namespace top {
   
   class TopShop {
@@ -40,12 +38,6 @@ namespace top {
 
   public:
     mos::Mosaic mosaic;
-
-#if USE_GRID
-    grid::Grid left_grid;
-    grid::Grid right_grid;
-#endif
-
     ImageCollector img_collector;                       /* watches a directory for new files */
     //track::Tracking tracking;                         /* responsible for the interactive/tracking part of the mosaic. */
   };

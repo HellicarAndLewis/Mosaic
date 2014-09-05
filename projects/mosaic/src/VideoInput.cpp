@@ -164,6 +164,7 @@ namespace mos {
 
     /* draw the webcam to screen (tiny) */
     capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
+    //capture.draw(0, 0, mos::config.window_width, mos::config.window_height);
   }
 
 
@@ -375,19 +376,27 @@ namespace mos {
   }
 
   void VideoInput::draw() {
+
+#if !defined(NDEBUG)
+    if (0 == mos::config.window_width || 0 == mos::config.window_height) {
+      RX_ERROR("Cannot draw the video input because the window width and height are invalid. %d x %d", mos::config.window_width, mos::config.window_height);
+      return;
+    }
+#endif
+
       int local_state;
       lock();
         local_state = state;
       unlock();
 
-      glViewport(0, 0, yuv.w >> 2, yuv.h >> 2);
+      glViewport(0, 0, mos::config.window_width, mos::config.window_height);
       {
         if (MOS_VID_STATE_PLAYING == local_state) {
           yuv.draw();
         }
         else {
 #if USE_BACKUP_PLAYER
-          backup_player.draw(0, 0, yuv.w >> 2, yuv.h >> 2);      
+          backup_player.draw(0, 0, mos::config.window_width, mos::config.window_height);
 #endif
         }
       }

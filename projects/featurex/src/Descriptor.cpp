@@ -63,7 +63,7 @@ namespace fex {
     /* open the file. */
     std::ifstream ifs(filename.c_str());
     if (!ifs.is_open()) {
-      RX_ERROR("Cannot load the descriptors; cannot open file %s", filename.c_str());
+      RX_ERROR("Cannot load the descriptors.txt file; cannot open file %s", filename.c_str());
       return -1;
     }
 

@@ -53,6 +53,8 @@ namespace track {
       return -2;
     }
 
+    capture.listCapabilities(device);
+
     if (0 > capture.start()) {
       RX_ERROR("Cannot start the video capture.");
       capture.close();

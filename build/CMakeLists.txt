@@ -148,7 +148,7 @@ macro(create_test name)
     ${extern_source_dir}/glad.c
     )
   target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture shop tracker tracking)
-  install(TARGETS test_${name} DESTINATION bin)
+  install(TARGETS test_${name} DESTINATION bin/test/)
 endmacro()
 
 # The graphics library
@@ -208,7 +208,7 @@ install(TARGETS AppGridRight DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
-#create_test(tracker)
+create_test(tracker)
 
 
 
