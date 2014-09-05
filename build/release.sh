@@ -7,9 +7,9 @@ if [ ! -d build.release ] ; then
 fi
 
 
- if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
-     cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
- fi
+# if [ -f ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h ] ; then
+#     cp ${d}/../extern/tinylib/src/tinylib.h ${d}/../extern/video_capture/shared/tinylib/src/tinylib.h
+# fi
 
 ./build_mac_dependencies.sh
 
@@ -61,7 +61,7 @@ fi
 #./test_grid
 #./test_png_rgba
 #./test_ogg_player
-#./test_tracker
+./test/test_tracker
 #./AppMosaic
-./AppGridLeft
+#./AppGridLeft
 #./AppGridRight

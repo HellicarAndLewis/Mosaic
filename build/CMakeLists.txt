@@ -208,7 +208,7 @@ install(TARGETS AppGridRight DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
-#create_test(tracker)
+create_test(tracker)
 
 
 
