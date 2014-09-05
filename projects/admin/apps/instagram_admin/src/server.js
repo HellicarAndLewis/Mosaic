@@ -199,7 +199,7 @@ var Server = new Class({
 
           // Get recent user media
           self.users.each(function(user, i) {
-            self.getUserRecentMedia(user);
+           self.getUserRecentMedia(user);
           });
         
         } else if(Program.polltags && !Program.pollusers) {
@@ -321,7 +321,7 @@ var Server = new Class({
         return;
       }
       
-      Console.status('Received recent media for tag ' + tag);
+     // Console.status('Received recent media for tag ' + tag);
       Console.status(remaining + ' remaining calls');
       
       // Empty check
@@ -343,7 +343,7 @@ var Server = new Class({
           var media = list.pop();
           
           // Check for image type and existing id
-          if(media.type = 'image' && media.id) {
+          if((media.type == 'image' && media.id)) {
             
             // Check if media already exists
             var exists = collection.find({media_id: media.id}, {_id: 1}).limit(1);
@@ -352,11 +352,13 @@ var Server = new Class({
               // If media doesn't exist
               if(count==0) {
                 
+
+		var mtype = (self.options.instagram.users.indexOf(media.user.username) < 0) ? 'tag' : 'user';
                 // Create media object
                 new_medias.push({
 
                   media_id: media.id
-                  ,msg_type: 'tag'
+                  ,msg_type: mtype
                   ,queue_id: ObjectID()
                   ,images: media.images
                   ,user: media.user
@@ -369,7 +371,7 @@ var Server = new Class({
                   ,modified_time: Date.now()
                   ,locked_time: Date.now()
                   ,locked: false
-                  ,approved: false
+                  ,approved: (mtype == 'user' && self.options.instagram.auto_approve_users) ? true : false
                   ,reviewed: false
                 });
               }
@@ -407,7 +409,7 @@ var Server = new Class({
               }  
             });
           } else {
-            Console.status('No new images found for tag ' + tag);
+           // Console.status('No new images found for tag ' + tag);
             retry(); 
           }
         });
@@ -465,7 +467,7 @@ var Server = new Class({
         return;
       }
       
-      Console.status('Received recent media for user ' + user.username);
+     // Console.status('Received recent media for user ' + user.username);
       Console.status(remaining + ' remaining calls');
       
       // Empty check
@@ -487,7 +489,7 @@ var Server = new Class({
           var media = list.pop();
           
           // Check for image type, existing media id
-          if(media.type = 'image' && media.id) {
+          if((media.type == 'image' && media.id)) {
             
             // Check if media has one of the set hashtags
             var has_hashtag = false;
@@ -558,7 +560,9 @@ var Server = new Class({
               // is available
               if(pagination) { 
                 if(pagination.next) { 
-                  pagination.next(rm_callback); 
+                 setTimeout(function() {
+			 pagination.next(rm_callback);
+			}, self.options.instagram.request_delay); 
                 } else { 
                   retry(); 
                 }
@@ -567,7 +571,7 @@ var Server = new Class({
               }  
             });
           } else {
-            Console.status('No new images found for user ' + user.username);
+           // Console.status('No new images found for user ' + user.username);
             retry(); 
           }
         });
