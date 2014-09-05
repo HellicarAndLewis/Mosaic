@@ -62,5 +62,5 @@ fi
 #./test_ogg_player
 #./test_tracker
 #./AppMosaic
-#./AppGridLeft
-./AppGridRight
+./AppGridLeft
+#./AppGridRight

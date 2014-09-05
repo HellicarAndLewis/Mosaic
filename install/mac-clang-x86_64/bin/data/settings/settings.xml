@@ -1,4 +1,57 @@
-<settings group="tiny">
+<settings group="screens3">
+  <group name="screens3">
+    <!-- GENERAL -->
+    <fullscreen>1</fullscreen>
+    <window_width>1920</window_width>
+    <window_height>1080</window_height> 
+    <log_level>4</log_level>
+    <grid_left_monitor>0</grid_left_monitor>
+    <grid_right_monitor>2</grid_right_monitor>
+    <mosaic_monitor>1</mosaic_monitor>
+    <!-- WEBCAM -->
+    <webcam_device>0</webcam_device>
+    <webcam_width>640</webcam_width>
+    <webcam_height>480</webcam_height>
+    <!-- PATHS + MEMORY POOL-->
+    <raw_filepath>raw_mosaic</raw_filepath>
+    <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>
+    <raw_right_grid_filepath>raw_right</raw_right_grid_filepath>
+    <resized_filepath>input_mosaic</resized_filepath>
+    <blurred_filepath>input_blurred</blurred_filepath>
+    <input_tile_size>10</input_tile_size>
+    <file_tile_width>64</file_tile_width>  
+    <file_tile_height>64</file_tile_height>
+    <memory_pool_size>2000</memory_pool_size>
+    <!-- STREAM -->
+    <!--
+    <stream_url>rtmp://localhost</stream_url>
+    <stream_width>1280</stream_width>
+    <stream_height>720</stream_height>
+    -->
+    <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
+    <stream_width>854</stream_width>
+    <stream_height>480</stream_height>
+    <!-- MOSAIC -->
+    <analyzer_width>720</analyzer_width>
+    <analyzer_height>360</analyzer_height>
+    <mosaic_width>1920</mosaic_width>
+    <mosaic_height>1080</mosaic_height>
+    <mosaic_x>00</mosaic_x>
+    <mosaic_y>0</mosaic_y>
+    <!-- GRID -->
+    <grid_padding_x>10</grid_padding_x>
+    <grid_padding_y>12</grid_padding_y>
+    <grid_rows>4</grid_rows>
+    <grid_cols>10</grid_cols>
+    <grid_file_width>230</grid_file_width>
+    <grid_file_height>230</grid_file_height>
+    <left_grid_filepath>input_grid_left</left_grid_filepath>
+    <left_grid_x>1920</left_grid_x> 
+    <left_grid_y>60</left_grid_x>
+    <right_grid_filepath>input_grid_right</right_grid_filepath>
+    <right_grid_x>0</right_grid_x>
+    <right_grid_y>60</right_grid_y>
+  </group>
   <group name="tiny">
     <!-- GENERAL -->
     <fullscreen>0</fullscreen>
