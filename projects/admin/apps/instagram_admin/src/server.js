@@ -199,7 +199,7 @@ var Server = new Class({
 
           // Get recent user media
           self.users.each(function(user, i) {
-            self.getUserRecentMedia(user);
+           self.getUserRecentMedia(user);
           });
         
         } else if(Program.polltags && !Program.pollusers) {
@@ -321,7 +321,7 @@ var Server = new Class({
         return;
       }
       
-      Console.status('Received recent media for tag ' + tag);
+     // Console.status('Received recent media for tag ' + tag);
       Console.status(remaining + ' remaining calls');
       
       // Empty check
@@ -409,7 +409,7 @@ var Server = new Class({
               }  
             });
           } else {
-            Console.status('No new images found for tag ' + tag);
+           // Console.status('No new images found for tag ' + tag);
             retry(); 
           }
         });
@@ -467,7 +467,7 @@ var Server = new Class({
         return;
       }
       
-      Console.status('Received recent media for user ' + user.username);
+     // Console.status('Received recent media for user ' + user.username);
       Console.status(remaining + ' remaining calls');
       
       // Empty check
@@ -560,7 +560,9 @@ var Server = new Class({
               // is available
               if(pagination) { 
                 if(pagination.next) { 
-                  pagination.next(rm_callback); 
+                 setTimeout(function() {
+			 pagination.next(rm_callback);
+			}, self.options.instagram.request_delay); 
                 } else { 
                   retry(); 
                 }
@@ -569,7 +571,7 @@ var Server = new Class({
               }  
             });
           } else {
-            Console.status('No new images found for user ' + user.username);
+           // Console.status('No new images found for user ' + user.username);
             retry(); 
           }
         });
