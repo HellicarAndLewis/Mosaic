@@ -32,7 +32,6 @@ namespace mos {
     int stream_width;                  /* width of the rtmp video stream, necessary so we can setup the decoder textures */
     int stream_height;                 /* height of the rtmp video stream, necessary so we can setup the decoder textures */
     std::string stream_url;            /* the url of the rtmp video stream. */
-    
   };
 
   /* --------------------------------------------------------------------------------- */

@@ -11,6 +11,9 @@ namespace track {
 #if USE_TRACKER
     ,tracker(NULL)
 #endif
+#if USE_BG
+    ,bg(NULL)
+#endif
   {
   }
 
@@ -18,6 +21,10 @@ namespace track {
   }
   
   int Tracking::init(int dev, int w, int h) {
+
+    device = dev;
+    width = w;
+    height = h;
     
     if (true == is_init) {
       RX_ERROR("Cannot initialize because we're already initialized.");
@@ -31,18 +38,6 @@ namespace track {
     }
 #endif
 
-    device = dev;
-    width = w;
-    height = h;
-
-#if USE_TRACKER    
-    tracker = new Tracker(width, height, 5);
-    if (NULL == tracker) {
-      RX_ERROR("Cannot allocate the tracker");
-      return -102;
-    }
-#endif
-
     if (0 == width || 0 == height) {
       RX_ERROR("Invalid width or height for the tracker. %d x %d", width, height);
       return -1;
@@ -53,13 +48,28 @@ namespace track {
       return -2;
     }
 
-    capture.listCapabilities(device);
-
     if (0 > capture.start()) {
       RX_ERROR("Cannot start the video capture.");
       capture.close();
       return -3;
     }
+
+
+#if USE_BG
+    bg = new BackgroundBuffer(width, height, 5);
+    if (NULL == bg) {
+      RX_ERROR("Cannot allocate the background buffer.");
+      return -103;
+    }
+#endif
+
+#if USE_TRACKER    
+    tracker = new Tracker(width, height, 5);
+    if (NULL == tracker) {
+      RX_ERROR("Cannot allocate the tracker");
+      return -102;
+    }
+#endif
 
     is_init = true;
     
@@ -95,19 +105,44 @@ namespace track {
 #endif
 
     needs_update = capture.needs_update;
-    RX_VERBOSE("Update: %d", needs_update);
-    capture.update();
+    //    RX_VERBOSE("Update: %d", needs_update);
+    ///  capture.update();
   }
 
   void Tracking::draw() {
+    /*
 
+    capture.draw();
+    return;
+    */
 #if USE_TRACKER
       tracker->beginFrame();
+        capture.update();
         capture.draw();
       tracker->endFrame();
       tracker->apply();
       tracker->draw();
+#elif USE_BG
+
+      /*
+        painter.clear();
+        painter.fill();
+        painter.circle(100,100, 50);
+        painter.circle(200,200, (0.5 + sin(t)) * 100);
+        painter.draw();
+
+       */
+
+      double t = rx_millis();
+      bg->beginFrame();
+      {
+        capture.update();
+        capture.draw();
+      }
+      bg->endFrame();
+      bg->apply();
 #else 
+      capture.update();
       capture.draw();
 #endif
 

@@ -319,6 +319,22 @@ if [ ! -d ${sd}/freetype ] ; then
     git clone git://git.sv.nongnu.org/freetype/freetype2.git
 fi
 
+# Download libcurl 
+if [ ! -d ${sd}/curl ] ; then
+    cd ${sd}
+    curl -o curl.tar.gz http://curl.haxx.se/download/curl-7.37.1.tar.gz
+    tar -zxvf curl.tar.gz
+    mv curl-7.37.1 curl
+fi
+
+# Download jansson 
+if [ ! -d ${sd}/jansson ] ; then
+  cd ${sd}
+  curl -o jans.tar.gz http://www.digip.org/jansson/releases/jansson-2.6.tar.gz
+  tar -zxvf jans.tar.gz
+  mv jansson-2.6 jansson
+fi
+
 # Cleanup some files we don't need anymore.
 if [ -f ${sd}/autoconf.tar.gz ] ; then
     rm ${sd}/autoconf.tar.gz
@@ -341,7 +357,6 @@ fi
 if [ -f ${sd}/imagemagick.tar.gz ] ; then 
     rm ${sd}/imagemagick.tar.gz
 fi 
-
 if [ -f ${sd}/yasm.tar.gz ] ; then 
     rm ${sd}/yasm.tar.gz
 fi 
@@ -366,7 +381,12 @@ fi
 if [ -f ${sd}/pkg.tar.gz ] ; then
     rm ${sd}/pkg.tar.gz 
 fi
-
+if [ -f ${sd}/curl.tar.gz ] ; then
+    rm ${sd}/curl.tar.gz
+fi
+if [ -f ${sd}/jans.tar.gz ] ; then
+    rm ${sd}/jans.tar.gz
+fi
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
 # ----------------------------------------------------------------------- #
@@ -434,7 +454,7 @@ if [ ! -f ${bd}/src/glad.c ] ; then
         mkdir ${bd}/src 
     fi
     cd ${sd}/glad
-    python main.py --generator=c --out-path=gl --extensions GL_ARB_timer_query
+    python main.py --generator=c --out-path=gl --extensions GL_ARB_timer_query,GL_APPLE_rgb_422
     cp -r ${sd}/glad/gl/include/glad ${bd}/include/
     cp -r ${sd}/glad/gl/include/KHR ${bd}/include/
     cp ${sd}/glad/gl/src/glad.c ${bd}/src/
@@ -624,10 +644,43 @@ if [ ! -f ${bd}/lib/libintl.a ] ; then
     make install
 fi
 
-cd ${sd}/cairo
-if [ ! -f ./configure ] ; then
-    ./autogen.sh
+# Compile libcurl 
+if [ ! -f ${bd}/lib/libcurl.a ] ; then
+    cd ${sd}/curl
+    ./configure --prefix=${bd} \
+        --enable-static=yes \
+        --enable-shared=0 \
+        --disable-ldaps \
+        --disable-rtsp \
+        --disable-dict \
+        --disable-telnet \
+        --disable-pop3 \
+        --disable-imap \
+        --disable-smtp \
+        --disable-librtmp \
+        --disable-libssh2 \
+        --disable-gopher \
+        --disable-axtls \
+        --disable-ares
+    make
+    make install
 fi
+
+if [ ! -f ${bd}/lib/libjansson.a ] ; then 
+    cd ${sd}/jansson
+    mkdir build.release
+    cd build.release 
+    cmake -DCMAKE_INSTALL_PREFIX=${bd} -DCMAKE_BUILD_TYPE=Release ../
+    cmake --build . --target install
+fi
+
+
+# cd ${sd}/cairo
+# if [ ! -f ./configure ] ; then
+#     ./autogen.sh
+# fi
+
+
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then

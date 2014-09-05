@@ -13,6 +13,7 @@
 #include <tracker/Tracker.h>
 
 #define USE_TRACKER 1
+#define USE_BG 0
 
 namespace track {
 
@@ -33,6 +34,10 @@ namespace track {
     ca::CaptureGL capture;
 #if USE_TRACKER
     Tracker* tracker;
+#endif
+#if USE_BG 
+    BackgroundBuffer* bg;
+    Painter painter;
 #endif
     bool needs_update;
     bool is_init;

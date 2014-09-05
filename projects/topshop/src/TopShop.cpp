@@ -19,12 +19,27 @@ namespace top {
   }
 
   int TopShop::init() {
+
     int r = 0;
+    
+    /* make sure the webcam settings are correct. */
+    if (0 != mos::config.validateWebcam()) {
+      RX_ERROR("Webcam settings are incorrect");
+      return -98;
+    }
+    
+    /* initialize the tracker. */
+    r = tracking.init(mos::config.webcam_device, mos::config.webcam_width, mos::config.webcam_height);
+    if (0 != r) {
+      RX_ERROR("Cannot initialize the tracker.");
+      return -99;
+    }
 
     /* init the mosaic. */
     r = mosaic.init();
     if (0 != r) {
       RX_ERROR("Cannot init mosiac: %d", r);
+      tracking.shutdown();
       return -101;
     }
 
@@ -33,11 +48,22 @@ namespace top {
     if (0 != r) {
       RX_ERROR("Cannot start the image collector: %d.", r);
       mosaic.shutdown();
+      tracking.shutdown();
       return -102;
+    }
+
+    r = remote_state.init();
+    if (0 != r) {
+      RX_ERROR("Cannot init the remote state: %d", r);
+      mosaic.shutdown();
+      tracking.shutdown();
+      img_collector.shutdown();
+      return -103;
     }
 
     img_collector.user = this;
     img_collector.on_file = on_new_file;
+
     return 0;
   }
 
@@ -53,6 +79,11 @@ namespace top {
     if (0 != r) {
       RX_ERROR("Failed to shutdown the image collector: %d.", r);
     }
+
+    r = remote_state.shutdown();
+    if (0 != r) {
+      RX_ERROR("Failed to shutdown the remote state: %d", r);
+    }
     
     return 0;
   }
@@ -60,6 +91,8 @@ namespace top {
   void TopShop::update() {
     img_collector.update();
     mosaic.update();
+    tracking.update();
+    remote_state.update();
   }
 
   void TopShop::draw() {
@@ -69,6 +102,8 @@ namespace top {
     if (1 == top::config.is_debug_draw) {
       mosaic.debugDraw();
     }
+
+    tracking.draw();
   }
 
   /* ------------------------------------------------------------------------- */

@@ -23,6 +23,7 @@
 #include <grid/Grid.h>
 #include <topshop/ImageCollector.h>
 #include <topshop/ImageProcessor.h>
+#include <topshop/RemoteState.h>
 #include <tracking/Tracking.h>
 
 namespace top {
@@ -39,7 +40,8 @@ namespace top {
   public:
     mos::Mosaic mosaic;
     ImageCollector img_collector;                       /* watches a directory for new files */
-    //track::Tracking tracking;                         /* responsible for the interactive/tracking part of the mosaic. */
+    track::Tracking tracking;                           /* responsible for the interactive/tracking part of the mosaic. */
+    RemoteState remote_state;                           /* polls the server and checks if we need to change something in the application */
   };
 
 } /* namespace top */

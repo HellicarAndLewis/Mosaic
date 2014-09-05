@@ -61,6 +61,8 @@ if(APPLE)
     ${extern_lib_dir}/libtheora.a
     ${extern_lib_dir}/libvorbis.a
     ${extern_lib_dir}/libogg.a
+    ${extern_lib_dir}/libcurl.a
+    ${extern_lib_dir}/libjansson.a
 
     # for the tracking
     ${extern_lib_dir}libopencv_core.a
@@ -78,6 +80,9 @@ if(APPLE)
     ${fr_opencl}                       # tracking
 
     bz2 
+    ssl
+    crypto
+    ldap
     )
 elseif(UNIX)
 
@@ -140,6 +145,7 @@ set(topshop_lib_sources
   ${ts_sd}/ImageCollector.cpp
   ${ts_sd}/ImageProcessor.cpp
   ${ts_sd}/GridApp.cpp
+  ${ts_sd}/RemoteState.cpp
 )
 
 macro(create_test name)

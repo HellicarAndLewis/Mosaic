@@ -22,6 +22,7 @@
 #define ROXLU_USE_OPENGL
 #include <tinylib.h>
 
+#define VIDEO_CAPTURE_USE_APPLE_RGB_422 
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>  
 
@@ -34,8 +35,6 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods);
 void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
-
-track::Tracking tracking;
 
 int main() {
 
@@ -80,13 +79,14 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-
-  #if 0
-  GLint t;
+  /*
+  GLint t = 0;
   glGetIntegerv(GL_UNPACK_ALIGNMENT, &t);
-  printf("t: %d\n", t);
-  ::exit(0);
-  #endif 
+  printf("%d\n", t);
+  exit(0);
+  */
+
+  track::Tracking tracking;
 
   if (0 != tracking.init(0, 320, 240)) {
     exit(EXIT_FAILURE);
