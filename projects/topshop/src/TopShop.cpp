@@ -11,10 +11,6 @@ namespace top {
   /* ------------------------------------------------------------------------- */
   
   TopShop::TopShop() 
-#if USE_GRID
-    :left_grid(GRID_DIR_RIGHT)
-    ,right_grid(GRID_DIR_LEFT)
-#endif
   {
   }
 
@@ -42,8 +38,6 @@ namespace top {
 
     img_collector.user = this;
     img_collector.on_file = on_new_file;
-
-
     return 0;
   }
 
@@ -100,8 +94,6 @@ namespace top {
       return;
     }
 #endif
-
-
 
     /* @todo - we assume the file is correct here, we may add validation here to be sure */
     RX_VERBOSE("Got a mosaic file: %s", file.filename.c_str());

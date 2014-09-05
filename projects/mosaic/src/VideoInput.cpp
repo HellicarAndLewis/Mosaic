@@ -164,6 +164,7 @@ namespace mos {
 
     /* draw the webcam to screen (tiny) */
     capture.draw(0, 0, capture.width >> 2, capture.height >> 2);
+    //capture.draw(0, 0, mos::config.window_width, mos::config.window_height);
   }
 
 
