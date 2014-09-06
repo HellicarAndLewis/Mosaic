@@ -60,6 +60,30 @@
     
     "width": 600
     ,"height": 600
+    
+    ,"inner" : {
+      
+      "width": 580
+      ,"height": 500
+      ,"x": 10
+      ,"y": 40
+    }
+    
+    ,"text": {
+      
+      "username": {
+        "font_size": 10
+        ,"x": 0
+        ,"y": 10
+      }
+      
+      ,"hashtag": {
+        "font_size": 13
+        ,"x": 0
+        ,"y": 480
+        ,"text": "#topshopwindow"
+      }
+    }
   }
   
 }

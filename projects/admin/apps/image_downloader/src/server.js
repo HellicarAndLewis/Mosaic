@@ -275,48 +275,50 @@ var ImageDownloader = new Class({
               // Valid size
               } else {
                 
-           
-                  // Create thumbnail
-                  Fs.ensureDir(thumb_dir, function(err) {
-     
-                    // Image processing thumb
-                    var ix = self.settings.image_size_thumb.inner.x;
-                    var iy = self.settings.image_size_thumb.inner.y;
-                    var tw = self.settings.image_size_thumb.width;
-                    var th = self.settings.image_size_thumb.height;
-                    var tiw = self.settings.image_size_thumb.inner.width;
-                    var tih = self.settings.image_size_thumb.inner.height;
+                  
+                var create_large = function() {
                     
+                  // Create large
+                  Fs.ensureDir(large_dir, function(err) {
+
+                    // Image processing large
+                    var ix = self.settings.image_size_large.inner.x;
+                    var iy = self.settings.image_size_large.inner.y;
+                    var tw = self.settings.image_size_large.width;
+                    var th = self.settings.image_size_large.height;
+                    var tiw = self.settings.image_size_large.inner.width;
+                    var tih = self.settings.image_size_large.inner.height;
+
                     Gm(tmp_file)
                       .resize(tw, th)
                       .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
-                      .write(thumb_file, function(err) {
-                        
+                      .write(large_file, function(err) {
+
                         Gm()
                         .in('-page', '+0+0')
-                        .in(self.thumbFilename)
+                        .in(self.largeFilename)
                         .in('-page', '+'+ix+'+'+iy)
-                        .in(thumb_file)
+                        .in(large_file)
                         .in('-flatten')
-                        .write(thumb_file, function(err) {
-                          
+                        .write(large_file, function(err) {
+
                           // Add text
-                          Gm(thumb_file)
+                          Gm(large_file)
                             .font(self.settings.image_font)
-                            .fontSize(self.settings.image_size_thumb.text.username.font_size)
+                            .fontSize(self.settings.image_size_large.text.username.font_size)
                             .drawText(
-                              self.settings.image_size_thumb.text.username.x
-                              ,-(th/2) + self.settings.image_size_thumb.text.username.y
+                              self.settings.image_size_large.text.username.x
+                              ,-(th/2) + self.settings.image_size_large.text.username.y
                               ,img.user.username.toUpperCase(), 'center')
-                            .fontSize(self.settings.image_size_thumb.text.hashtag.font_size)
+                            .fontSize(self.settings.image_size_large.text.hashtag.font_size)
                             .drawText(
-                              self.settings.image_size_thumb.text.hashtag.x
-                              ,-(th/2) + self.settings.image_size_thumb.text.hashtag.y
-                              ,self.settings.image_size_thumb.text.hashtag.text
+                              self.settings.image_size_large.text.hashtag.x
+                              ,-(th/2) + self.settings.image_size_large.text.hashtag.y
+                              ,self.settings.image_size_large.text.hashtag.text
                               , 'center'
                             )
-                            .write(thumb_file, function(err) {
-                            
+                            .write(large_file, function(err) {
+
                               // Move image from tmp to save dir
                               Fs.copy(tmp_file, dest_file, function() {
 
@@ -333,17 +335,67 @@ var ImageDownloader = new Class({
 
                                     // Next
                                     setTimeout(function() {
-                                      
+
                                       dl_img(queue);
                                     }, self.settings.image_save_delay);
                                   });
                                 });
                               });
                             });
-                            
+
                         });
                       });
                   });
+                }
+                
+                // Create thumbnail
+                Fs.ensureDir(thumb_dir, function(err) {
+
+                  // Image processing thumb
+                  var ix = self.settings.image_size_thumb.inner.x;
+                  var iy = self.settings.image_size_thumb.inner.y;
+                  var tw = self.settings.image_size_thumb.width;
+                  var th = self.settings.image_size_thumb.height;
+                  var tiw = self.settings.image_size_thumb.inner.width;
+                  var tih = self.settings.image_size_thumb.inner.height;
+
+                  Gm(tmp_file)
+                    .resize(tw, th)
+                    .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
+                    .write(thumb_file, function(err) {
+
+                      Gm()
+                      .in('-page', '+0+0')
+                      .in(self.thumbFilename)
+                      .in('-page', '+'+ix+'+'+iy)
+                      .in(thumb_file)
+                      .in('-flatten')
+                      .write(thumb_file, function(err) {
+
+                        // Add text
+                        Gm(thumb_file)
+                          .font(self.settings.image_font)
+                          .fontSize(self.settings.image_size_thumb.text.username.font_size)
+                          .drawText(
+                            self.settings.image_size_thumb.text.username.x
+                            ,-(th/2) + self.settings.image_size_thumb.text.username.y
+                            ,img.user.username.toUpperCase(), 'center')
+                          .fontSize(self.settings.image_size_thumb.text.hashtag.font_size)
+                          .drawText(
+                            self.settings.image_size_thumb.text.hashtag.x
+                            ,-(th/2) + self.settings.image_size_thumb.text.hashtag.y
+                            ,self.settings.image_size_thumb.text.hashtag.text
+                            , 'center'
+                          )
+                          .write(thumb_file, function(err) {
+
+                            create_large();
+                          });
+
+                      });
+                    });
+                });
+
               }
               
             }, function() {
