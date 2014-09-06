@@ -10,8 +10,8 @@
     <mosaic_monitor>0</mosaic_monitor>
     <!-- WEBCAM -->
     <webcam_device>0</webcam_device>
-    <webcam_width>640</webcam_width>
-    <webcam_height>480</webcam_height>
+    <webcam_width>320</webcam_width>
+    <webcam_height>240</webcam_height>
     <!-- PATHS + MEMORY POOL-->
     <raw_filepath>raw_mosaic</raw_filepath>
     <raw_left_grid_filepath>raw_left</raw_left_grid_filepath>

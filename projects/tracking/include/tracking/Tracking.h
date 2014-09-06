@@ -1,3 +1,26 @@
+/*
+---------------------------------------------------------------------------------
+ 
+                                               oooo
+                                               `888
+                oooo d8b  .ooooo.  oooo    ooo  888  oooo  oooo
+                `888""8P d88' `88b  `88b..8P'   888  `888  `888
+                 888     888   888    Y888'     888   888   888
+                 888     888   888  .o8"'88b    888   888   888
+                d888b    `Y8bod8P' o88'   888o o888o  `V88V"V8P'
+ 
+                                                  www.roxlu.com
+                                             www.apollomedia.nl
+                                          www.twitter.com/roxlu
+ 
+---------------------------------------------------------------------------------
+
+  Tracking
+  ------
+
+  Interactive layer for the Mosaic. 
+    
+*/
 #ifndef ROXLU_TOPSHOP_TRACKING_H
 #define ROXLU_TOPSHOP_TRACKING_H
 
@@ -11,9 +34,7 @@
 #include <tinylib.h>
 #include <videocapture/CaptureGL.h>
 #include <tracker/Tracker.h>
-
-#define USE_TRACKER 1
-#define USE_BG 0
+#include <tracking/Tiles.h>
 
 namespace track {
 
@@ -30,15 +51,9 @@ namespace track {
     int width; 
     int height;
     int device;
-
     ca::CaptureGL capture;
-#if USE_TRACKER
     Tracker* tracker;
-#endif
-#if USE_BG 
-    BackgroundBuffer* bg;
-    Painter painter;
-#endif
+    Tiles tiles;
     bool needs_update;
     bool is_init;
   };
