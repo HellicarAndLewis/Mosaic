@@ -3,8 +3,8 @@
 
   ,"queue_url": "http://80.85.84.140/images/approved"
   ,"limit": 10
-  ,"request_delay": 5000
-  ,"image_save_delay": 1000
+  ,"request_delay": 2000
+  ,"image_save_delay": 500
   ,"request_timeout_restart": 60000
   
   ,"images_db": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tmp/images.json"
@@ -63,24 +63,25 @@
     
     ,"inner" : {
       
-      "width": 580
-      ,"height": 500
-      ,"x": 10
-      ,"y": 40
+      "width": 550
+      ,"height": 450
+      ,"x": 25
+      ,"y": 50
     }
     
     ,"text": {
       
       "username": {
-        "font_size": 10
+        "font_size": 25
         ,"x": 0
-        ,"y": 10
+        ,"y": 25
       }
       
       ,"hashtag": {
-        "font_size": 13
+        
+        "font_size": 25
         ,"x": 0
-        ,"y": 480
+        ,"y": 550
         ,"text": "#topshopwindow"
       }
     }

@@ -27,6 +27,7 @@ var ImageDownloader = new Class({
       .option('-d, --debug', 'Force debug console output')
       .option('-h, --homedir', 'Use homedir as base folder')
       .option('-c, --compare', 'Compare db with local files')
+      .option('-e, --empty', 'Empty all save dirs on start')
       .parse(process.argv);
     
     
@@ -38,98 +39,114 @@ var ImageDownloader = new Class({
     if(Program.settings) {
       file = Path.normalize(process.cwd() + '/' + Program.settings);
     }
-    
-    // TEMP
-    Fs.remove('/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/', function() {
 
-    // Check if file exists...
-    if(Fs.existsSync(file)) {
-    
-      // Include project file
-      self.settings = require(file);
-      
-      if(Program.debug) { this.settings.debug = true; }
-      
-      self.log('Started with settings ' + file);
-      
-      if(Program.homedir) {
-        
-        self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
-        self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
-        self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
-      }
-      
-      // Check if tmp dir exists
-      Fs.ensureDir(self.settings.image_tmp_path, function(err) {
-        
-        self.log('Checking tmp dir ' + self.settings.image_tmp_path);
-        
-        if(err) {
-          self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
+    var start_download = function() {
+
+        if(Program.debug) { self.settings.debug = true; }
+
+        self.log('Started with settings ' + file);
+
+        if(Program.homedir) {
+
+          self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
+          self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
+          self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
         }
-        
-        // Check if save dir exists
-        Fs.ensureDir(self.settings.image_save_path_users, function(err) {
 
-          self.log('Checking users dir ' + self.settings.image_save_path_users);
+        // Check if tmp dir exists
+        Fs.ensureDir(self.settings.image_tmp_path, function(err) {
+
+          self.log('Checking tmp dir ' + self.settings.image_tmp_path);
 
           if(err) {
-            self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
+            self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
           }
-          
-          Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
 
-            self.log('Checking tags dir ' + self.settings.image_save_path_tags);
+          // Check if users save dir exists
+          Fs.ensureDir(self.settings.image_save_path_users, function(err) {
+
+            self.log('Checking users dir ' + self.settings.image_save_path_users);
 
             if(err) {
-              self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
+              self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
             }
             
-            // Resize assets
-            
-            
-            self.thumbFilename = self.settings.image_overlay_thumb 
-              + '.' 
-              + self.settings.image_size_thumb.width 
-              + 'x' 
-              + self.settings.image_size_thumb.height 
-              + '.png';
-            
-            self.largeFilename = self.settings.image_overlay_large 
-              + '.' 
-              + self.settings.image_size_large.width 
-              + 'x' 
-              + self.settings.image_size_large.height 
-              + '.png';
-            
-            // .. thumb
-            Gm(self.settings.image_overlay_thumb)
-              .resize(self.settings.image_size_thumb.width, self.settings.image_size_thumb.height, '!')
-              .colors(256)
-              .write(self.thumbFilename, function(err) {
-            
-                // .. large
-                Gm(self.settings.image_overlay_large)
-                  .resize(self.settings.image_size_large.width, self.settings.image_size_large.height, '!')
-                  .write(self.largeFilename, function(err) {
+            // Check if tags save dir exists
+            Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
 
-                    // Start downloading!
-                    self.start();
-                  });
-                
-              });
-          });  
-        }); 
-      });
- 
+              self.log('Checking tags dir ' + self.settings.image_save_path_tags);
+
+              if(err) {
+                self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
+              }
+
+              // Resize assets
+              
+              // ..thumb filename
+              self.thumbFilename = self.settings.image_overlay_thumb 
+                + '.' 
+                + self.settings.image_size_thumb.width 
+                + 'x' 
+                + self.settings.image_size_thumb.height 
+                + '.png';
+              
+              // ..large filename
+              self.largeFilename = self.settings.image_overlay_large 
+                + '.' 
+                + self.settings.image_size_large.width 
+                + 'x' 
+                + self.settings.image_size_large.height 
+                + '.png';
+
+              // .. thumb
+              Gm(self.settings.image_overlay_thumb)
+                .resize(self.settings.image_size_thumb.width, self.settings.image_size_thumb.height, '!')
+                .colors(256)
+                .write(self.thumbFilename, function(err) {
+
+                  // .. large
+                  Gm(self.settings.image_overlay_large)
+                    .resize(self.settings.image_size_large.width, self.settings.image_size_large.height, '!')
+                    .write(self.largeFilename, function(err) {
+
+                      // Start downloading!
+                      self.start();
+                    });
+
+                });
+            });  
+          }); 
+        });
+    }
+  
+    // Check if file exists...
+    if(Fs.existsSync(file)) {
+
+      // Include project file
+      self.settings = require(file);
+
+      // Empty dirs
+      if(Program.empty) {
+
+        Fs.removeSync(self.settings.image_tmp_path);
+        Fs.removeSync(self.settings.image_save_path_users);
+        Fs.removeSync(self.settings.image_save_path_users_thumb);
+        Fs.removeSync(self.settings.image_save_path_users_large);
+        Fs.removeSync(self.settings.image_save_path_tags);
+        Fs.removeSync(self.settings.image_save_path_tags);
+        Fs.removeSync(self.settings.image_save_path_tags);
+      }
+
+      // Start
+      start_download(); 
+
     } else {
-    
+
       // No file found
       self.log('Could not find settings file at ' + file);
       process.exit(0);
     }
 
-    }); // TEMP
   }
   
   // 
@@ -180,11 +197,15 @@ var ImageDownloader = new Class({
         
         // .. no images
         } else {
-          
-          // Retry  
-          self.lastModIdMin = 0;
-          self.lastModIdMax = 0;
-          self.start();
+
+          setTimeout(function() {
+              
+            // Retry  
+            self.lastModIdMin = 0;
+            self.lastModIdMax = 0;
+            self.start();
+            
+          }, self.settings.request_delay);
           
           return;
         }
@@ -241,7 +262,6 @@ var ImageDownloader = new Class({
             current_images.shift();
           }
           
-          console.log(current_images.length);
           
           // Check if file exists
           var file_exists = (current_images.indexOf(img.media_id) >= 0);
@@ -388,7 +408,7 @@ var ImageDownloader = new Class({
                             , 'center'
                           )
                           .write(thumb_file, function(err) {
-
+                            //console.log('save');
                             create_large();
                           });
 
@@ -404,11 +424,10 @@ var ImageDownloader = new Class({
                 dl_img(queue);
               }, self.settings.image_save_delay);
             });
-          } else {
             
-            setTimeout(function() {
-              dl_img(queue);
-            }, self.settings.image_save_delay);
+          } else {
+
+            dl_img(queue);
           }
         };
         
