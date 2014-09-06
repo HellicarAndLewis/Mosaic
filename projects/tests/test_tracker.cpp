@@ -26,6 +26,7 @@
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>  
 
+#include <featurex/Config.h>
 #include <mosaic/Config.h>
 #include <topshop/Config.h>
 #include <tracking/Tracking.h>
@@ -94,8 +95,8 @@ int main() {
 
   mos::config.webcam_width = 320;
   mos::config.webcam_height = 240;
-  top::config.grid_rows = 4;
-  top::config.grid_cols = 10;
+  fex::config.rows = 4;
+  fex::config.cols = 10;
 
   track::Tracking tracking;
   tracking_ptr = &tracking;
@@ -143,7 +144,13 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
         RX_ERROR("invalid image index.");
         return;
       }
-      tracking_ptr->tiles.load(image_files[image_index]);
+      track::ImageOptions opt;
+      opt.filepath = image_files[image_index];
+      opt.x = rx_random(0, 400);
+      opt.y = rx_random(0, 400);
+//opt.x = 100;
+//opt.y = 100;
+      tracking_ptr->tiles.load(opt);
       ++image_index %= image_files.size();
       break;
       

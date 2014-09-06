@@ -110,13 +110,15 @@ namespace track {
     for (size_t i = 0; i < tracker->blobs.blobs.size(); ++i) {
 
       Blob& blob = tracker->blobs.blobs[i];
+      /*
       if (false == blob.matched) {
         continue;
       }
       
-      if (10 > blob.trail.size()) {
+      if (5 > blob.trail.size()) {
         continue;
-      }
+        }
+      */
       
       /* convert the position of the blob to a cell index. */
       cv::Point& pt = blob.position;
@@ -137,7 +139,7 @@ namespace track {
         /* new cell, make active. */
         //RX_VERBOSE("Activated: %d x %d, timeout: %llu", col, row, cell.timeout);
         on_activate(col, row, user);
-        cell.timeout = now + 3e9; /* this cell can be reused after X seconds (Xe9) */
+        cell.timeout = now + 1e9; /* this cell can be reused after X seconds (Xe9) */
       }
     }
   }

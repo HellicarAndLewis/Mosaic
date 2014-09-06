@@ -5,6 +5,9 @@ sd=${d}/mac-sources
 bd=${d}/../extern/mac-clang-x86_64
 id=${d}/../install/mac-clang-x86_64
 
+cflagsorig=${CFLAGS}
+ldflagsorig=${LDFLAGS}
+pathorig=${PATH}
 export PATH=${PATH}:${bd}/bin/:${sd}/gyp/
 export CFLAGS="-I${bd}/include"
 export LDFLAGS="-L${bd}/lib"
@@ -168,6 +171,15 @@ if [ ! -d ${sd}/imagemagick ] ; then
     curl -o imagemagick.tar.gz ftp://ftp.imagemagick.org/pub/ImageMagick/binaries/ImageMagick-x86_64-apple-darwin13.2.0.tar.gz
     tar -zxvf imagemagick.tar.gz
     mv ImageMagick-6.8.9 imagemagick
+fi
+
+# Download GraphicsMagick
+if [ ! -d ${sd}/graphicsmagick ] ; then
+    cd ${sd}
+    #curl -L -o gm.tar.gz ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-1.3.20.tar.gz
+    curl -L -o gm.tar.gz http://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/1.3.20/GraphicsMagick-1.3.20.tar.gz
+    tar -zxvf gm.tar.gz
+    mv GraphicsMagick-1.3.20 graphicsmagick
 fi
 
 # Fix ImageMagick dylibs + install
@@ -386,6 +398,9 @@ if [ -f ${sd}/curl.tar.gz ] ; then
 fi
 if [ -f ${sd}/jans.tar.gz ] ; then
     rm ${sd}/jans.tar.gz
+fi
+if [ -f ${sd}/gm.tar.gz ] ; then
+    rm ${sd}/gm.tar.gz
 fi
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
@@ -674,13 +689,26 @@ if [ ! -f ${bd}/lib/libjansson.a ] ; then
     cmake --build . --target install
 fi
 
+# Compile graphics magick, needs to use system paths/libs, cant use our png
+if [ ! -f ${bd}/bin/gm ] ; then
+    export PATH=${pathorig}
+    export CFLAGS=${cflagsorig}
+    export LDFLAGS=${ldflagsorig}
+    
+    cd ${sd}/graphicsmagick
+    ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
+    make
+    make install
+    export PATH=${pathcopy}
+    export CFLAGS=${cfcopy}
+    export LDFLAGS=${ldcopy}
+fi
+
 
 # cd ${sd}/cairo
 # if [ ! -f ./configure ] ; then
 #     ./autogen.sh
 # fi
-
-
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then
@@ -694,3 +722,5 @@ fi
 # Compile pixman
 #cd ${sd}/pixman
 #./autogen.sh
+
+

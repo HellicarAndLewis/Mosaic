@@ -102,9 +102,21 @@ namespace track {
     size_t allocated; /* how many bytes we can store in pixels. */
     bool is_free;
     float layer;
+    
+    int x;  /* where to position when created ? */
+    int y;  /* where to position when created ? */
   };
 
   /* ---------------------------------------------------------------- */
+
+  struct ImageOptions {
+    int x;
+    int y;
+    std::string filepath;
+  };
+
+  /* ---------------------------------------------------------------- */
+
 
   enum {
     VERTEX_STATE_NONE,
@@ -145,12 +157,13 @@ namespace track {
     void update();
     void draw();
     int shutdown();
-    int load(std::string filepath);
+    int load(ImageOptions& options);
     Image* getFreeImage();                      /* the images are loaded in a separate thread and when loaded the data is copied to the main thread so we can update the texture data. We reuse preallocated Images for this. Returns NULL on error */
     void lock();
     void unlock();
     void updateVertexState();
-    //int showTileAtPosition();
+    int showTileAtPosition(std::string filename, int x, int y);
+
   public:
     bool is_init;
     int tex_width;

@@ -17,6 +17,7 @@ namespace mos {
     ,nbytes(0)
     ,type(IMAGE_TASK_NONE)
     ,is_free(true)
+    ,user(NULL)
   {
     reset();
   }
@@ -33,6 +34,7 @@ namespace mos {
 
     pixels = 0;
     capacity = 0;
+    user = NULL;
   }
 
   int ImageTask::reset() {
@@ -43,7 +45,7 @@ namespace mos {
     channels = 0;
     is_free = true;
     nbytes = 0;
-
+    user = NULL;
     return 0;
   }
 
@@ -113,7 +115,7 @@ namespace mos {
     return 0;
   }
 
-  int ImageLoader::load(std::string filepath) {
+  int ImageLoader::load(std::string filepath, void* userData) {
 
     if (0 == filepath.size()) {
       RX_ERROR("Invalid file. size is 0.");
@@ -140,6 +142,7 @@ namespace mos {
     task->filepath = filepath;
     task->extension = ext;
     task->type = IMAGE_TASK_LOAD;
+    task->user = userData;
     
     return addWork(task);
   }
