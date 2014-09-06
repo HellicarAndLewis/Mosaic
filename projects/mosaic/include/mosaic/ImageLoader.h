@@ -49,6 +49,7 @@ extern "C" {
 #define ROXLU_USE_PNG
 #define ROXLU_USE_JPG
 #include <tinylib.h>
+#include <err.h>
 
 #define IMAGE_TASK_NONE 0x00
 #define IMAGE_TASK_LOAD 0x01      /* load a new image */
@@ -118,11 +119,17 @@ namespace mos {
   /* ---------------------------------------------------------------------------------- */
 
   inline void ImageLoader::lock() {
-    pthread_mutex_lock(&mutex);
+    int r = pthread_mutex_lock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Failed to lock the mutex in the image loader: %s", strerror(r));
+    }
   }
 
   inline void ImageLoader::unlock() {
-    pthread_mutex_unlock(&mutex);
+    int r = pthread_mutex_unlock(&mutex);
+    if (0 != r) {
+      RX_ERROR("Failed to unlock the mutex in the image loader: %s", strerror(r));
+    }
   }
 
 } /* namespace mos */

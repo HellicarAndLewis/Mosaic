@@ -20,8 +20,10 @@
 #define ROXLU_USE_MATH
 #define ROXLU_USE_FONT
 #define ROXLU_USE_OPENGL
+#define ROXLU_USE_CURL
 #include <tinylib.h>
 
+#define VIDEO_CAPTURE_USE_APPLE_RGB_422
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>
 
@@ -143,6 +145,11 @@ int main() {
 
   if (!gladLoadGL()) {
     printf("Cannot load GL.\n");
+    exit(1);
+  }
+
+  if (!GL_APPLE_rgb_422) {
+    RX_ERROR("It seems that the APPLE_RGB_422 extension is not loaded. Did you enable it with GLAD?");
     exit(1);
   }
 

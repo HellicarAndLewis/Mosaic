@@ -8,9 +8,7 @@ namespace track {
     ,device(0)
     ,is_init(false)
     ,needs_update(false)
-#if USE_TRACKER
     ,tracker(NULL)
-#endif
   {
   }
 
@@ -18,30 +16,20 @@ namespace track {
   }
   
   int Tracking::init(int dev, int w, int h) {
+
+    device = dev;
+    width = w;
+    height = h;
     
     if (true == is_init) {
       RX_ERROR("Cannot initialize because we're already initialized.");
       return -100;
     }
 
-#if USE_TRACKER
     if (NULL != tracker) {
       RX_ERROR("Tracker is not NULL, not supposed to happen.");
       return -101;
     }
-#endif
-
-    device = dev;
-    width = w;
-    height = h;
-
-#if USE_TRACKER    
-    tracker = new Tracker(width, height, 5);
-    if (NULL == tracker) {
-      RX_ERROR("Cannot allocate the tracker");
-      return -102;
-    }
-#endif
 
     if (0 == width || 0 == height) {
       RX_ERROR("Invalid width or height for the tracker. %d x %d", width, height);
@@ -53,12 +41,24 @@ namespace track {
       return -2;
     }
 
-    capture.listCapabilities(device);
-
     if (0 > capture.start()) {
       RX_ERROR("Cannot start the video capture.");
       capture.close();
       return -3;
+    }
+
+    tracker = new Tracker(width, height, 5);
+    if (NULL == tracker) {
+      RX_ERROR("Cannot allocate the tracker");
+      return -102;
+    }
+
+    if (0 != tiles.init()) {
+      RX_ERROR("Cannot init the tiles, see error messages above.");
+      capture.stop();
+      capture.close();
+      /* @todo - close tracker // free */
+      return -104;
     }
 
     is_init = true;
@@ -73,12 +73,16 @@ namespace track {
       return -1;
     }
 
-#if USE_TRACKER
     if (NULL != tracker) {
       delete tracker;
       tracker = NULL;
     }
-#endif
+
+    RX_ERROR("WE NEED TO SHUTDOWN THE WEBCAM AND TRACKER");
+
+    if (0 != tiles.shutdown()) {
+      RX_ERROR("Failed to shutdown the tiles renderer.");
+    }
 
     is_init = false;
 
@@ -94,39 +98,26 @@ namespace track {
     }
 #endif
 
+    tiles.update();
     needs_update = capture.needs_update;
-    RX_VERBOSE("Update: %d", needs_update);
-    capture.update();
   }
 
+  /* @todo only update the bg buffer when we have a new frame. */
   void Tracking::draw() {
 
-#if USE_TRACKER
-      tracker->beginFrame();
-        capture.draw();
-      tracker->endFrame();
-      tracker->apply();
-      tracker->draw();
-#else 
+    tracker->beginFrame();
+    {
+      capture.update();
       capture.draw();
-#endif
-
-      needs_update = false;
-
-      /*
-    if (true == needs_update) {
-      tracker->beginFrame();
-        capture.draw();
-      tracker->endFrame();
-      tracker->apply();
-      needs_update = false;
     }
-    else {
-      capture.draw();
-      tracker->draw();
-    }
-      */
 
+    tracker->endFrame();
+    tracker->apply();
+    tracker->draw();
+
+    tiles.draw();
+
+    needs_update = false;
   }
 
 } /* namespace t */

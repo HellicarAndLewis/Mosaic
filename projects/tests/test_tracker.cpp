@@ -22,6 +22,7 @@
 #define ROXLU_USE_OPENGL
 #include <tinylib.h>
 
+#define VIDEO_CAPTURE_USE_APPLE_RGB_422 
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>  
 
@@ -35,7 +36,9 @@ void char_callback(GLFWwindow* win, unsigned int key);
 void error_callback(int err, const char* desc);
 void resize_callback(GLFWwindow* window, int width, int height);
 
-track::Tracking tracking;
+track::Tracking* tracking_ptr = NULL;
+std::vector<std::string> image_files;
+size_t image_index = 0;
 
 int main() {
 
@@ -80,13 +83,22 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-
-  #if 0
-  GLint t;
+  /*
+  GLint t = 0;
   glGetIntegerv(GL_UNPACK_ALIGNMENT, &t);
-  printf("t: %d\n", t);
-  ::exit(0);
-  #endif 
+  printf("%d\n", t);
+  exit(0);
+  */
+
+  std::string files_path = rx_get_exe_path() +"/../data/input_mosaic/";
+  image_files = rx_get_files(files_path, "png");
+  if (0 == image_files.size()) {
+    RX_ERROR("Cannot find the image files: %lu", image_files.size());
+    ::exit(1);
+  }
+
+  track::Tracking tracking;
+  tracking_ptr = &tracking;
 
   if (0 != tracking.init(0, 320, 240)) {
     exit(EXIT_FAILURE);
@@ -119,7 +131,23 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
     return;
   }
 
+  if (NULL == tracking_ptr) {
+    RX_ERROR("Ignoring key callback because the tracking ptr is invalid.");
+    return;
+  }
+
   switch(key) {
+    case GLFW_KEY_SPACE: {
+      
+      if (image_index >= image_files.size()) {
+        RX_ERROR("invalid image index.");
+        return;
+      }
+      tracking_ptr->tiles.load(image_files[image_index]);
+      ++image_index %= image_files.size();
+      break;
+      
+    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;
