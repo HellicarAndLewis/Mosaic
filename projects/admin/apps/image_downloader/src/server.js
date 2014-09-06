@@ -10,8 +10,13 @@ var Fs = require('fs-extra');
 var Request = require('request');
 var Program = require('commander');
 var Path = require('path');
-var GGm = require('gm');
-var Gm = GGm.subClass({ imageMagick: true });
+var GGM = require('gm');
+var Gm = GGM.subClass({ imageMagick: true });
+
+Gm.prototype.compose = function(operator) {
+   this.command('composite'); // need to use composite over the node gm default convert
+   return this.out("-compose", operator);
+};
 
 var ImageDownloader = new Class({
   
@@ -101,10 +106,11 @@ var ImageDownloader = new Class({
 
               // .. thumb
               Gm(self.settings.image_overlay_thumb)
+                .antialias(true)
+                .blur('2x2')
                 .resize(self.settings.image_size_thumb.width, self.settings.image_size_thumb.height, '!')
-                .colors(256)
                 .write(self.thumbFilename, function(err) {
-
+                  console.log(err);
                   // .. large
                   Gm(self.settings.image_overlay_large)
                     .resize(self.settings.image_size_large.width, self.settings.image_size_large.height, '!')
@@ -242,10 +248,10 @@ var ImageDownloader = new Class({
           var dest_file_tags_json = self.settings.image_save_path_tags_json + img.media_id + '.json';
           
           var thumb_dir = (img.msg_type == 'tag') ? self.settings.image_save_path_tags_thumb : self.settings.image_save_path_users_thumb;
-          var thumb_file = thumb_dir + img.media_id + '.jpg';
+          var thumb_file = thumb_dir + img.media_id + '.png';
           
           var large_dir = (img.msg_type == 'tag') ? self.settings.image_save_path_tags_large : self.settings.image_save_path_users_large;
-          var large_file = large_dir + img.media_id + '.jpg';
+          var large_file = large_dir + img.media_id + '.png';
           
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
           var json_file = (img.msg_type == 'tag') ? dest_file_tags_json : dest_file_users_json;
@@ -315,14 +321,13 @@ var ImageDownloader = new Class({
                       .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
                       .write(large_file, function(err) {
 
-                        Gm()
-                        .in('-page', '+0+0')
-                        .in(self.largeFilename)
-                        .in('-page', '+'+ix+'+'+iy)
+                        Gm() 
+                        .geometry(tiw, tih, '+'+ix+'+'+iy)
                         .in(large_file)
-                        .in('-flatten')
+                        .in(self.largeFilename)
+                        .compose('Over')
                         .write(large_file, function(err) {
-
+                          console.log(err);
                           // Add text
                           Gm(large_file)
                             .font(self.settings.image_font)
