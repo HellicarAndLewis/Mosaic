@@ -10,7 +10,7 @@
     ,"hashtags": ["tswtest","fashion"]
     ,"users": ["vanillaicebucket"]
     ,"auto_approve_users": true
-    ,"request_delay": 2000
+    ,"request_delay": 4000
   }
   ,"http": {
     "host": "localhost"

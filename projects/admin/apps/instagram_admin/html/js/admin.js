@@ -228,7 +228,7 @@ var MosaicInstagramAdmin = Class.extend({
         self.retryRequest(self.messageType, 1, function() {
         
           $('#instagram-images').fadeOut(100, function() {
-            el.remove();
+        
             $('#instagram-images-overlay').fadeOut(100);
             $('#instagram-images').fadeIn(100, function() {
               self.locked = false; 
