@@ -150,6 +150,7 @@ namespace track {
     void lock();
     void unlock();
     void updateVertexState();
+    //int showTileAtPosition();
   public:
     bool is_init;
     int tex_width;

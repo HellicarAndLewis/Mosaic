@@ -2,6 +2,12 @@
 
 namespace track {
 
+  /* ---------------------------------------------------------------------------------- */
+
+  static void tracking_on_activate_cell(int i, int j, void* user); /* is called by the InteractiveGrid when we need to make a specific cell active */
+
+  /* ---------------------------------------------------------------------------------- */
+
   Tracking::Tracking() 
     :width(0)
     ,height(0)
@@ -9,6 +15,8 @@ namespace track {
     ,is_init(false)
     ,needs_update(false)
     ,tracker(NULL)
+    ,on_activate(NULL)
+    ,user(NULL)
   {
   }
 
@@ -61,6 +69,19 @@ namespace track {
       return -104;
     }
 
+    if (0 != interactive_grid.init(tracker, &tiles)) {
+      RX_ERROR("Cannot init the interactive grid.");
+      capture.stop();
+      capture.close();
+      tiles.shutdown();
+      delete tracker;
+      tracker = NULL;
+      return -105;
+    }
+
+    interactive_grid.user = this;
+    interactive_grid.on_activate = tracking_on_activate_cell;
+
     is_init = true;
     
     return 0;
@@ -78,12 +99,19 @@ namespace track {
       tracker = NULL;
     }
 
-    RX_ERROR("WE NEED TO SHUTDOWN THE WEBCAM AND TRACKER");
-
     if (0 != tiles.shutdown()) {
       RX_ERROR("Failed to shutdown the tiles renderer.");
     }
 
+    if (0 != interactive_grid.shutdown()) {
+      RX_ERROR("Failed to shutdown the interactive grid.");
+    }
+
+    capture.stop();
+    capture.close();
+
+    interactive_grid.user = NULL;
+    interactive_grid.on_activate = NULL;
     is_init = false;
 
     return 0;
@@ -98,7 +126,9 @@ namespace track {
     }
 #endif
 
+    interactive_grid.update();
     tiles.update();
+
     needs_update = capture.needs_update;
   }
 
@@ -118,6 +148,23 @@ namespace track {
     tiles.draw();
 
     needs_update = false;
+  }
+
+  /* ---------------------------------------------------------------------------------- */
+
+  static void tracking_on_activate_cell(int i, int j, void* user) {
+
+    Tracking* tracking = static_cast<Tracking*>(user);
+    if (NULL == tracking) {
+      RX_ERROR("Cannot get handle to Tracking.");
+      return;
+    }
+    if (NULL == tracking->on_activate) {
+      RX_ERROR("on_activate not set in Tracking.");
+      return;
+    }
+
+    tracking->on_activate(i, j, tracking->user);
   }
 
 } /* namespace t */

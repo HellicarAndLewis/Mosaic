@@ -26,6 +26,7 @@
 #define VIDEO_CAPTURE_IMPLEMENTATION
 #include <videocapture/CaptureGL.h>  
 
+#include <mosaic/Config.h>
 #include <topshop/Config.h>
 #include <tracking/Tracking.h>
 
@@ -83,12 +84,6 @@ int main() {
   // ----------------------------------------------------------------
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
-  /*
-  GLint t = 0;
-  glGetIntegerv(GL_UNPACK_ALIGNMENT, &t);
-  printf("%d\n", t);
-  exit(0);
-  */
 
   std::string files_path = rx_get_exe_path() +"/../data/input_mosaic/";
   image_files = rx_get_files(files_path, "png");
@@ -97,10 +92,15 @@ int main() {
     ::exit(1);
   }
 
+  mos::config.webcam_width = 320;
+  mos::config.webcam_height = 240;
+  top::config.grid_rows = 4;
+  top::config.grid_cols = 10;
+
   track::Tracking tracking;
   tracking_ptr = &tracking;
 
-  if (0 != tracking.init(0, 320, 240)) {
+  if (0 != tracking.init(0, mos::config.webcam_width, mos::config.webcam_height)) {
     exit(EXIT_FAILURE);
   }
 

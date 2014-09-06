@@ -42,21 +42,30 @@ namespace fex {
     Featurex();
     ~Featurex();
 
-    int init(GLuint inputTex);                /* initialize the analyzers; the inputTex is passed to the gpu analyzer. */
+    int init(GLuint inputTex);                               /* initialize the analyzers; the inputTex is passed to the gpu analyzer. */
     int shutdown(); 
     void draw();
 
     int analyzeCPU(std::string filepath);
     int analyzeGPU();
-    void match();                             /* when called, we use the current set of cpu/gpu descriptors to find the best matches. make sure to only call this when you actually updated the input. */
-    
+    void match();                                            /* when called, we use the current set of cpu/gpu descriptors to find the best matches. make sure to only call this when you actually updated the input. */
+    int getDescriptorGPU(int i, int j, Descriptor& out);     /* will return the descriptor for the given col and row, sets `out` and returns 0 on success else -1. */
+
   public:
     AnalyzerCPU analyzer_cpu;
     AnalyzerGPU analyzer_gpu;
     Comparator comp;
-    TilesPool tiles;                         /* the tiles pool contains the images that make up the mosiac. */
+    TilesPool tiles;                                          /* the tiles pool contains the images that make up the mosiac. */
     unsigned char* mosaic_pixels; 
   };
+
+  /* ----------------------------------------------------------------------------------- */
+
+  inline int Featurex::getDescriptorGPU(int i, int j, Descriptor& out) {
+    return analyzer_gpu.getDescriptor(i, j, out);
+  }
+
+  /* ----------------------------------------------------------------------------------- */
 
 } /* namespace fex */
 

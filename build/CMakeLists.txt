@@ -137,6 +137,7 @@ set(mosaic_lib_sources
 set(tracking_lib_sources
   ${track_sd}/Tracking.cpp
   ${track_sd}/Tiles.cpp
+  ${track_sd}/InteractiveGrid.cpp
 )
 
 # The TopShop application - "main application"

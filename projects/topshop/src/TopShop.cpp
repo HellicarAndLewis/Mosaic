@@ -5,9 +5,8 @@
 namespace top {
 
   /* ------------------------------------------------------------------------- */
-  
   static void on_new_file(ImageCollector* col, CollectedFile& file);         /* gets called when a file is ready to be shown in the mosaic. */
-
+  static void topshop_activate_cell(int i, int j, void* user);               /* gets called when we need to show the bigger version of the given cell, is called by the `interactive_grid` member of the Tracking layer. */
   /* ------------------------------------------------------------------------- */
   
   TopShop::TopShop() 
@@ -63,6 +62,8 @@ namespace top {
 
     img_collector.user = this;
     img_collector.on_file = on_new_file;
+    tracking.user = this;
+    tracking.on_activate = topshop_activate_cell;
 
     return 0;
   }
@@ -139,6 +140,23 @@ namespace top {
       RX_ERROR("Failed to add a new file for the cpu analyzer. Check messages above");
     }
   } 
+
+  static void topshop_activate_cell(int i, int j, void* user) {
+
+    TopShop* shop = static_cast<TopShop*>(user);
+    if (NULL == shop) {
+      RX_ERROR("Cannot get a valid TopShop handle");
+      return;
+    }
+
+    fex::Descriptor desc;
+    if (0 != shop->mosaic.featurex.getDescriptorGPU(i, j, desc)) {
+      RX_ERROR("Cannot get a descriptor for col: %d and row :%d", i, j);
+      return;
+    }
+
+    RX_VERBOSE("i: %d, j: %d --> %s", i, j, desc.getFilename().c_str());
+  }
 
   /* ------------------------------------------------------------------------- */
   

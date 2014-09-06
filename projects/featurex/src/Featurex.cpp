@@ -62,15 +62,12 @@ namespace fex {
     analyzer_cpu.on_analyzed = on_cpu_analyzed;
     analyzer_cpu.user = this;
 
-    /* BEGIN TESTING - LOAD FILES */                                
+    /* Load existing files. */
     /* -------------------------------------------------------------------------- */
-
     for (size_t i = 0; i < analyzer_cpu.descriptors.size(); ++i) {
       tiles.loadDescriptorTile(analyzer_cpu.descriptors[i]);
     }
-
     /* -------------------------------------------------------------------------- */
-    /* END TESTING - LOAD FILES */
     
     /* create the surface that will hold the mosaic pixels. */
     int nbytes = (fex::config.getMosaicImageWidth() * fex::config.getMosaicImageHeight()) * 4; 
@@ -167,7 +164,8 @@ namespace fex {
       if (0 != cdesc.id && gdesc.matched_id == cdesc.id) {
         continue;
       }
-      gdesc.matched_id = cdesc.id;
+      // gdesc.matched_id = cdesc.id;
+      gdesc.setFilename(cdesc.getFilename());
 
       Tile* tile = tiles.getTileForDescriptorID(cdesc.id);
       if (NULL == tile) {

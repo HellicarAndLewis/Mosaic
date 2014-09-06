@@ -126,5 +126,19 @@ namespace fex {
     return 0;
   }
 
+  /* get a descriptor for the given location. */
+  int AnalyzerGPU::getDescriptor(int i, int j, Descriptor& out) {
+
+    int dx = j * fex::config.cols + i;
+    if (dx >= descriptors.size()) {
+      RX_ERROR("You asked for a invalid index. Using col: %d, row: %d, calculated index: %d", i, j, dx);
+      return -1;
+    }
+
+    out = descriptors[dx];
+
+    return 0;
+  }
+
 
 } /* namespace fex */

@@ -37,10 +37,11 @@ namespace fex {
   public:
     AnalyzerGPU();
     ~AnalyzerGPU();
-    int init(GLuint inputTex);        /* initialize; settings the texture that we need to use to analyze. */
-    int shutdown();                   /* cleanup // stop */
-    int analyze();                    /* analyze the current input texture; only call this when the input texture has changed. */
-    void draw();                      /* draw some info to show the current state of the analyzer. */
+    int init(GLuint inputTex);                              /* initialize; settings the texture that we need to use to analyze. */
+    int shutdown();                                         /* cleanup // stop */
+    int analyze();                                          /* analyze the current input texture; only call this when the input texture has changed. */
+    void draw();                                            /* draw some info to show the current state of the analyzer. */
+    int getDescriptor(int i, int j, Descriptor& out);       /* get the descriptor for the given column/row. Sets `out` and returns 0 on success else < 0 */
 
   public:
     GLuint input_tex;

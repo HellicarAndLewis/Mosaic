@@ -35,6 +35,7 @@
 #include <videocapture/CaptureGL.h>
 #include <tracker/Tracker.h>
 #include <tracking/Tiles.h>
+#include <tracking/InteractiveGrid.h>
 
 namespace track {
 
@@ -51,11 +52,17 @@ namespace track {
     int width; 
     int height;
     int device;
+    bool needs_update;
+    bool is_init;
+
     ca::CaptureGL capture;
     Tracker* tracker;
     Tiles tiles;
-    bool needs_update;
-    bool is_init;
+    InteractiveGrid interactive_grid;
+    
+    /* wrapper around InteractiveGrid::on_activate */
+    activate_cell_callback on_activate;                        /* is called when the InteractiveGrid tells us to "activate" a cell which meens that we need to show the bigger version of a cell image. */
+    void* user;                                                /* gets passed into the on_activate function, see InteractiveGrid for the definition */ 
   };
 
 } /* namespace track */
