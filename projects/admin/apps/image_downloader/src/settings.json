@@ -8,8 +8,8 @@
   ,"request_timeout_restart": 60000
   
   ,"images_db": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tmp/images.json"
-  ,"image_overlay_thumb": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_thumb.jpg"
-  ,"image_overlay_large": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_large.jpg"
+  ,"image_overlay_thumb": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_thumb.png"
+  ,"image_overlay_large": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_large.png"
   
   ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tmp/"
   
@@ -41,12 +41,14 @@
     ,"text": {
       
       "username": {
+        
         "font_size": 10
         ,"x": 0
         ,"y": 10
       }
       
       ,"hashtag": {
+        
         "font_size": 13
         ,"x": 0
         ,"y": 183
@@ -63,25 +65,25 @@
     
     ,"inner" : {
       
-      "width": 550
-      ,"height": 450
-      ,"x": 25
+      "width": 490
+      ,"height": 430
+      ,"x": 55
       ,"y": 50
     }
     
     ,"text": {
       
       "username": {
-        "font_size": 25
+        "font_size": 15
         ,"x": 0
-        ,"y": 25
+        ,"y": 35
       }
       
       ,"hashtag": {
         
         "font_size": 25
         ,"x": 0
-        ,"y": 550
+        ,"y": 520
         ,"text": "#topshopwindow"
       }
     }
