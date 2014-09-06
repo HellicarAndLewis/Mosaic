@@ -11,10 +11,10 @@ var Request = require('request');
 var Program = require('commander');
 var Path = require('path');
 
-var Gm = require('gm');
+//var Gm = require('gm');
 
-//var GGM = require('gm');
-//var Gm = GGM.subClass({ imageMagick: true });
+var GGM = require('gm');
+var Gm = GGM.subClass({ imageMagick: true });
 
 Gm.prototype.compose = function(operator) {
    this.command('composite'); // need to use composite over the node gm default convert
