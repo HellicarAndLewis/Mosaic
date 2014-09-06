@@ -1,11 +1,65 @@
 {
   "debug": true
+
   ,"queue_url": "http://80.85.84.140/images/approved"
   ,"limit": 10
-  ,"request_delay": 4000
-  ,"request_timeout_restart": 30000
-  ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/tmp/"
-  ,"image_save_path_users": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/images/users/"
-  ,"image_save_path_tags": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/images/tags/"
-  ,"image_size": "standard_resolution"
+  ,"request_delay": 5000
+  ,"image_save_delay": 1000
+  ,"request_timeout_restart": 60000
+  
+  ,"images_db": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tmp/images.json"
+  ,"image_overlay_thumb": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_thumb.jpg"
+  ,"image_overlay_large": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/polaroid_large.jpg"
+  
+  ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tmp/"
+  
+  ,"image_save_path_users": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/users/"
+  ,"image_save_path_users_thumb": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/users/thumb/"
+  ,"image_save_path_users_large": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/users/large/"
+  
+  ,"image_save_path_tags": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tags/"
+  ,"image_save_path_tags_thumb": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tags/thumb/"
+  ,"image_save_path_tags_large": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tags/large/"
+  
+  ,"image_size_download": "standard_resolution"
+  
+  ,"image_font": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/assets/OpenSans-Semibold.ttf"
+  
+  ,"image_size_thumb": {
+    
+    "width": 200
+    ,"height": 200
+    
+    ,"inner" : {
+      
+      "width": 180
+      ,"height": 150
+      ,"x": 10
+      ,"y": 20
+    }
+    
+    ,"text": {
+      
+      "username": {
+        "font_size": 10
+        ,"x": 0
+        ,"y": 10
+      }
+      
+      ,"hashtag": {
+        "font_size": 13
+        ,"x": 0
+        ,"y": 183
+        ,"text": "#topshopwindow"
+      }
+    }
+    
+  }
+  
+  ,"image_size_large": {
+    
+    "width": 600
+    ,"height": 600
+  }
+  
 }
