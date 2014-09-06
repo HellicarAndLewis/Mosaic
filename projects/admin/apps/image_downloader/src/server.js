@@ -10,7 +10,8 @@ var Fs = require('fs-extra');
 var Request = require('request');
 var Program = require('commander');
 var Path = require('path');
-var Gm = require('gm');
+var GGm = require('gm');
+var Gm = GGm.subClass({ imageMagick: true });
 
 var ImageDownloader = new Class({
   
