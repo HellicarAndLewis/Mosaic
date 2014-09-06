@@ -323,7 +323,10 @@ var ImageDownloader = new Class({
                       .resize(tw, th)
                       .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
                       .write(large_file, function(err) {
-
+                        if(err) {
+                          console.log('err in large file');
+                          console.log(err);
+                        }
                         Gm() 
                         .geometry(tiw, tih, '+'+ix+'+'+iy)
                         .in(large_file)

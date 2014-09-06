@@ -22,7 +22,6 @@
     "node": "v0.10.x"
   },
   "dependencies": {
-    "forever": "0.11.1",
     "mootools": "1.4.5",
     "cli-color": "0.3.2",
     "commander": "2.3.0",
