@@ -215,13 +215,13 @@ namespace track {
           /* -------------------------- */
           p->must_remove = false;
           p->layer = free_layer;
-          p->position.set(rx_random(0,400), rx_random(0, 400));
+          p->position.set(img->x, img->y); // rx_random(0,400), rx_random(0, 400));
           p->start_time = rx_millis();
           p->state = VERTEX_STATE_TWEEN_IN;
           p->t = 0.0f;                      /* current time */
-          p->d = 1.0f;                      /* duration */
+          p->d = 0.3f;                      /* duration */
           p->b = 0;                         /* start */
-          p->c = 50;                        /* change */
+          p->c = 100;                       /* change */
           p->age = 0.0f; 
           /* ------------------------- */
           
@@ -291,12 +291,13 @@ namespace track {
     while (it != particles.end()) {
       Particle& p = *(*it);
       float dt = now - (p.start_time + p.d);
-      if (VERTEX_STATE_TWEEN_IN == p.state && dt > 1.0) {
+      /* start the tween out with a `dt` sec delay */
+      if (VERTEX_STATE_TWEEN_IN == p.state && dt > 0.4) {
         p.state = VERTEX_STATE_TWEEN_OUT;
         p.start_time = rx_millis();
-        p.d = 2.5f;
+        p.d = 0.5f;
         p.b = p.b + p.c;
-        p.c = -50;
+        p.c = -100;
         t = 0.0f;
       }
       ++it;
@@ -319,6 +320,8 @@ namespace track {
   }
 
   int Tiles::shutdown() {
+
+    RX_VERBOSE("Shutting down the Tiles");
 
     if (false == is_init) {
       RX_ERROR("Cannot shutdown because we're not initialized.");
@@ -360,36 +363,55 @@ namespace track {
     return 0;
   }
 
-  int Tiles::load(std::string filepath) {
+  int Tiles::load(ImageOptions& opt) {// std::string filepath) {
 
     if (false == is_init) {
       RX_ERROR("Canot load image, we're not initialized");
       return -1;
     }
 
-    if (0 == filepath.size()) {
+    if (0 == opt.filepath.size()) {
       RX_ERROR("Invald filepath, is empty.");
       return -2;
     }
 
-    if (false == rx_file_exists(filepath)) {
-      RX_ERROR("The given filepath doesn't exist: %s", filepath.c_str());
+    if (false == rx_file_exists(opt.filepath)) {
+      RX_ERROR("The given filepath doesn't exist: %s", opt.filepath.c_str());
       return -3;
     }
 
-    std::string ext = rx_get_file_ext(filepath);
+    std::string ext = rx_get_file_ext(opt.filepath);
     if (ext != "png") {
       RX_ERROR("The tile images have to be PNGs with 4 channels.");
       return -4;
     }
 
-    if (0 != img_loader.load(filepath)) {
-      RX_ERROR("The threaded image loader rejected the file: %s", filepath.c_str());
+    /* 
+       @todo we're not keeping track of created image options; 
+       this means that when the image loader doesn't call our callback
+       (on_image_loaded) we're leaking memory! */
+       
+    ImageOptions* io = new ImageOptions();
+    if (NULL == io) {
+      RX_ERROR("Cannot allocate an image option.");
+      return -5;
+    }
+    io->x = opt.x;
+    io->y = opt.y;
+
+    if (0 != img_loader.load(opt.filepath, io)) {
+      RX_ERROR("The threaded image loader rejected the file: %s", opt.filepath.c_str());
       return -5;
     }
 
     return 0;
   }
+
+  /*
+  int Tiles::showTileAtPosition(std::string filename, int x, int y) {
+
+  }
+  */
 
   Image* Tiles::getFreeImage() {
     if (false == is_init) {
@@ -448,16 +470,24 @@ namespace track {
   static void on_image_loaded(mos::ImageTask* task, void* user) {
     RX_VERBOSE("Loaded an image!");
     RX_ERROR("Check if the texture width/height is correct");
+    Image* img = NULL;
+    ImageOptions* io = static_cast<ImageOptions*>(task->user);
+    if (NULL == io) {
+      RX_ERROR("The image options are invalid. Not supposed to happen!");
+      return;
+    }
+
+    RX_VERBOSE("LOADED IMAGE OPTIONS: %d x %d", io->x, io->y);
 
     Tiles* tiles = static_cast<Tiles*>(user);
     if (NULL == tiles) {
       RX_ERROR("Cannot get the handle to Tiles");
-      return;
+      goto error;
     }
 
     if (task->width != tiles->tex_width) {
       RX_ERROR("We loaded an invalid image, wrong width. We expect: %d and got: %d", tiles->tex_width, task->width);
-      return;
+      goto error;
     }
 
     if (task->height != tiles->tex_height) {
@@ -465,7 +495,7 @@ namespace track {
       return;
     }
 
-    Image* img = tiles->getFreeImage();
+    img = tiles->getFreeImage();
     if (NULL == img) {
       RX_ERROR("Cannot get a free image for the track::Tiles");
       return;
@@ -476,16 +506,28 @@ namespace track {
       tiles->lock();
       img->is_free = true;
       tiles->unlock();
-      return;
+      goto error;
     }
 
+    /* Set custom image specs here! */               
+    /* ---------------------- */
     memcpy(img->pixels, task->pixels, task->nbytes);
+    img->x = io->x;
+    img->y = io->y;
+    /* ---------------------- */
+
     RX_VERBOSE("Copied pixels that we need to update!");
 
     /* make sure the main thread knows that we must update. */
     tiles->lock();
       tiles->must_update = true;
     tiles->unlock();
+
+  error:
+    if (NULL != io) {
+      delete io;
+      io = NULL;
+    }
   }
 
 } /* namespace track */

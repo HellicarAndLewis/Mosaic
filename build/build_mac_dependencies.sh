@@ -689,6 +689,7 @@ if [ ! -f ${bd}/lib/libjansson.a ] ; then
     cmake --build . --target install
 fi
 
+# Compile graphics magick, needs to use system paths/libs, cant use our png
 if [ ! -f ${bd}/bin/gm ] ; then
     export PATH=${pathorig}
     export CFLAGS=${cflagsorig}

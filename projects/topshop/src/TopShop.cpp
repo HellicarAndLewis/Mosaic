@@ -143,6 +143,13 @@ namespace top {
 
   static void topshop_activate_cell(int i, int j, void* user) {
 
+#if !defined(NDEBUG)
+    if (0 == mos::config.window_width || 0 == mos::config.window_height || 0 == fex::config.cols || 0 == fex::config.rows) {
+      RX_ERROR("Invalid config; check window_width, window_height, fex::config.cols, fex::config.rows");
+      return;
+    }
+#endif
+
     TopShop* shop = static_cast<TopShop*>(user);
     if (NULL == shop) {
       RX_ERROR("Cannot get a valid TopShop handle");
@@ -153,6 +160,22 @@ namespace top {
     if (0 != shop->mosaic.featurex.getDescriptorGPU(i, j, desc)) {
       RX_ERROR("Cannot get a descriptor for col: %d and row :%d", i, j);
       return;
+    }
+
+    std::string filepath = fex::config.resized_filepath +"/" +desc.getFilename();
+    if (false == rx_file_exists(filepath)) {
+      RX_ERROR("Cannot find the file: %s for the bigger grid version", filepath.c_str());
+      return;
+    }
+
+    float col_w = float(mos::config.window_width) / fex::config.cols;
+    float col_h = float(mos::config.window_height) / fex::config.rows;
+    track::ImageOptions img_opt;
+    img_opt.x = col_w * i;
+    img_opt.y = col_h * j;
+    img_opt.filepath = filepath;
+    if (0 != shop->tracking.tiles.load(img_opt)) {
+      RX_ERROR("Something went wrong while trying to load %s", filepath.c_str());
     }
 
     RX_VERBOSE("i: %d, j: %d --> %s", i, j, desc.getFilename().c_str());

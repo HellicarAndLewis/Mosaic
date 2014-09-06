@@ -82,6 +82,7 @@ namespace mos {
     int channels;                  /* number of channels in the image. */ 
     int capacity;                  /* how many bytes can be stored in pixels */
     int nbytes;                    /* how many bytes were loaded. */
+    void* user;                    /* can be set to any user data. */  
   };
 
   /* ---------------------------------------------------------------------------------- */
@@ -91,14 +92,14 @@ namespace mos {
   public:
     ImageLoader();
     ~ImageLoader();
-    int init();                            /* initialize */
-    int load(std::string filepath);        /* load the given filepath in a separate thread */
-    int shutdown();                        /* cleanup, stop thread, frees allocated mem. */
-    void lock();                           /* locks our mutex for shared resources. */
-    void unlock();                         /* unlock the mutex */
-
-    ImageTask* getFreeTask();              /* used internally; creates or returns an free task */
-    int addWork(ImageTask* task);          /* add some work to the queue; used internally. */
+    int init();                                                   /* initialize */
+    int load(std::string filepath, void* userData = NULL);        /* load the given filepath in a separate thread */
+    int shutdown();                                               /* cleanup, stop thread, frees allocated mem. */
+    void lock();                                                  /* locks our mutex for shared resources. */
+    void unlock();                                                /* unlock the mutex */
+                                                                  
+    ImageTask* getFreeTask();                                     /* used internally; creates or returns an free task */
+    int addWork(ImageTask* task);                                 /* add some work to the queue; used internally. */
 
   public:
 
@@ -112,8 +113,8 @@ namespace mos {
     std::vector<ImageTask*> work;
 
     /* callback */
-    imageloader_on_loaded on_loaded;      /* gets called when an image has been loaded. */
-    void* user;                           /* gets passed into the on_loaded function. */
+    imageloader_on_loaded on_loaded;                              /* gets called when an image has been loaded. */
+    void* user;                                                   /* gets passed into the on_loaded function. */
   };
 
   /* ---------------------------------------------------------------------------------- */
