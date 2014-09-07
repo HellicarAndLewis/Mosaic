@@ -713,8 +713,6 @@ if [ ! -f ${bd}/bin/gm ] ; then
     export LDFLAGS=${ldflagsorig}
     
     cd ${sd}/graphicsmagick
-#   export LIBS="-ljpeg"
-#   export CFLAGS="-I${bd}/include/"
     ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
     make
     make install
@@ -742,27 +740,26 @@ if [ ! -d ${bd}/include/pixman-1 ] ; then
     make install
 fi
 
-exit
+if [ ! -f ${bd}/lib/libcairo.a ] ; then 
+    export PKG_CONFIG=${bd}/bin/pkg-config
+    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
+    export pixman_CFLAGS=-I${bd}/include/pixman-1/
+    export pixman_LIBS="-l${bd}/lib/libpixman-1.a"
+    cd ${sd}/cairo
+    if [ ! -f ./configure ] ; then
+        ./autogen.sh
+    fi
 
-export PKG_CONFIG=${bd}/bin/pkg-config
-export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
-export pixman_CFLAGS=-I${bd}/include/pixman-1/
-export pixman_LIBS="-l${bd}/lib/libpixman-1.a"
-cd ${sd}/cairo
-if [ ! -f ./configure ] ; then
-    ./autogen.sh
+    ./configure \
+        --prefix=${bd} \
+        --disable-dependency-tracking \
+        --disable-xlib \
+        --enable-static=yes \
+        --enable-shared=no
+    make
+    make install
 fi
 
-#export PATH=${PATH}:${bd}/bin
-
-./configure \
-    --prefix=${bd} \
-    --disable-dependency-tracking \
-    --disable-xlib \
-    --enable-static=yes \
-    --enable-shared=no
-#make
-make install
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then

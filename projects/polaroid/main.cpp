@@ -457,7 +457,6 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-
 template<class T> static T convert_type(char* input) {
   T out;
 
