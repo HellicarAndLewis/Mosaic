@@ -1,7 +1,7 @@
 <settings group="screens3">
   <group name="screens3">
     <!-- GENERAL -->
-    <fullscreen>0</fullscreen>
+    <fullscreen>1</fullscreen>
     <window_width>1920</window_width>
     <window_height>1080</window_height> 
     <log_level>4</log_level>
