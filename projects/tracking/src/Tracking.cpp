@@ -143,7 +143,7 @@ namespace track {
 
     tracker->endFrame();
     tracker->apply();
-    tracker->draw();
+    //    tracker->draw();
 
     tiles.draw();
 

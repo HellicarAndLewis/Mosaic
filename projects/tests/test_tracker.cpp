@@ -13,7 +13,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define USE_POLAROID 0
+#define USE_POLAROID 1
 
 #define ROXLU_IMPLEMENTATION
 #define ROXLU_USE_LOG
@@ -159,10 +159,10 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       opt.x = rx_random(0, 400);
       opt.y = rx_random(0, 400);
       opt.mode = track::IMAGE_MODE_FLY;
-      opt.tween_x.set(1.0f, win_w * 0.5, rx_random(0, 600));
-      opt.tween_y.set(1.0f, win_h, rx_random(0, -600));
+      opt.tween_x.set(1.0f, win_w * 0.5, rx_random(-600, 600));
+      opt.tween_y.set(1.0f, win_h, rx_random(-300, -600));
       opt.tween_angle.set(1.0f, 0.0, rx_random(-HALF_PI, HALF_PI));
-      opt.tween_size.set(1.0f, 0.0f, 400.0f);
+      opt.tween_size.set(1.0f, 0.0f, 200.0f);
 
       tracking_ptr->tiles.load(opt);
 
