@@ -9,7 +9,7 @@
     ,"client_secret": "b696e197298c400b92e10a303a07d797"
     ,"hashtags": ["tswtest","fashion"]
     ,"users": ["vanillaicebucket"]
-    ,"auto_approve_users": true
+    ,"auto_approve_users": false
     ,"request_delay": 4000
   }
   ,"http": {

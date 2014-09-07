@@ -5,7 +5,6 @@
   <meta name="author" content="Hellicar & Lewis + Apollo" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
   <title>Mosaic Instagram Admin</title>
-  
 
   <link rel="stylesheet" href="/admin/css/admin.css">
   <link rel="stylesheet" href="/admin/css/font-awesome.min.css">
@@ -18,10 +17,12 @@
 <body>
   <div class="logo"></div>
   <ul class="menu {{? it.auto_approve_users == true }}one-item{{?}}">
-    <li id="instagram-menu-tags" {{? it.msg_type == "tag" }}class="selected"{{?}}><a href="/admin/tags"><i class="fa fa-tags"></i>Tags</a></li>
+    <li id="instagram-menu-tags" {{? it.msg_type == "tag" }}class="selected"{{?}}><a href="/admin/tags"><i class="fa fa-tags"></i></a></li>
     {{? it.auto_approve_users == false }}
-    <li id="instagram-menu-users" {{? it.msg_type == "user" }}class="selected"{{?}}><a href="/admin/users"><i class="fa fa-users"></i>Users</a></li>
+    <li id="instagram-menu-users" {{? it.msg_type == "user" }}class="selected"{{?}}><a href="/admin/users"><i class="fa fa-users"></i></a></li>
     {{?}}
+    <li id="instagram-menu-settings"><a href="/admin/settings"><i class="fa fa-cog"></i></a></li>
+    <li id="instagram-menu-logout"><a id="logout-menu-link" href="#"><i class="fa fa-times-circle"></i></a></li>
   </ul>
   <div class="container">
     <div class="instagram-images-container">

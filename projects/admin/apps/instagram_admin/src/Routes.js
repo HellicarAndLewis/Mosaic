@@ -95,11 +95,45 @@ var Admin = new Class({
     
     // Login form
     this.router.get('/login', function(req, res) {
-      self.app.iaid = ObjectID();
       req.session.iaid = '';
       Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
         res.send(text);
       });
+    });
+    
+    // Logout
+    this.router.get('/logout', function(req, res) {
+      
+      req.session.iaid = '';
+      res.redirect('/login');
+    });
+    
+    this.router.get('/logout/:resetid', function(req, res) {
+      
+      req.session.iaid = '';
+      
+      if(req.params.resetid == '0' || req.params.resetid == 0) {
+        
+        res.redirect('/login');
+        
+      } else {
+        
+        var collection = self.app.db.collection('instagram');
+        collection.update(
+          {_id:ObjectID(req.params.resetid)}
+          ,{$set:{
+            locked: false
+            ,reviewed: false
+            ,approved: false
+          }}
+          ,{w:1}
+          ,function() {
+
+            Console.status('image unlocked: ' + req.params.resetid);
+            res.redirect('/login');
+        });
+      }
+      
     });
     
     // Login form post
@@ -128,6 +162,11 @@ var Admin = new Class({
     this.router.get('/admin', this.validate.bind(this), function(req, res) {
       
       res.redirect('/admin/tags');
+    });
+    
+    // Settings route
+    this.router.get('/admin/settings', this.validate.bind(this), function(req, res) {
+      
     });
     
     // Tags route
@@ -213,7 +252,11 @@ var Admin = new Class({
 
         collection.update(
           {_id:{$in:docs_ids}}
-          ,{$set:{locked: false, reviewed: false}}
+          ,{$set:{
+            locked: false
+            ,reviewed: false
+            ,approved: false
+          }}
           ,{w:1, multi:true}
           ,function() {
 
