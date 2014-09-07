@@ -231,9 +231,7 @@ var ImageDownloader = new Class({
               
               var stats = Fs.statSync(tmp_file)
               var size = stats['size'];
-              
-              
-              
+  
               // Invalid image size
               if(size < 1000) {
                 
