@@ -47,6 +47,7 @@ static const char* TRACK_TILES_VS = ""
   "layout( location = 1 ) in vec2 a_size;"
   "layout( location = 2 ) in int a_layer;"
   "layout( location = 3 ) in float a_age;"
+  "layout( location = 3 ) in float a_angle;"
   "out vec2 v_tex;"
   "out float v_layer;"
 
@@ -66,6 +67,9 @@ static const char* TRACK_TILES_VS = ""
 
   "void main() {"
   "  vec2 offset = pos[gl_VertexID];"
+  "  float ct = cos(a_angle);"
+  "  float st = sin(a_angle);"
+  "  float xx = ct * offset.x - st * offset.y;"
   "  gl_Position = u_pm * vec4(a_pos.x + (offset.x * a_size.x), "
   "                            a_pos.y + (offset.y * a_size.y),  "
   "                            0.0, "
@@ -129,6 +133,7 @@ namespace track {
     vec2 size;
     int layer;                               /* what texture array layer, indicates what texture to use, < 0 means the vertex is not used. */
     float age;
+    float angle;                             /* the z-rotation. */
   };
 
   struct Particle {
@@ -136,6 +141,7 @@ namespace track {
     vec2 size;
     int layer;
     float age;
+    float angle;
 
     /* tween values. */
     float start_time;                        /* time when the vertex was initialized.*/

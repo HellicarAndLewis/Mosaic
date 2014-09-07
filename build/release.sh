@@ -67,8 +67,9 @@ fi
 #./test_grid
 #./test_png_rgba
 #./test_ogg_player
-#./test/test_tracker
+./test/test_tracker
+#./test/test_cairo
 #./AppMosaic
 #./AppGridLeft
 #./AppGridRight
-./test/Polaroid
+

@@ -15,14 +15,17 @@ namespace track {
   }
 
   Image::~Image() {                             
-    layer = 0;
-    is_free = false;
 
     if (NULL != pixels) {
       delete[] pixels;
     }
     pixels = NULL;
+
+    layer = 0;
+    is_free = false;
     allocated = 0;
+    x = 0;
+    y = 0;
   }
 
   /* ---------------------------------------------------------------------------------- */
@@ -97,14 +100,17 @@ namespace track {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 8); /* size */
     glVertexAttribIPointer(2, 1, GL_INT, sizeof(Vertex), (GLvoid*) 16); /* layer */
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 20); /* age */
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 28); /* angle */
     glEnableVertexAttribArray(0); /* pos */
     glEnableVertexAttribArray(1); /* size */
     glEnableVertexAttribArray(2); /* layer */
     glEnableVertexAttribArray(3); /* age */
+    glEnableVertexAttribArray(4); /* angle */
     glVertexAttribDivisor(0, 1); /* pos */
     glVertexAttribDivisor(1, 1); /* size */
     glVertexAttribDivisor(2, 1); /* layer */
-    glVertexAttribDivisor(3, 1); /* layer */
+    glVertexAttribDivisor(3, 1); /* age */
+    glVertexAttribDivisor(4, 1); /* angle */
 
     vert = rx_create_shader(GL_VERTEX_SHADER, TRACK_TILES_VS);
     frag = rx_create_shader(GL_FRAGMENT_SHADER, TRACK_TILES_FS);
@@ -223,6 +229,7 @@ namespace track {
           p->b = 0;                         /* start */
           p->c = 100;                       /* change */
           p->age = 0.0f; 
+          p->angle = HALF_PI;
           /* ------------------------- */
           
         }
@@ -274,6 +281,7 @@ namespace track {
       vertices[dx].size = p.size;
       vertices[dx].position = p.position;
       vertices[dx].layer = p.layer;
+      vertices[dx].angle = p.angle;
 
       dx++;
       ++it;
