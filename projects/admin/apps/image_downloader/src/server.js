@@ -25,9 +25,7 @@ var ImageDownloader = new Class({
       .version('0.0.1')
       .option('-s, --settings [path]', 'Start with custom settings file')
       .option('-d, --debug', 'Force debug console output')
-      .option('-h, --homedir', 'Use homedir as base folder')
       .option('-c, --compare', 'Compare db with local files')
-      .option('-e, --empty', 'Empty all save dirs on start')
       .parse(process.argv);
     
     
@@ -46,12 +44,6 @@ var ImageDownloader = new Class({
 
         self.log('Started with settings ' + file);
 
-        if(Program.homedir) {
-
-          self.settings.image_tmp_path = Path.normalize(process.env['HOME'] + '/' + self.settings.image_tmp_path);
-          self.settings.image_save_path_users = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_users);
-          self.settings.image_save_path_tags = Path.normalize(process.env['HOME'] + '/' + self.settings.image_save_path_tags);
-        }
 
         // Check if tmp dir exists
         Fs.ensureDir(self.settings.image_tmp_path, function(err) {
@@ -62,27 +54,19 @@ var ImageDownloader = new Class({
             self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
           }
 
-          // Check if users save dir exists
-          Fs.ensureDir(self.settings.image_save_path_users, function(err) {
+          // Check if raw save dir exists
+          Fs.ensureDir(self.settings.image_raw_path, function(err) {
 
-            self.log('Checking users dir ' + self.settings.image_save_path_users);
+            self.log('Checking raw save dir ' + self.settings.image_raw_path);
 
             if(err) {
-              self.log('Users dir ' + self.settings.image_save_path_users + 'is not ok');
+              self.log('Raw save dir ' + self.settings.image_raw_path + 'is not ok');
             }
-            
-            // Check if tags save dir exists
-            Fs.ensureDir(self.settings.image_save_path_tags, function(err) {
+         
 
-              self.log('Checking tags dir ' + self.settings.image_save_path_tags);
-
-              if(err) {
-                self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
-              }
-
-              // Start downloading!
-              self.start();
-            });  
+            // Start downloading!
+            self.start();
+ 
           }); 
         });
     }
@@ -190,17 +174,7 @@ var ImageDownloader = new Class({
           // Set all paths
           // -----------------------------------------------------------------------------
           var tmp_file = self.settings.image_tmp_path + img.media_id + '.jpg';
-          
-          var dest_file_users = self.settings.image_save_path_users + img.media_id + '.jpg';
-          var dest_file_tags = self.settings.image_save_path_tags + img.media_id + '.jpg';
-          
-          var thumb_dir = (img.msg_type == 'tag') ? self.settings.image_save_path_tags_thumb : self.settings.image_save_path_users_thumb;
-          var thumb_file = thumb_dir + img.media_id + '.png';
-          
-          var large_dir = (img.msg_type == 'tag') ? self.settings.image_save_path_tags_large : self.settings.image_save_path_users_large;
-          var large_file = large_dir + img.media_id + '.png';
-          
-          var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
+          var dest_file = self.settings.image_raw_path + img.media_id + '.jpg';
           
           // -----------------------------------------------------------------------------
           
@@ -225,7 +199,7 @@ var ImageDownloader = new Class({
             // Download image
             //self.log('Trying to download ' + img.images[self.settings.image_size_download].url);
             
-            self.download(img.images[self.settings.image_size_download].url, tmp_file, function(err) {
+            self.download(img.images['standard_resolution'].url, tmp_file, function(err) {
               
               var stats = Fs.statSync(tmp_file)
               var size = stats['size'];
@@ -248,8 +222,8 @@ var ImageDownloader = new Class({
               // Valid size
               } else {
                 
-                Fs.outputJson(self.settings.image_json_path, {user: img.user, tags:img.tags}, function() {
-                  
+                Fs.outputJson(self.settings.image_json_path + img.media_id + '.json', {user:img.user,tags:img.tags}, function(err) {
+                
                   // Move image from tmp to save dir
                   Fs.copy(tmp_file, dest_file, function() {
 

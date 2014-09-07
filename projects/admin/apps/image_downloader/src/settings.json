@@ -7,6 +7,8 @@
   ,"image_save_delay": 500
   ,"request_timeout_restart": 60000
   
+  ,"images_db": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/tmp/images.json"
+  ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/tmp/"
   ,"image_json_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/json/"
   ,"image_raw_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/"
 
