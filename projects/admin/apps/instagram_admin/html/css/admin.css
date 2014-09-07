@@ -118,8 +118,8 @@ ul.menu {
   position: absolute;
   left: 50%;
   top: 10px;
-  width: 260px;
-  margin-left: -130px;
+  width: 270px;
+  margin-left: -135px;
 }
 
 ul.menu.one-item {
@@ -127,30 +127,35 @@ ul.menu.one-item {
   position: absolute;
   left: 50%;
   top: 10px;
-  width: 130px;
-  margin-left: -65px;
+  width: 200px;
+  margin-left: -100px;
 }
 
 ul.menu li {
   
-  width: 120px;
+  width: 60px;
   float: left;
   height: 40px;
   margin-right: 10px;
 }
 
+ul.menu li:last-child {
+  
+  margin-right: 0;
+}
+
 ul.menu li a {
   
   display: block;
-  width: 120px;
-  height: 40px;
-  padding-top: 10px;
+  width: 60px;
+  height: 27px;
+  padding-top: 13px;
   border-radius: 10px 10px 0px 0px;
   background: #000;
   text-align: center;
   text-decoration: none;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 20px;
+  font-size: 15px;
   color: #828282;
   
   background: rgb(226,226,226); /* Old browsers */
@@ -174,12 +179,19 @@ ul.menu li.selected a {
   background: linear-gradient(to bottom,  rgba(59,103,158,1) 0%,rgba(43,136,217,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
   color: #fff;
-
 }
 
-ul.menu li a i {
+li#instagram-menu-logout a {
   
-  margin-right: 5px;
+  background: #f85032; /* Old browsers */
+  background: -moz-linear-gradient(top,  #f85032 0%, #f16f5c 50%, #f6290c 51%, #f02f17 71%, #e73827 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f85032), color-stop(50%,#f16f5c), color-stop(51%,#f6290c), color-stop(71%,#f02f17), color-stop(100%,#e73827)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f85032', endColorstr='#e73827',GradientType=0 ); /* IE6-9 */
+  color: #fff;
 }
 
 /* Images */
@@ -385,13 +397,13 @@ div#controls div#declined-btn.highlight i {
 /* Login */
 div.login-container {
   
-  width: 200px;
+  width: 250px;
   height: 200px;
   position: absolute;
   top: 50%;
   left: 50%;
   margin-top: -100px;
-  margin-left: -100px;
+  margin-left: -125px;
 }
 
 div.login-container form label {
@@ -407,14 +419,14 @@ div.login-container form label {
 div.login-container .form-row {
   
   display: block;
-  width: 200px;
+  width: 250px;
   margin-bottom: 20px;
 }
 
 div.login-container .form-row input[type=text],
 div.login-container .form-row input[type=password] {
   
-  width: 200px;
+  width: 230px;
   border: none;
   font-size: 18px;
   padding: 10px;

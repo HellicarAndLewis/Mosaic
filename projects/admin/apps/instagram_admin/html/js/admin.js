@@ -14,6 +14,7 @@ var MosaicInstagramAdmin = Class.extend({
   }
   
   ,messageType: ''
+  ,logoutTimer: null
   
   // Constructor
   // --------------------------------------------------------
@@ -28,6 +29,15 @@ var MosaicInstagramAdmin = Class.extend({
     
     $('#instagram-images-overlay').fadeOut(0);
     $('#controls').hide();
+    
+    // Logout
+    $('#logout-menu-link').click(function(e) {
+
+      e.preventDefault();
+      var last_id = $('#instagram-images li:first-child').data('item-id');
+      if(last_id == undefined) { last_id = 0 };
+      window.location.href = '/logout/' + last_id;
+    });
     
     this.getQueuedImages(this.messageType, 1, function() {
       
@@ -45,6 +55,8 @@ var MosaicInstagramAdmin = Class.extend({
           self.updateImage($('#instagram-images li:first-child'), false);
         }
       });
+      
+      
       
       // Touch
       /*
@@ -96,6 +108,7 @@ var MosaicInstagramAdmin = Class.extend({
   ,getQueuedImages: function(type, limit, callback) {
     
     var self = this;
+    clearTimeout(self.logoutTimer);
     
     // Get queued images json
     $.getJSON(
@@ -152,8 +165,7 @@ var MosaicInstagramAdmin = Class.extend({
   ,retryRequest: function(type, limit, callback) {
     
     var self = this;
-    
-    
+
     $('#instagram-images-overlay div.inner-update').hide();
     $('#instagram-images-overlay div.inner-error').show();
     $('#instagram-images-overlay').fadeIn(100, function() {
@@ -186,6 +198,15 @@ var MosaicInstagramAdmin = Class.extend({
     var check_img = function(queue, cb) {
       
       if(queue.length == 0) {
+        
+        clearTimeout(self.logoutTimer);
+        var last_id = $('#instagram-images li:first-child').data('item-id');
+        if(last_id == undefined) { last_id = 0 };
+        
+        self.logoutTimer = setTimeout(function() {
+          window.location.href = '/logout/' + last_id;
+        }, 60000);
+        
         cb();
         return;
       }
@@ -282,6 +303,7 @@ var MosaicInstagramAdmin = Class.extend({
       self.getQueuedImages(self.messageType, 1, function() {
         
         $('#instagram-images').fadeOut(100, function() {
+          
           el.remove();
           $('#instagram-images-overlay').fadeOut(100);
           $('#instagram-images').fadeIn(100, function() {
