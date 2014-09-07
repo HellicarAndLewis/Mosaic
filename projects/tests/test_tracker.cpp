@@ -13,7 +13,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define USE_POLAROID 1
+#define USE_POLAROID 0
 
 #define ROXLU_IMPLEMENTATION
 #define ROXLU_USE_LOG
