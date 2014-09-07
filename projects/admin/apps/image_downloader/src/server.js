@@ -10,16 +10,7 @@ var Fs = require('fs-extra');
 var Request = require('request');
 var Program = require('commander');
 var Path = require('path');
-
-//var Gm = require('gm');
-
-var GGM = require('gm');
-var Gm = GGM.subClass({ imageMagick: true });
-
-Gm.prototype.compose = function(operator) {
-   this.command('composite'); // need to use composite over the node gm default convert
-   return this.out("-compose", operator);
-};
+var Exec = require('child_process').exec;
 
 var ImageDownloader = new Class({
   
@@ -89,41 +80,8 @@ var ImageDownloader = new Class({
                 self.log('Tags dir ' + self.settings.image_save_path_tags + 'is not ok');
               }
 
-              // Resize assets
-              
-              // ..thumb filename
-              self.thumbFilename = self.settings.image_overlay_thumb 
-                + '.' 
-                + self.settings.image_size_thumb.width 
-                + 'x' 
-                + self.settings.image_size_thumb.height 
-                + '.png';
-              
-              // ..large filename
-              self.largeFilename = self.settings.image_overlay_large 
-                + '.' 
-                + self.settings.image_size_large.width 
-                + 'x' 
-                + self.settings.image_size_large.height 
-                + '.png';
-
-              // .. thumb
-              Gm(self.settings.image_overlay_thumb)
-                .antialias(true)
-                .blur('2x2')
-                .resize(self.settings.image_size_thumb.width, self.settings.image_size_thumb.height, '!')
-                .write(self.thumbFilename, function(err) {
-                  console.log(err);
-                  // .. large
-                  Gm(self.settings.image_overlay_large)
-                    .resize(self.settings.image_size_large.width, self.settings.image_size_large.height, '!')
-                    .write(self.largeFilename, function(err) {
-
-                      // Start downloading!
-                      self.start();
-                    });
-
-                });
+              // Start downloading!
+              self.start();
             });  
           }); 
         });
@@ -134,18 +92,6 @@ var ImageDownloader = new Class({
 
       // Include project file
       self.settings = require(file);
-
-      // Empty dirs
-      if(Program.empty) {
-
-        Fs.removeSync(self.settings.image_tmp_path);
-        Fs.removeSync(self.settings.image_save_path_users);
-        Fs.removeSync(self.settings.image_save_path_users_thumb);
-        Fs.removeSync(self.settings.image_save_path_users_large);
-        Fs.removeSync(self.settings.image_save_path_tags);
-        Fs.removeSync(self.settings.image_save_path_tags);
-        Fs.removeSync(self.settings.image_save_path_tags);
-      }
 
       // Start
       start_download(); 
@@ -247,8 +193,6 @@ var ImageDownloader = new Class({
           
           var dest_file_users = self.settings.image_save_path_users + img.media_id + '.jpg';
           var dest_file_tags = self.settings.image_save_path_tags + img.media_id + '.jpg';
-          var dest_file_users_json = self.settings.image_save_path_users_json + img.media_id + '.json';
-          var dest_file_tags_json = self.settings.image_save_path_tags_json + img.media_id + '.json';
           
           var thumb_dir = (img.msg_type == 'tag') ? self.settings.image_save_path_tags_thumb : self.settings.image_save_path_users_thumb;
           var thumb_file = thumb_dir + img.media_id + '.png';
@@ -257,7 +201,6 @@ var ImageDownloader = new Class({
           var large_file = large_dir + img.media_id + '.png';
           
           var dest_file = (img.msg_type == 'tag') ? dest_file_tags : dest_file_users;
-          var json_file = (img.msg_type == 'tag') ? dest_file_tags_json : dest_file_users_json;
           
           // -----------------------------------------------------------------------------
           
@@ -285,7 +228,7 @@ var ImageDownloader = new Class({
             self.download(img.images[self.settings.image_size_download].url, tmp_file, function(err) {
               
               var stats = Fs.statSync(tmp_file)
-              var size = stats["size"];
+              var size = stats['size'];
               
               // Invalid image size
               if(size < 1000) {
@@ -305,129 +248,32 @@ var ImageDownloader = new Class({
               // Valid size
               } else {
                 
+                Fs.outputJson(self.settings.image_json_path, {user: img.user, tags:img.tags}, function() {
                   
-                var create_large = function() {
-                    
-                  // Create large
-                  Fs.ensureDir(large_dir, function(err) {
+                  // Move image from tmp to save dir
+                  Fs.copy(tmp_file, dest_file, function() {
 
-                    // Image processing large
-                    var ix = self.settings.image_size_large.inner.x;
-                    var iy = self.settings.image_size_large.inner.y;
-                    var tw = self.settings.image_size_large.width;
-                    var th = self.settings.image_size_large.height;
-                    var tiw = self.settings.image_size_large.inner.width;
-                    var tih = self.settings.image_size_large.inner.height;
+                    // Remove tmp file
+                    Fs.unlink(tmp_file, function() {
 
-                    Gm(tmp_file)
-                      .resize(tw, th)
-                      .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
-                      .write(large_file, function(err) {
-                        if(err) {
-                          console.log('err in large file');
-                          console.log(err);
-                        }
-                        Gm() 
-                        .geometry(tiw, tih, '+'+ix+'+'+iy)
-                        .in(large_file)
-                        .in(self.largeFilename)
-                        .compose('Over')
-                        .write(large_file, function(err) {
-                          console.log(err);
-                          // Add text
-                          Gm(large_file)
-                            .font(self.settings.image_font)
-                            .fontSize(self.settings.image_size_large.text.username.font_size)
-                            .drawText(
-                              self.settings.image_size_large.text.username.x
-                              ,-(th/2) + self.settings.image_size_large.text.username.y
-                              ,img.user.username.toUpperCase(), 'center')
-                            .fontSize(self.settings.image_size_large.text.hashtag.font_size)
-                            .drawText(
-                              self.settings.image_size_large.text.hashtag.x
-                              ,-(th/2) + self.settings.image_size_large.text.hashtag.y
-                              ,self.settings.image_size_large.text.hashtag.text
-                              , 'center'
-                            )
-                            .write(large_file, function(err) {
+                      // Add to images db
+                      current_images.push(img.media_id);
 
-                              // Move image from tmp to save dir
-                              Fs.copy(tmp_file, dest_file, function() {
+                      // Update images db
+                      Fs.outputJson(self.settings.images_db, current_images, function(err) {
 
-                                // Remove tmp file
-                                Fs.unlink(tmp_file, function() {
+                        self.log('Image ' + dest_file + ' saved');
 
-                                  // Add to images db
-                                  current_images.push(img.media_id);
+                        // Next
+                        setTimeout(function() {
 
-                                  // Update images db
-                                  Fs.outputJson(self.settings.images_db, current_images, function(err) {
-
-                                    self.log('Image ' + dest_file + ' saved');
-
-                                    // Next
-                                    setTimeout(function() {
-
-                                      dl_img(queue);
-                                    }, self.settings.image_save_delay);
-                                  });
-                                });
-                              });
-                            });
-
-                        });
-                      });
-                  });
-                }
-                
-                // Create thumbnail
-                Fs.ensureDir(thumb_dir, function(err) {
-
-                  // Image processing thumb
-                  var ix = self.settings.image_size_thumb.inner.x;
-                  var iy = self.settings.image_size_thumb.inner.y;
-                  var tw = self.settings.image_size_thumb.width;
-                  var th = self.settings.image_size_thumb.height;
-                  var tiw = self.settings.image_size_thumb.inner.width;
-                  var tih = self.settings.image_size_thumb.inner.height;
-
-                  Gm(tmp_file)
-                    .resize(tw, th)
-                    .crop(tiw, tih, (tw-tiw)/2, (th-tih)/2)
-                    .write(thumb_file, function(err) {
-
-                      Gm()
-                      .in('-page', '+0+0')
-                      .in(self.thumbFilename)
-                      .in('-page', '+'+ix+'+'+iy)
-                      .in(thumb_file)
-                      .in('-flatten')
-                      .write(thumb_file, function(err) {
-
-                        // Add text
-                        Gm(thumb_file)
-                          .font(self.settings.image_font)
-                          .fontSize(self.settings.image_size_thumb.text.username.font_size)
-                          .drawText(
-                            self.settings.image_size_thumb.text.username.x
-                            ,-(th/2) + self.settings.image_size_thumb.text.username.y
-                            ,img.user.username.toUpperCase(), 'center')
-                          .fontSize(self.settings.image_size_thumb.text.hashtag.font_size)
-                          .drawText(
-                            self.settings.image_size_thumb.text.hashtag.x
-                            ,-(th/2) + self.settings.image_size_thumb.text.hashtag.y
-                            ,self.settings.image_size_thumb.text.hashtag.text
-                            , 'center'
-                          )
-                          .write(thumb_file, function(err) {
-                            //console.log('save');
-                            create_large();
-                          });
-
+                          dl_img(queue);
+                        }, self.settings.image_save_delay);
                       });
                     });
+                  });
+                  
                 });
-
               }
               
             }, function() {
