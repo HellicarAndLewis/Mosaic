@@ -29,6 +29,34 @@ namespace track {
   }
 
   /* ---------------------------------------------------------------------------------- */
+  
+  void Tween::reset() {
+    start_time = 0.0f;
+    t = 0.0f;
+    d = 0.0f;
+    b = 0.0f;
+    c = 0.0f;
+    value = 0.0f;
+  }
+
+  void Tween::update(float now) {
+    float tt;
+    float tc;
+    float ts;
+    
+    tt = now - start_time;
+    t = tt / d;
+    if (t > 1.0f) {
+      t = 1.0f;
+    }
+
+    ts = t * t;
+    tc = ts * t;
+ 
+    value = b + c * (tc * ts + -5.0 * ts * ts + 10 * tc + -10 * ts + 5 * t); /* out quintic */
+  }
+
+  /* ---------------------------------------------------------------------------------- */
 
   Tiles::Tiles() 
     :is_init(false)
@@ -63,11 +91,11 @@ namespace track {
     must_update = false;
   }
 
-  int Tiles::init() {
+  int Tiles::init(int texW, int texH) {
 
-    tex_width = 64;
-    tex_height = 64;
-    tex_ntotal = 150;
+    tex_width = texW;
+    tex_height = texH;
+    tex_ntotal = 5;
 
     if (true == is_init) {
       RX_ERROR("Tiles already initialized, first shutdown");
@@ -100,7 +128,7 @@ namespace track {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 8); /* size */
     glVertexAttribIPointer(2, 1, GL_INT, sizeof(Vertex), (GLvoid*) 16); /* layer */
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 20); /* age */
-    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 28); /* angle */
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*) 24); /* angle */
     glEnableVertexAttribArray(0); /* pos */
     glEnableVertexAttribArray(1); /* size */
     glEnableVertexAttribArray(2); /* layer */
@@ -197,7 +225,13 @@ namespace track {
           }
 
           if (0 == free_layers.size()) {
-            RX_VERBOSE("No free layers!");
+            RX_VERBOSE("No free layers! The image will be shown as soon as we have a free layer");
+            continue;
+          }
+
+          if (IMAGE_MODE_BOINK != img->mode && IMAGE_MODE_FLY != img->mode) {
+            RX_ERROR("Invalid image mode: ", img->mode);
+            img->is_free = true;
             continue;
           }
 
@@ -219,19 +253,24 @@ namespace track {
 
           /* initialize the particle    */
           /* -------------------------- */
-          p->must_remove = false;
-          p->layer = free_layer;
-          p->position.set(img->x, img->y); // rx_random(0,400), rx_random(0, 400));
-          p->start_time = rx_millis();
+          p->mode = img->mode;
           p->state = VERTEX_STATE_TWEEN_IN;
-          p->t = 0.0f;                      /* current time */
-          p->d = 0.3f;                      /* duration */
-          p->b = 0;                         /* start */
-          p->c = 100;                       /* change */
+          p->layer = free_layer;
           p->age = 0.0f; 
-          p->angle = HALF_PI;
-          /* ------------------------- */
+          p->angle = 0.0f;
+          p->tween_size.set(img->tween_size.d, img->tween_size.b, img->tween_size.c);
+
+          if (IMAGE_MODE_BOINK == p->mode) {
+            p->position.set(img->x, img->y);
+          }
+
+          if (IMAGE_MODE_FLY == p->mode) {
+            p->tween_angle.set(img->tween_angle.d, img->tween_angle.b, img->tween_angle.c);
+            p->tween_x.set(img->tween_x.d, img->tween_x.b, img->tween_x.c);
+            p->tween_y.set(img->tween_y.d, img->tween_y.b, img->tween_y.c);
+          }
           
+          /* ------------------------- */
         }
       }
       unlock();
@@ -244,32 +283,36 @@ namespace track {
 
   void Tiles::updateVertexState() {
 
-    float t;
-    float dt;
-    float tc;
-    float ts;
-    float scale; 
     size_t dx = 0;
+    float now = rx_millis();
 
     std::vector<Particle*>::iterator it = particles.begin();
     while (it != particles.end()) {
+
       Particle& p = *(*it);
 
-      /* tween */
-      t = rx_millis() - p.start_time;
-      t = t / p.d;
-      if (t > 1.0) {
-        t = 1.0f;
+      p.tween_size.update(now);
+      
+      if (IMAGE_MODE_BOINK == p.mode) {
+        p.size.set(p.tween_size.value, p.tween_size.value);
       }
-      ts = t * t;
-      tc = ts * t;
- 
-      scale = p.b + p.c * (tc * ts + -5.0 * ts * ts + 10 * tc + -10 * ts + 5 * t); /* out quintic */
+      else if (IMAGE_MODE_FLY == p.mode) {
 
-      p.size.set(scale, scale);
+        p.tween_angle.update(now);
+        p.tween_x.update(now);
+        p.tween_y.update(now);
+
+        p.size.set(p.tween_size.value, p.tween_size.value);
+        p.position.set(p.tween_x.value, p.tween_y.value);
+        p.angle = p.tween_angle.value;
+
+      }
+      else {
+        RX_ERROR("Unhandled animation mode.");
+      }
 
       /* remote the particle and free the layer. */
-      if (VERTEX_STATE_TWEEN_OUT == p.state && t >= 1.0f) {
+      if (VERTEX_STATE_TWEEN_OUT == p.state && p.tween_size.t >= 1.0f) {
         free_layers.push_back(p.layer);
         delete *it;
         it = particles.erase(it);
@@ -294,19 +337,14 @@ namespace track {
     }
 
     /* update states and hide the image again*/
-    float now = rx_millis();
     it = particles.begin();
     while (it != particles.end()) {
       Particle& p = *(*it);
-      float dt = now - (p.start_time + p.d);
+      float dt = now - (p.tween_size.start_time + p.tween_size.d);
       /* start the tween out with a `dt` sec delay */
       if (VERTEX_STATE_TWEEN_IN == p.state && dt > 0.4) {
         p.state = VERTEX_STATE_TWEEN_OUT;
-        p.start_time = rx_millis();
-        p.d = 0.5f;
-        p.b = p.b + p.c;
-        p.c = -100;
-        t = 0.0f;
+        p.tween_size.set(0.5f, p.tween_size.b + p.tween_size.c, -100);
       }
       ++it;
     }
@@ -394,6 +432,13 @@ namespace track {
       return -4;
     }
 
+    if (IMAGE_MODE_BOINK != opt.mode 
+        && IMAGE_MODE_FLY != opt.mode) 
+      {
+        RX_ERROR("The image optoin has an invalid mode: %d", opt.mode);
+        return -5;
+      }
+
     /* 
        @todo we're not keeping track of created image options; 
        this means that when the image loader doesn't call our callback
@@ -402,10 +447,16 @@ namespace track {
     ImageOptions* io = new ImageOptions();
     if (NULL == io) {
       RX_ERROR("Cannot allocate an image option.");
-      return -5;
+      return -6;
     }
+
     io->x = opt.x;
     io->y = opt.y;
+    io->mode = opt.mode;
+    io->tween_angle = opt.tween_angle;
+    io->tween_x = opt.tween_x;
+    io->tween_y = opt.tween_y;
+    io->tween_size = opt.tween_size;
 
     if (0 != img_loader.load(opt.filepath, io)) {
       RX_ERROR("The threaded image loader rejected the file: %s", opt.filepath.c_str());
@@ -519,6 +570,11 @@ namespace track {
     memcpy(img->pixels, task->pixels, task->nbytes);
     img->x = io->x;
     img->y = io->y;
+    img->mode = io->mode;
+    img->tween_angle = io->tween_angle;
+    img->tween_x = io->tween_x;
+    img->tween_y = io->tween_y;
+    img->tween_size = io->tween_size;
     /* ---------------------- */
 
     RX_VERBOSE("Copied pixels that we need to update!");

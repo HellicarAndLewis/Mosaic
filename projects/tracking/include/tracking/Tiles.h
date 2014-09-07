@@ -47,7 +47,7 @@ static const char* TRACK_TILES_VS = ""
   "layout( location = 1 ) in vec2 a_size;"
   "layout( location = 2 ) in int a_layer;"
   "layout( location = 3 ) in float a_age;"
-  "layout( location = 3 ) in float a_angle;"
+  "layout( location = 4 ) in float a_angle;"
   "out vec2 v_tex;"
   "out float v_layer;"
 
@@ -70,8 +70,9 @@ static const char* TRACK_TILES_VS = ""
   "  float ct = cos(a_angle);"
   "  float st = sin(a_angle);"
   "  float xx = ct * offset.x - st * offset.y;"
-  "  gl_Position = u_pm * vec4(a_pos.x + (offset.x * a_size.x), "
-  "                            a_pos.y + (offset.y * a_size.y),  "
+  "  float yy = st * offset.x + ct * offset.y;"
+  "  gl_Position = u_pm * vec4(a_pos.x + xx * a_size.x, "
+  "                            a_pos.y + yy * a_size.y,   "
   "                            0.0, "
   "                            1.0); "
   "  v_tex = tex[gl_VertexID];"
@@ -95,6 +96,22 @@ static const char* TRACK_TILES_FS = ""
 
 namespace track {
 
+
+  /* ---------------------------------------------------------------- */
+
+  struct Tween {
+    void reset();
+    void update(float now);
+    void set(float duration, float start, float end);
+
+    float start_time;
+    float t;                                /* current time [0-1] */  
+    float d;                                /* duration */
+    float b;                                /* start value */
+    float c;                                /* change */
+    float value;                            /* last updated value */
+  };
+
   /* ---------------------------------------------------------------- */
 
   class Image {
@@ -107,16 +124,32 @@ namespace track {
     bool is_free;
     float layer;
     
-    int x;  /* where to position when created ? */
-    int y;  /* where to position when created ? */
+    int x;  /* where to position when created, used by the boink effect ? */
+    int y;  /* where to position when created, used by the boink effect ? */
+    int mode; /* what image mode */
+    Tween tween_size;
+    Tween tween_angle;
+    Tween tween_x;
+    Tween tween_y;
   };
 
   /* ---------------------------------------------------------------- */
 
+  enum {
+    IMAGE_MODE_NONE,
+    IMAGE_MODE_BOINK, /* an image is shown at x/y and grows and then hides again */
+    IMAGE_MODE_FLY,   /* an image flies into view to x/y and rotates to the set destination angle */
+  };
+
   struct ImageOptions {
+    int mode; 
     int x;
     int y;
     std::string filepath;
+    Tween tween_size;
+    Tween tween_angle;
+    Tween tween_x;
+    Tween tween_y;
   };
 
   /* ---------------------------------------------------------------- */
@@ -136,6 +169,15 @@ namespace track {
     float angle;                             /* the z-rotation. */
   };
 
+  inline void Tween::set(float duration, float start, float change) {
+    d = duration;
+    b = start;
+    c = change;
+    start_time = rx_millis();
+    t = 0.0f;
+    value = 0.0f;
+  }
+
   struct Particle {
     vec2 position;
     vec2 size;
@@ -143,14 +185,12 @@ namespace track {
     float age;
     float angle;
 
-    /* tween values. */
-    float start_time;                        /* time when the vertex was initialized.*/
-    float t;                                 /* current time */
-    float d;                                 /* duration in seconds, 1 = 1000ms*/
-    float b;                                 /* start value */
-    float c;                                 /* change in value */
     uint8_t state;
-    bool must_remove;
+    int mode;                                /* what mode, e.g. how the image is presented on screen */
+    Tween tween_size;
+    Tween tween_angle;
+    Tween tween_x;
+    Tween tween_y;
    };
 
   /* ---------------------------------------------------------------- */
@@ -159,7 +199,7 @@ namespace track {
   public:
     Tiles();
     ~Tiles();
-    int init();
+    int init(int texW, int texH);
     void update();
     void draw();
     int shutdown();
