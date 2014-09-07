@@ -61,7 +61,7 @@ namespace track {
       return -102;
     }
 
-    if (0 != tiles.init()) {
+    if (0 != tiles.init(284, 347)) {
       RX_ERROR("Cannot init the tiles, see error messages above.");
       capture.stop();
       capture.close();
@@ -143,7 +143,7 @@ namespace track {
 
     tracker->endFrame();
     tracker->apply();
-    tracker->draw();
+    //    tracker->draw();
 
     tiles.draw();
 

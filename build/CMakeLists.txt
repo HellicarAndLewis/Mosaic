@@ -227,8 +227,8 @@ install(TARGETS AppPolaroid DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
-#create_test(tracker)
-create_test(cairo_png)
+create_test(tracker)
+#create_test(cairo_png)
 
 
 
