@@ -468,16 +468,13 @@ namespace track {
   /* ---------------------------------------------------------------------------------- */
 
   static void on_image_loaded(mos::ImageTask* task, void* user) {
-    RX_VERBOSE("Loaded an image!");
-    RX_ERROR("Check if the texture width/height is correct");
+   
     Image* img = NULL;
     ImageOptions* io = static_cast<ImageOptions*>(task->user);
     if (NULL == io) {
       RX_ERROR("The image options are invalid. Not supposed to happen!");
       return;
     }
-
-    RX_VERBOSE("LOADED IMAGE OPTIONS: %d x %d", io->x, io->y);
 
     Tiles* tiles = static_cast<Tiles*>(user);
     if (NULL == tiles) {
@@ -517,6 +514,9 @@ namespace track {
     /* ---------------------- */
 
     RX_VERBOSE("Copied pixels that we need to update!");
+
+    delete io;
+    io = NULL;
 
     /* make sure the main thread knows that we must update. */
     tiles->lock();

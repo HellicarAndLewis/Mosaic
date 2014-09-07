@@ -302,10 +302,17 @@ if [ ! -d ${sd}/pkgconfig ] ; then
     mv pkg-config-0.28 pkgconfig
 fi
 
+
+
 # Download pixman 
+
 if [ ! -d ${sd}/pixman ] ; then
     cd ${sd}
-    git clone git://anongit.freedesktop.org/git/pixman.git
+   # git clone git://anongit.freedesktop.org/git/pixman.git
+    #curl -o pixman.tar.gz http://www.cairographics.org/releases/pixman-0.16.2.tar.gz 
+    curl -o pixman.tar.gz http://cairographics.org/releases/pixman-0.32.6.tar.gz
+    tar -zxvf pixman.tar.gz
+    mv ${sd}/pixman-0.32.6 ${sd}/pixman
 fi 
 
 # Download cairo 
@@ -322,7 +329,10 @@ if [ ! -d ${sd}/cairo ] ; then
    # curl -o cairo.tar.gz http://cairographics.org/releases/rcairo-1.12.9.tar.gz
    # tar -zxvf cairo.tar.gz
    # mv rcairo-1.12.9 cairo
-    git clone git://anongit.freedesktop.org/git/cairo
+   git clone git://anongit.freedesktop.org/git/cairo
+ #  curl -o cairo.tar.xz  http://cairographics.org/releases/cairo-1.12.6.tar.xz
+   #tar -zxvf cairo.tar.xz
+   #mv cairo-1.12.6 cairo
 fi 
 
 # Download freetype
@@ -401,6 +411,13 @@ if [ -f ${sd}/jans.tar.gz ] ; then
 fi
 if [ -f ${sd}/gm.tar.gz ] ; then
     rm ${sd}/gm.tar.gz
+fi
+if [ -f ${sd}/pixman.tar.gz ] ; then
+    rm ${sd}/pixman.tar.gz
+fi
+if [ -f ${sd}/cairo.xz ] ; then 
+#    rm ${sd}/cairo.xz
+    echo "o"
 fi
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
@@ -696,6 +713,8 @@ if [ ! -f ${bd}/bin/gm ] ; then
     export LDFLAGS=${ldflagsorig}
     
     cd ${sd}/graphicsmagick
+#   export LIBS="-ljpeg"
+#   export CFLAGS="-I${bd}/include/"
     ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
     make
     make install
@@ -705,10 +724,45 @@ if [ ! -f ${bd}/bin/gm ] ; then
 fi
 
 
-# cd ${sd}/cairo
-# if [ ! -f ./configure ] ; then
-#     ./autogen.sh
-# fi
+# Compile pixman
+if [ ! -d ${bd}/include/pixman-1 ] ; then
+
+    cd ${sd}/pixman
+    if [ ! -f ./configure ] ; then
+        ./autogen.sh
+    fi
+
+    export PKG_CONFIG=${bd}/bin/pkg-config
+    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
+    ./configure --prefix=${bd} \
+        --disable-dependency-tracking \
+        --enable-static=yes \
+        --enable-shared=non
+    make
+    make install
+fi
+
+exit
+
+export PKG_CONFIG=${bd}/bin/pkg-config
+export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
+export pixman_CFLAGS=-I${bd}/include/pixman-1/
+export pixman_LIBS="-l${bd}/lib/libpixman-1.a"
+cd ${sd}/cairo
+if [ ! -f ./configure ] ; then
+    ./autogen.sh
+fi
+
+#export PATH=${PATH}:${bd}/bin
+
+./configure \
+    --prefix=${bd} \
+    --disable-dependency-tracking \
+    --disable-xlib \
+    --enable-static=yes \
+    --enable-shared=no
+#make
+make install
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then
@@ -719,8 +773,5 @@ fi
 #     make install
 # fi
 
-# Compile pixman
-#cd ${sd}/pixman
-#./autogen.sh
 
 

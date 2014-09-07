@@ -64,12 +64,17 @@ if(APPLE)
     ${extern_lib_dir}/libcurl.a
     ${extern_lib_dir}/libjansson.a
 
+    # Polaroid
+    ${extern_lib_dir}/libcairo.a
+    ${extern_lib_dir}/libpixman-1.a
+    ${extern_lib_dir}/libfreetype.a
+
     # for the tracking
     ${extern_lib_dir}libopencv_core.a
     ${extern_lib_dir}libopencv_imgproc.a
     ${extern_lib_dir}libopencv_video.a
     ${extern_lib_dir}libopencv_features2d.a
-    
+
     ${fr_corefoundation}               # uv
     ${fr_cocoa}                        # uv
     ${fr_iokit}                        # uv
@@ -159,50 +164,56 @@ macro(create_test name)
   install(TARGETS test_${name} DESTINATION bin/test/)
 endmacro()
 
-# The graphics library
-add_library(gfx ${gfx_lib_sources})
-install(TARGETS gfx ARCHIVE DESTINATION lib)
 
-# The feature-extractor library
-add_library(fex ${fex_lib_sources})
-install(TARGETS fex ARCHIVE DESTINATION lib)
+  # The graphics library
+  add_library(gfx ${gfx_lib_sources})
+  install(TARGETS gfx ARCHIVE DESTINATION lib)
 
-# The video library 
-add_library(vid ${vid_lib_sources})
-install(TARGETS vid ARCHIVE DESTINATION lib)
+  # The feature-extractor library
+  add_library(fex ${fex_lib_sources})
+  install(TARGETS fex ARCHIVE DESTINATION lib)
 
-# The grid library 
-add_library(grid ${grid_lib_sources})
-install(TARGETS grid ARCHIVE DESTINATION lib)
+  # The video library 
+  add_library(vid ${vid_lib_sources})
+  install(TARGETS vid ARCHIVE DESTINATION lib)
 
-# The mosaic library
-add_library(mosaic ${mosaic_lib_sources})
-install(TARGETS mosaic ARCHIVE DESTINATION lib)
+  # The grid library 
+  add_library(grid ${grid_lib_sources})
+  install(TARGETS grid ARCHIVE DESTINATION lib)
 
-# The tracking library
-add_library(tracking ${tracking_lib_sources})
-install(TARGETS tracking ARCHIVE DESTINATION lib)
+  # The mosaic library
+  add_library(mosaic ${mosaic_lib_sources})
+  install(TARGETS mosaic ARCHIVE DESTINATION lib)
 
-# The TopShop library
-add_library(shop ${topshop_lib_sources})
-install(TARGETS shop ARCHIVE DESTINATION lib)
+  # The tracking library
+  add_library(tracking ${tracking_lib_sources})
+  install(TARGETS tracking ARCHIVE DESTINATION lib)
 
-# The final Mosaic application
-add_executable(AppMosaic ${ts_sd}/app_mosaic.cpp  ${extern_source_dir}/glad.c)
-target_link_libraries(AppMosaic ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppMosaic DESTINATION bin)
+  # The TopShop library
+  add_library(shop ${topshop_lib_sources})
+  install(TARGETS shop ARCHIVE DESTINATION lib)
 
-# The final left grid  application
-add_executable(AppGridLeft ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
-set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
-target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppGridLeft DESTINATION bin)
+  # The final Mosaic application
+  add_executable(AppMosaic ${ts_sd}/app_mosaic.cpp  ${extern_source_dir}/glad.c)
+  target_link_libraries(AppMosaic ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppMosaic DESTINATION bin)
 
-add_executable(AppGridRight ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
-set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
-target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppGridRight DESTINATION bin)
+  # The final left grid  application
+  add_executable(AppGridLeft ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
+  target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridLeft DESTINATION bin)
 
+  add_executable(AppGridRight ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
+  target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridRight DESTINATION bin)
+
+
+# The polaroid creator
+add_executable(AppPolaroid ${bd}/projects/polaroid/main.cpp)
+target_link_libraries(AppPolaroid ${app_libs})
+install(TARGETS AppPolaroid DESTINATION bin)
 
 # The tests used during development
 #create_test(mosaic)
@@ -216,7 +227,8 @@ install(TARGETS AppGridRight DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
-create_test(tracker)
+#create_test(tracker)
+create_test(cairo_png)
 
 
 

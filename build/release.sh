@@ -23,8 +23,14 @@ if [ "$(uname)" == "Darwin" ] ; then
 
     # Create log dir.
     id=${d}/../install/mac-clang-x86_64
-    if [ ! -d ${id}/bin/data/log ] ; then 
-        mkdir ${id}/bin/data/log
+    if [ ! -d ${id}/bin/data/log_left ] ; then 
+        mkdir ${id}/bin/data/log_left
+    fi
+    if [ ! -d ${id}/bin/data/log_right ] ; then 
+        mkdir ${id}/bin/data/log_right
+    fi
+    if [ ! -d ${id}/bin/data/log_mosaic ] ; then 
+        mkdir ${id}/bin/data/log_mosaic
     fi
     if [ ! -d ${id}/bin/data/input_blurred ] ; then 
         mkdir -p ${id}/bin/data/input_blurred
@@ -62,6 +68,7 @@ fi
 #./test_png_rgba
 #./test_ogg_player
 #./test/test_tracker
-./AppMosaic
+#./AppMosaic
 #./AppGridLeft
 #./AppGridRight
+./test/Polaroid

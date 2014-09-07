@@ -38,7 +38,13 @@ static int sort_monitors(GLFWmonitor* a, GLFWmonitor* b);
 
 int main() {
 
-  rx_log_init(rx_to_data_path("log"));
+#if defined(APP_GRID_LEFT)  
+  rx_log_init(rx_to_data_path("log_left"));
+#elif defined(APP_GRID_RIGHT)
+  rx_log_init(rx_to_data_path("log_right"));
+#else
+  #error "No APP_GRID_LEFT or APP_GRID_RIGHT defined in CFLAGS"
+#endif
  
   /* load all the configuration */
   if (0 != top::load_config()) {
