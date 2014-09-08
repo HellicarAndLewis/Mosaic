@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="author" content="Hellicar & Lewis + Apollo" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+  <title>Mosaic Instagram Admin</title>
+
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="stylesheet" href="/admin/css/toggles-full.css">
+  <link rel="stylesheet" href="/admin/css/font-awesome.min.css">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  <div class="logo"></div>
+  <ul class="menu {{? it.auto_approve_users == true }}one-item{{?}}">
+    <li id="instagram-menu-tags"><a href="/admin/tags"><i class="fa fa-tags"></i></a></li>
+    {{? it.auto_approve_users == false }}
+    <li id="instagram-menu-users"><a href="/admin/users"><i class="fa fa-users"></i></a></li>
+    {{?}}
+    <li id="instagram-menu-settings" class="selected"><a href="/admin/settings"><i class="fa fa-cog"></i></a></li>
+    <li id="instagram-menu-logout"><a href="/logout/0"><i class="fa fa-sign-out"></i></a></li>
+  </ul>
+  <div class="container">
+    <div class="instagram-settings-container">
+      <div class="settings-row">
+        <div class="settings-label">Show mosaic</div>
+        <div class="settings-setting toggle-iphone">
+          <div id="toggle-show-mosaic" class="toggle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/admin/js/libs/jquery-2.1.1.min.js"></script>
+  <script src="/admin/js/libs/jquery.class.js"></script>
+  <script src="/admin/js/libs/toggles.min.js"></script>
+  <script src="/admin/js/settings.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      MosaicInstagramAdminSettings = new MosaicInstagramAdminSettings({{=it.show_mosaic}}, '{{=it.host}}', '{{=it.port}}');
+    });
+  </script>
+</body>
+</html>

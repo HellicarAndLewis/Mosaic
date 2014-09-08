@@ -10,6 +10,7 @@
   ,"images_db": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/tmp/images.json"
   ,"image_tmp_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/tmp/"
   ,"image_json_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/json/"
-  ,"image_raw_path": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/"
+  ,"image_raw_path_tags": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/tags/"
+  ,"image_raw_path_users": "/Users/martinbartels/Sites/mosaic/projects/admin/apps/image_downloader/downloads/images/users/"
 
 }

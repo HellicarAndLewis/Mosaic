@@ -54,18 +54,29 @@ var ImageDownloader = new Class({
             self.log('Tmp dir ' + self.settings.image_tmp_path + 'is not ok');
           }
 
-          // Check if raw save dir exists
-          Fs.ensureDir(self.settings.image_raw_path, function(err) {
+          // Check if raw tags save dir exists
+          Fs.ensureDir(self.settings.image_raw_path_tags, function(err) {
 
-            self.log('Checking raw save dir ' + self.settings.image_raw_path);
+            self.log('Checking raw tags save dir ' + self.settings.image_raw_path_tags);
 
             if(err) {
-              self.log('Raw save dir ' + self.settings.image_raw_path + 'is not ok');
+              self.log('Raw tags save dir ' + self.settings.image_raw_path_tags + 'is not ok');
             }
-         
+            
+            // Check if raw users save dir exists
+            Fs.ensureDir(self.settings.image_raw_path_users, function(err) {
 
-            // Start downloading!
-            self.start();
+              self.log('Checking raw users save dir ' + self.settings.image_raw_path_users);
+
+              if(err) {
+                self.log('Raw users save dir ' + self.settings.image_raw_path_users + 'is not ok');
+              }
+
+
+              // Start downloading!
+              self.start();
+
+            }); 
  
           }); 
         });
@@ -174,7 +185,11 @@ var ImageDownloader = new Class({
           // Set all paths
           // -----------------------------------------------------------------------------
           var tmp_file = self.settings.image_tmp_path + img.media_id + '.jpg';
-          var dest_file = self.settings.image_raw_path + img.media_id + '.jpg';
+          var dest_file = self.settings.image_raw_path_tags + img.media_id + '.jpg';
+          
+          if(img.msg_type == 'user') {
+            dest_file = self.settings.image_raw_path_users + img.media_id + '.jpg';
+          }
           
           // -----------------------------------------------------------------------------
           
@@ -199,23 +214,40 @@ var ImageDownloader = new Class({
             // Download image
             //self.log('Trying to download ' + img.images[self.settings.image_size_download].url);
             
+            var next_img = function() {
+              // Next
+              setTimeout(function() {
+                dl_img(queue);
+              }, self.settings.image_save_delay); 
+            };
+            
             self.download(img.images['standard_resolution'].url, tmp_file, function(err) {
+            
+              // Error
+              if(err || !Fs.existsSync(tmp_file)) {
+                next_img();
+                return;
+              }
               
               var stats = Fs.statSync(tmp_file)
               var size = stats['size'];
-              
+  
               // Invalid image size
               if(size < 1000) {
                 
                 // Remove invalid image
-                Fs.unlink(tmp_file, function() {
+                Fs.unlink(tmp_file, function(err) {
+                  
+                  // Error
+                  if(err) {
+                    next_img();
+                    return;
+                  }
                   
                   self.log('Image size invalid. ' + size + ' bytes received, removed tmp file ' + tmp_file);
                   
                   // Next
-                  setTimeout(function() {
-                    dl_img(queue);
-                  }, self.settings.image_save_delay);
+                  next_img();
                 });
               
               
@@ -223,12 +255,30 @@ var ImageDownloader = new Class({
               } else {
                 
                 Fs.outputJson(self.settings.image_json_path + img.media_id + '.json', {user:img.user,tags:img.tags}, function(err) {
-                
+                  
+                  // Error
+                  if(err || !Fs.existsSync(tmp_file)) {
+                    next_img();
+                    return;
+                  }
+                  
                   // Move image from tmp to save dir
-                  Fs.copy(tmp_file, dest_file, function() {
-
+                  Fs.copy(tmp_file, dest_file, function(err) {
+                    
+                    // Error
+                    if(err || !Fs.existsSync(tmp_file)) {
+                      next_img();
+                      return;
+                    }
+                    
                     // Remove tmp file
-                    Fs.unlink(tmp_file, function() {
+                    Fs.unlink(tmp_file, function(err) {
+                      
+                      // Error
+                      if(err) {
+                        next_img();
+                        return;
+                      }
 
                       // Add to images db
                       current_images.push(img.media_id);
@@ -239,10 +289,7 @@ var ImageDownloader = new Class({
                         self.log('Image ' + dest_file + ' saved');
 
                         // Next
-                        setTimeout(function() {
-
-                          dl_img(queue);
-                        }, self.settings.image_save_delay);
+                        next_img();
                       });
                     });
                   });
@@ -252,9 +299,8 @@ var ImageDownloader = new Class({
               
             }, function() {
               
-              setTimeout(function() {
-                dl_img(queue);
-              }, self.settings.image_save_delay);
+              // Next
+              next_img();
             });
             
           } else {
