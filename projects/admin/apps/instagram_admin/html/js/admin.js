@@ -32,15 +32,32 @@ var MosaicInstagramAdmin = Class.extend({
     $('#controls').hide();
     
     // Logout
+    
+    var logout_cb = function(isClick) {
+
+      
+      var last_id = $('#instagram-images li:first-child').data('item-id');
+      if(last_id == undefined) { last_id = 0 };
+      
+      var queue_id = (self.queue.length > 0) ? self.queue[0].id : 0;
+      var appr = (self.queue.length > 0) ? self.queue[0].approved : 0;
+      
+      if(isClick) {
+        window.location.href = '/logout/' + last_id + '/' + queue_id + '/' + appr; 
+      } else {
+        $.get('/reset/' + last_id + '/' + queue_id + '/' + appr);
+      }
+    }
     $('#logout-menu-link').click(function(e) {
 
       e.preventDefault();
-      var last_id = $('#instagram-images li:first-child').data('item-id');
-      
-      if(last_id == undefined) { last_id = 0 };
-      
-      window.location.href = '/logout/' + last_id;
+      logout_cb(true);
     });
+    
+    window.onbeforeunload = function() {
+    
+      logout_cb(false);
+    }
     
     // Get new image
     this.getQueuedImages(this.messageType, 1, function() {
@@ -287,13 +304,17 @@ var MosaicInstagramAdmin = Class.extend({
       if(queue.length == 0) {
         
         clearTimeout(self.logoutTimer);
+        
+        var queue_id = (self.queue.length > 0) ? self.queue[0].id : 0;
+        var appr = (self.queue.length > 0) ? self.queue[0].approved : 0;
         var last_id = $('#instagram-images li:first-child').data('item-id');
+        
         if(last_id == undefined) { last_id = 0 };
         
         self.locked = false;
         
         self.logoutTimer = setTimeout(function() {
-          window.location.href = '/logout/' + last_id;
+          window.location.href = '/logout/' + last_id + '/' + queue_id + '/' + appr;
         }, 600000);
         
         cb();
