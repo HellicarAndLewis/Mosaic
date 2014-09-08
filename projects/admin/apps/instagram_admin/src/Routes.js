@@ -188,7 +188,7 @@ var Admin = new Class({
               auto_approve_users: self.app.options.instagram.auto_approve_users
               ,host: self.app.options.http.host
               ,port: self.app.options.http.port
-              ,show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : true
+              ,show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : 1
             }));
           });
           
@@ -216,7 +216,7 @@ var Admin = new Class({
       var collection = self.app.db.collection('settings');
       var result = collection.find({}).limit(1);
       result.toArray(function(err, docs) {
-        res.json({show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : true});
+        res.json({show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : 1});
       });
     });
     

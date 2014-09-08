@@ -37,7 +37,7 @@ var MosaicInstagramAdminSettings = Class.extend({
         + self.options.http.port 
         + '/settings/update' 
         ,{
-          show_mosaic: active
+          show_mosaic: (active) ? 1 : 0
         }, function() {
          
         });
