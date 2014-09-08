@@ -173,7 +173,7 @@ var Admin = new Class({
         Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
           
           var tpl = Dot.template(text);
-          res.send(tpl({}));
+          res.send(tpl({auto_approve_users: self.app.options.instagram.auto_approve_users}));
         });
       }, (30*60*1000));
     });
