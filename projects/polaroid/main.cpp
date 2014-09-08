@@ -440,12 +440,11 @@ int main(int argc, char** argv) {
   //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_FULL);
 
   cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_BEST);
-
   cairo_font_options_set_hint_metrics(font_options, CAIRO_HINT_METRICS_DEFAULT);
   cairo_set_font_options (cr, font_options);
 
-  //cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   //  cairo_font_options_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
   cairo_set_source_rgba(cr, opt.name_r, opt.name_g, opt.name_b, 1.0); 
 
@@ -461,6 +460,7 @@ cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIG
 
   /* hashtag */
   if (0 != opt.hashtag.size()) {
+    cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_move_to(cr, opt.hashtag_x, opt.hashtag_y);
     cairo_set_font_size(cr, opt.name_font_size);
     cairo_show_text(cr, opt.hashtag.c_str());

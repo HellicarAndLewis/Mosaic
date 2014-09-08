@@ -276,6 +276,7 @@ namespace track {
 
           if (IMAGE_MODE_BOINK == p->mode) {
             p->position.set(img->x, img->y);
+            p->tween_angle.set(img->tween_angle.d, img->tween_angle.b, img->tween_angle.c);
           }
 
           if (IMAGE_MODE_FLY == p->mode) {
@@ -308,6 +309,8 @@ namespace track {
       p.tween_size.update(now);
       
       if (IMAGE_MODE_BOINK == p.mode) {
+        p.tween_angle.update(now);
+        p.angle = p.tween_angle.value;
         p.size.set(p.tween_size.value, p.tween_size.value);
       }
       else if (IMAGE_MODE_FLY == p.mode) {

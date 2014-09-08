@@ -43,8 +43,8 @@ namespace top {
     cfg.tile_height = 568;
     cfg.tile_nlayers = 10;
 #else
-    cfg.tile_width = 200; // fex::config.file_tile_width; 
-    cfg.tile_height = 200; // fex::config.file_tile_height; 
+    cfg.tile_width = 255; // fex::config.file_tile_width; 
+    cfg.tile_height = 255; // fex::config.file_tile_height; 
     cfg.tile_nlayers = 150;
 #endif
 
@@ -244,7 +244,11 @@ namespace top {
     img_opt.y = col_h * j;
     img_opt.filepath = filepath;
     img_opt.mode = track::IMAGE_MODE_BOINK;
-    img_opt.tween_size.set(0.6f, 0.0f, 125.0f);
+    img_opt.tween_size.set(0.6f, 0.0f, rx_random(150.0f, 195.0f));
+
+    float angle_range = PI * 0.25;
+    float start_angle = rx_random(-angle_range, angle_range);
+    img_opt.tween_angle.set(1.3f, start_angle , (start_angle * -1) + rx_random(0.3)); //rx_random(-(0.5 *HALF_PI), 0.5 * HALF_PI));
 #endif
 
     if (0 != shop->tracking.load(img_opt)) {

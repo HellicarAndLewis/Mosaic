@@ -212,6 +212,15 @@ namespace top {
     }
 
     RX_VERBOSE("Username: %s", img_info.username.c_str());
+    if (0 == img_info.username.size()) {
+      RX_ERROR("The username is empty, not supposed to happen.");
+      img_info.username = "anonymous";
+    }
+
+    /* convert the username to uppercase. */
+    std::string username_upper = img_info.username;
+    std::transform(username_upper.begin(), username_upper.end(), username_upper.begin(), toupper);
+
 
     switch (file.type) {
       case COL_FILE_TYPE_NONE: {
@@ -226,8 +235,8 @@ namespace top {
            << " " << top::config.grid_file_height 
            << " " << top::config.left_grid_filepath        /* this is where the files are stored. */
            << " " << fex::config.raw_filepath              /* images from the left grid are added to the mosaic after preprocessing */
-           << " " << top::config.polaroid_filepath          /* path where the big versions of the polaroids are stored.*/
-           << " " << img_info.username                     /* username, used to create polaroid. */
+           << " " << top::config.polaroid_filepath         /* path where the big versions of the polaroids are stored.*/
+           << " " << username_upper                        /* username, used to create polaroid. */
            << "";
 
         std::string command = ss.str();
@@ -244,7 +253,7 @@ namespace top {
            << " " << top::config.right_grid_filepath        /* this is where the files are stored. */
            << " " << fex::config.raw_filepath               /* images from the left grid are added to the mosaic after preprocessing */
            << " " << top::config.polaroid_filepath          /* path where the big versions of the polaroids are stored.*/
-           << " " << img_info.username                      /* username, used to create polaroid. */
+           << " " << username_upper                         /* username, used to create polaroid. */
            << "";
 
         std::string command = ss.str();
