@@ -188,7 +188,7 @@ var Admin = new Class({
               auto_approve_users: self.app.options.instagram.auto_approve_users
               ,host: self.app.options.http.host
               ,port: self.app.options.http.port
-              ,show_mosaic: (docs) ? docs[0].show_mosaic : true
+              ,show_mosaic: (docs.length == 0) ? docs[0].show_mosaic : true
             }));
           });
           
