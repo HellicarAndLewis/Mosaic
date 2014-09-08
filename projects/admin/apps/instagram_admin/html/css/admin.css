@@ -148,14 +148,14 @@ ul.menu li a {
   
   display: block;
   width: 60px;
-  height: 27px;
-  padding-top: 13px;
+  height: 30px;
+  padding-top: 10px;
   border-radius: 10px 10px 0px 0px;
   background: #000;
   text-align: center;
   text-decoration: none;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 15px;
+  font-size: 20px;
   color: #828282;
   
   background: rgb(226,226,226); /* Old browsers */
@@ -468,4 +468,49 @@ div.login-container input[type=submit]:active {
   
   background: #333333;
   color: #ffffff;
+}
+
+/* Settings */
+div.instagram-settings-container {
+  
+  width: 400px;
+}
+
+div.settings-row {
+  
+  display: block;
+  width: 260px;
+  position: absolute;
+  left: 50%;
+  margin-left: -130px;
+  margin-top: 50px;
+}
+
+div.settings-label {
+  
+  display: block;
+  float: left;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  color: #fff;
+  width: 150px;
+  height: 35px;
+  padding: 10px;
+}
+
+div.settings-setting {
+  
+  float: left;
+  width: 110px;
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  color: #fff;
+  text-align: center;
+}
+
+div.toggle {
+  
+  height: 35px;
+  width: 110px;
 }

@@ -166,7 +166,16 @@ var Admin = new Class({
     
     // Settings route
     this.router.get('/admin/settings', this.validate.bind(this), function(req, res) {
-      
+      // Unlock images older than x ms
+      self.unlockImages(function() {
+        
+        // Return index.html
+        Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
+          
+          var tpl = Dot.template(text);
+          res.send(tpl({}));
+        });
+      }, (30*60*1000));
     });
     
     // Tags route
