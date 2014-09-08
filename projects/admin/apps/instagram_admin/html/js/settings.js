@@ -27,7 +27,7 @@ var MosaicInstagramAdminSettings = Class.extend({
     }); 
 
     // Show mosaic toggle
-    $('#toggle-show-mosaic').toggles(showMosaic);
+    $('#toggle-show-mosaic').toggles((showMosaic == 1));
     $('#toggle-show-mosaic').on('toggle', function (e, active) {
 
       $.post(

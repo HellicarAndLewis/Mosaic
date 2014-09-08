@@ -90,11 +90,12 @@ var Admin = new Class({
     // Modules
     this.router.use(MethodOverride());
     this.router.use(CookieParser());
-    this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD'}));
+    this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD', expires:new Date(Date.now() + 900000), httpOnly:true}));
     this.router.use(BodyParser.urlencoded({extended: false}));
     
     // Login form
     this.router.get('/login', function(req, res) {
+      
       req.session.iaid = '';
       self.app.iaid = '';
       Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
