@@ -39,7 +39,7 @@ namespace mos {
   public:
     DirWatcher();
     ~DirWatcher();
-    int init(std::string dir, dirwatch_on_rename_callback cb, void* user);   /* start listening the given dir */
+    int init(std::string watchdir, dirwatch_on_rename_callback cb, void* user);   /* start listening the given dir */
     void update();                                                           /* call this often to process events. */
     int shutdown();                                                          /* shutdown and stop listening. */
 

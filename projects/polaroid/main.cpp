@@ -1,6 +1,6 @@
 /*
 
-  Used to create the polaroid images for the girds and interactive layer. 
+  Used to create the polaroid images for the grids and interactive layer. 
 
   -c = the background 'canvas', must be png (this is the instagram image)
   -f = the foreground overlay, must be png. 
@@ -13,18 +13,21 @@
   -r,-g, -b = color for then name
   -a = the size in pixels of the squale that is visible
   -h = hashtag
+  -i = hashtag x
+  -j = hashtag y
   -o = output path
+
 
   Create the big version of the polaroid:
   ----------------------------------------
 
-    ./AppPolaroid -x 55 -y 62 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 60 -t 578 -w 28 -a 458 -c ./polaroid_overlay_big.png
+    ./AppPolaroid -x 55 -y 62 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 60 -t 578 -w 28 -a 458 -c ./polaroid_overlay_big.png -o out_big.png
 
     
   Create the small version of the polaroid
   ----------------------------------------
 
-    ./AppPolaroid -x 10 -y 10 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 10 -t 187 -w 10 -a 180 -c ./polaroid_overlay_small.png
+    ./AppPolaroid -x 10 -y 10 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 10 -t 187 -w 10 -a 180 -c ./polaroid_overlay_small.png -o out_small.png
 
 
  */
@@ -398,8 +401,10 @@ int main(int argc, char** argv) {
 
 
   /* fill background. */
+  /*
   cairo_set_source_rgba(cr, 1, 1, 1, 1);
   cairo_paint(cr);
+  */
 
   float scale_factor = opt.visible_size / source_width;
   printf("+ Scale factor: %f\n", scale_factor);
@@ -418,7 +423,29 @@ int main(int argc, char** argv) {
   cairo_surface_flush(surf_out);
 
   /* font settings. */
-  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  //  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //  cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_font_options_t* font_options = cairo_font_options_create();
+  if (NULL == font_options) {
+    printf("+ Error: cannot create font options. Cannot create polaroid.\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  //cairo_font_options_set_hint_metrics (font_options, CAIRO_HINT_METRICS_ON);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_NONE);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GRAY);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_SUBPIXEL);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GOOD);
+  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_SLIGHT);
+  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_FULL);
+
+  cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_BEST);
+  cairo_font_options_set_hint_metrics(font_options, CAIRO_HINT_METRICS_DEFAULT);
+  cairo_set_font_options (cr, font_options);
+
+  cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //  cairo_font_options_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
   cairo_set_source_rgba(cr, opt.name_r, opt.name_g, opt.name_b, 1.0); 
 
   /* name */
@@ -433,6 +460,7 @@ int main(int argc, char** argv) {
 
   /* hashtag */
   if (0 != opt.hashtag.size()) {
+    cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_move_to(cr, opt.hashtag_x, opt.hashtag_y);
     cairo_set_font_size(cr, opt.name_font_size);
     cairo_show_text(cr, opt.hashtag.c_str());

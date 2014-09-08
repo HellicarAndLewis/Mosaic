@@ -113,10 +113,12 @@ namespace grid {
     "in vec2 v_pos;"
 
     "void main() {"
+    "   float index_col = (v_row * 20.0 + v_col) / 200.0; "
     "   fragcolor = vec4(1.0, 0.0, 0.0, 1.0);"
     "   vec2 texcoord = vec2(v_tex.x * u_scalex  + v_col * u_scalex, 1.0 - (v_tex.y * u_scaley + v_row * u_scaley));"
     "   vec4 tc = texture(u_tex, texcoord);"
     "   fragcolor.rgb = tc.rgb;"
+    //    "   fragcolor.rgb = vec3(index_col, 0, 0);"
     "}"
     "";
 
@@ -188,11 +190,14 @@ namespace grid {
 
     std::vector<Cell> cells;                      /* keeps state for the separate cells */
     std::deque<Source> sources;                   /* a list with source files */
+    std::deque<Source> preloaded;                 /* image paths that we preloaded, will be slowly added to the grid one at a time */
     std::vector<Vertex> vertices;                 /* the data for the VBO */
     std::vector<size_t> index_order;              /* what grid element do we need to fill next, depending on the direction the order will be different. */
     pthread_mutex_t mutex;                        /* used to protect sources */
     int col_hidden;                               /* which column is currently hidden? this is always the 'last' column the scrolled out of view and this column can be reused. */
     int prev_col_hidden;                          /* previously column that was set to hidden; used to track if a the hidden column changed */
+    uint64_t filled_cells;                        /* when filled_cells == cells.size(), we start to fill only hidden columns, but till then every empty cell can be filled. */
+    uint64_t preloaded_timeout;                   /* we slowly fill the grid with files that already exist in the given grid path. */
 
     /* gl */
     mat4 pm;
@@ -208,6 +213,7 @@ namespace grid {
     vec2 pos_b;                                   /* position of second set */
     vec2 offset;                                  /* top left position where we start drawing (relative to the current position) */
     vec2 padding;                                 /* padding between cells. */
+    
   }; 
 
   inline void Grid::lock() {

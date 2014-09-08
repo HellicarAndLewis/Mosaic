@@ -33,6 +33,7 @@
 
 #include <pthread.h>
 #include <topshop/ImageCollector.h>
+#include <topshop/ImageJSON.h>
 
 namespace top {
 
@@ -57,6 +58,7 @@ namespace top {
     pthread_cond_t cond;
     pthread_mutex_t mutex;
     std::vector<ProcessTask*> tasks;
+    ImageJSON img_json;
   };
 
   inline void ImageProcessor::lock() {

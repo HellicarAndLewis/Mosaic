@@ -34,12 +34,14 @@ namespace top {
     grid_right_monitor = -1;
     mosaic_monitor = -1;
     log_level = 4;
-    window_width = -1;
-    window_height = -1;
+    mosaic_win_width = -1;
+    mosaic_win_height = -1;
     mosaic_width = -1;
     mosaic_height = -1;
     mosaic_x = 0;
     mosaic_y = 0;
+    grid_win_width = -1;
+    grid_win_height = -1;
     grid_rows = -1;
     grid_cols = -1;
     grid_padding_x = -1;
@@ -70,13 +72,21 @@ namespace top {
       RX_ERROR("mosaic_monitor setting not found");
       return -152;
     }
-    if (0 > window_width) {
-      RX_ERROR("Invalid window width");
-      return -100;
+    if (0 > grid_win_width) {
+      RX_ERROR("Invalid grid_win_width setting");
+      return -1;
     }
-    if (0 > window_height) {
-      RX_ERROR("Invalid window height.");
-      return -101;
+    if (0 > grid_win_height) {
+      RX_ERROR("Invalid grid_win_height setting");
+      return -1;
+    }
+    if (-1 == mosaic_win_width) {
+      RX_ERROR("Invalid mosaic_win_width");
+      return -200;
+    }
+    if (-1 == mosaic_win_height) {
+      RX_ERROR("Invalid mosaic_win_height");
+      return -201;
     }
     if (-1 == mosaic_width) {
       RX_ERROR("Invalid mosaic width");
@@ -108,7 +118,15 @@ namespace top {
     }
     if (false == rx_is_dir(raw_right_grid_filepath)) {
       RX_ERROR("%s is not a filepath.", raw_right_grid_filepath.c_str());
-      return -101;
+      return -102;
+    }
+    if (false == rx_is_dir(json_filepath)) {
+      RX_ERROR("%s is not a filepath.", json_filepath.c_str());
+      return -103;
+    }
+    if (false == rx_is_dir(polaroid_filepath)) {
+      RX_ERROR("%s is not a filepath.", polaroid_filepath.c_str());
+      return -103;
     }
     if (-1 == left_grid_x) {
       RX_ERROR("No left_grid_x setting found.");
@@ -149,6 +167,10 @@ namespace top {
     if (-1 == grid_file_height) {
       RX_ERROR("No grid_file_height setting found.");
       return -15;
+    }
+    if (0 == remote_state_url.size()) {
+      RX_ERROR("No remote_state_url set.");
+      return -16;
     }
 
     return 0;
@@ -243,8 +265,9 @@ namespace top {
       top::config.grid_left_monitor = read_xml_int(cfg, "grid_left_monitor", -1);
       top::config.grid_right_monitor = read_xml_int(cfg, "grid_right_monitor", -1);
       top::config.mosaic_monitor = read_xml_int(cfg, "mosaic_monitor", -1);
-      top::config.window_width = read_xml_int(cfg, "window_width", -1);
-      top::config.window_height = read_xml_int(cfg, "window_height", -1);
+      top::config.remote_state_url = read_xml_str(cfg, "remote_state_url", "");
+      top::config.mosaic_win_width = read_xml_int(cfg, "mosaic_win_width", -1);
+      top::config.mosaic_win_height = read_xml_int(cfg, "mosaic_win_height", -1);
       top::config.mosaic_width = read_xml_int(cfg, "mosaic_width", -1);
       top::config.mosaic_height = read_xml_int(cfg, "mosaic_height", -1);
       top::config.mosaic_x = read_xml_int(cfg, "mosaic_x", 0);
@@ -253,10 +276,14 @@ namespace top {
       top::config.right_grid_filepath = read_xml_str(cfg, "right_grid_filepath", "");
       top::config.raw_right_grid_filepath = read_xml_str(cfg, "raw_right_grid_filepath", "");
       top::config.raw_left_grid_filepath = read_xml_str(cfg, "raw_left_grid_filepath", "");
+      top::config.json_filepath = read_xml_str(cfg, "json_filepath", "");
+      top::config.polaroid_filepath = read_xml_str(cfg, "polaroid_filepath", "");
       top::config.left_grid_x = read_xml_int(cfg, "left_grid_x", -1);
       top::config.left_grid_y = read_xml_int(cfg, "left_grid_y", -1);
       top::config.right_grid_x = read_xml_int(cfg, "right_grid_x", -1);
       top::config.right_grid_y = read_xml_int(cfg, "right_grid_y", -1);
+      top::config.grid_win_width = read_xml_int(cfg, "grid_win_width", -1);
+      top::config.grid_win_height = read_xml_int(cfg, "grid_win_height", -1);
       top::config.grid_padding_x = read_xml_int(cfg, "grid_padding_x", -1);
       top::config.grid_padding_y = read_xml_int(cfg, "grid_padding_y", -1);
       top::config.grid_rows = read_xml_int(cfg, "grid_rows", 10);
@@ -276,13 +303,19 @@ namespace top {
       if (0 != top::config.right_grid_filepath.size()) {
         top::config.right_grid_filepath = rx_to_data_path(top::config.right_grid_filepath);
       }
+      if (0 != top::config.json_filepath.size()) {
+        top::config.json_filepath = rx_to_data_path(top::config.json_filepath);
+      }
+      if (0 != top::config.polaroid_filepath.size()) {
+        top::config.polaroid_filepath = rx_to_data_path(top::config.polaroid_filepath);
+      }
 
       /* mosaic */
       mos::config.webcam_device = read_xml_int(cfg, "webcam_device", 0);
       mos::config.webcam_width = read_xml_int(cfg, "webcam_width", 640);
       mos::config.webcam_height = read_xml_int(cfg, "webcam_height", 480);
-      mos::config.window_width = read_xml_int(cfg, "window_width", -1);
-      mos::config.window_height = read_xml_int(cfg, "window_height", -1);
+      mos::config.window_width = read_xml_int(cfg, "mosaic_win_width", -1);
+      mos::config.window_height = read_xml_int(cfg, "mosaic_win_height", -1);
       mos::config.stream_url = read_xml_str(cfg, "stream_url", "");
       mos::config.stream_width = read_xml_int(cfg, "stream_width", 0);
       mos::config.stream_height = read_xml_int(cfg, "stream_height", 0);

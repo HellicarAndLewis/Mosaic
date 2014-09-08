@@ -37,33 +37,78 @@
 #include <tracking/Tiles.h>
 #include <tracking/InteractiveGrid.h>
 
+#define USE_TRACKER 1
+#define USE_TILES 1
+
 namespace track {
+
+  /* ------------------------------------------------------------------ */
+
+  class TrackingSettings {
+  public:
+    TrackingSettings();
+    ~TrackingSettings();
+    bool validate();
+
+  public:
+    int webcam_device;      /* the webcam number/id */
+    int webcam_width;       /* width of the webcam input */
+    int webcam_height;      /* height of the webcam input */
+    int tile_width;         /* the width o fthe tile that we show. */
+    int tile_height;        /* the height of the tile that we show, this can be the polaroid or the bigger version of the mosaic */
+    int tile_nlayers;       /* how many texture layer elements do we need to create */
+  };
+
+  /* ------------------------------------------------------------------ */
 
   class Tracking {
   public:
     Tracking();
     ~Tracking();
-    int init(int device, int width, int height);
+    int init(TrackingSettings cfg);
     int shutdown();
     void update();
     void draw();
 
+    /* wrappers */
+    int hasFreeLayer();
+    int load(ImageOptions& opt);
+
   public:
-    int width; 
-    int height;
-    int device;
     bool needs_update;
     bool is_init;
 
+    TrackingSettings settings;
     ca::CaptureGL capture;
+
+#if USE_TRACKER
     Tracker* tracker;
+#endif
+#if USE_TILES
     Tiles tiles;
+#endif
     InteractiveGrid interactive_grid;
     
     /* wrapper around InteractiveGrid::on_activate */
     activate_cell_callback on_activate;                        /* is called when the InteractiveGrid tells us to "activate" a cell which meens that we need to show the bigger version of a cell image. */
     void* user;                                                /* gets passed into the on_activate function, see InteractiveGrid for the definition */ 
   };
+
+  inline int Tracking::hasFreeLayer() {
+#if USE_TILES
+    return tiles.hasFreeLayer();
+#else 
+    return -1;
+#endif    
+  }
+
+  inline int Tracking::load(ImageOptions& opt) {
+#if USE_TILES
+    return tiles.load(opt);
+#else
+    return 0;
+#endif    
+  }
 
 } /* namespace track */
 

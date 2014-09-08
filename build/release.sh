@@ -50,25 +50,26 @@ if [ "$(uname)" == "Darwin" ] ; then
     if [ ! -d ${id}/bin/data/raw_mosaic ] ; then 
         mkdir -p ${id}/bin/data/raw_mosaic
     fi
-    
 
 else
     cd ./../../install/linux-gcc-x86_64/bin/
 fi
 
-#./test_fex_load_image
-#./test_libav_rtmp
-#./test_video_stream_player
-#./test_mosaic
-#./test_offline_analyzer
-#./test_online_analyzer
-#./test_async_upload
-#./test_image_loader
-#./test_grid
-#./test_png_rgba
-#./test_ogg_player
-./test/test_tracker
+#./test/test_fex_load_image
+#./test/test_libav_rtmp
+#./test/test_video_stream_player
+#./test/test_mosaic
+#./test/test_offline_analyzer
+#./test/test_online_analyzer
+#./test/test_async_upload
+#./test/test_image_loader
+#./test/test_grid
+#./test/test_png_rgba
+#./test/test_ogg_player
+#./test/test_tracker
 #./test/test_cairo
+#./test/test_image_json
+#./test/test_cairo_jpg
 #./AppMosaic
 #./AppGridLeft
 #./AppGridRight
