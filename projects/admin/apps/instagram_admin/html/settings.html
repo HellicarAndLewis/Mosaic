@@ -23,14 +23,14 @@
     <li id="instagram-menu-users"><a href="/admin/users"><i class="fa fa-users"></i></a></li>
     {{?}}
     <li id="instagram-menu-settings" class="selected"><a href="/admin/settings"><i class="fa fa-cog"></i></a></li>
-    <li id="instagram-menu-logout"><a id="logout-menu-link" href="#"><i class="fa fa-sign-out"></i></a></li>
+    <li id="instagram-menu-logout"><a href="/logout/0"><i class="fa fa-sign-out"></i></a></li>
   </ul>
   <div class="container">
     <div class="instagram-settings-container">
       <div class="settings-row">
-        <div class="settings-label">Livestream</div>
+        <div class="settings-label">Show mosaic</div>
         <div class="settings-setting toggle-iphone">
-          <div class="toggle"></div>
+          <div id="toggle-show-mosaic" class="toggle"></div>
         </div>
       </div>
     </div>
@@ -39,5 +39,10 @@
   <script src="/admin/js/libs/jquery.class.js"></script>
   <script src="/admin/js/libs/toggles.min.js"></script>
   <script src="/admin/js/settings.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      MosaicInstagramAdminSettings = new MosaicInstagramAdminSettings({{=it.show_mosaic}}, '{{=it.host}}', '{{=it.port}}');
+    });
+  </script>
 </body>
 </html>

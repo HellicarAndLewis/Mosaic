@@ -56,8 +56,6 @@ var MosaicInstagramAdmin = Class.extend({
         }
       });
       
-      
-      
       // Touch
       /*
       // Approve
@@ -203,6 +201,8 @@ var MosaicInstagramAdmin = Class.extend({
         var last_id = $('#instagram-images li:first-child').data('item-id');
         if(last_id == undefined) { last_id = 0 };
         
+        self.locked = false;
+        
         self.logoutTimer = setTimeout(function() {
           window.location.href = '/logout/' + last_id;
         }, 60000);
@@ -313,6 +313,7 @@ var MosaicInstagramAdmin = Class.extend({
         });
       });
     }).error(function() {
+      
       self.retryRequest(self.messageType, 1, function() {
         
         el.remove();

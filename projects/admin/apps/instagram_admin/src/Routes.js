@@ -96,6 +96,7 @@ var Admin = new Class({
     // Login form
     this.router.get('/login', function(req, res) {
       req.session.iaid = '';
+      self.app.iaid = '';
       Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
         res.send(text);
       });
@@ -105,12 +106,15 @@ var Admin = new Class({
     this.router.get('/logout', function(req, res) {
       
       req.session.iaid = '';
+      self.app.iaid = '';
+      
       res.redirect('/login');
     });
     
     this.router.get('/logout/:resetid', function(req, res) {
       
       req.session.iaid = '';
+      self.app.iaid = '';
       
       if(req.params.resetid == '0' || req.params.resetid == 0) {
         
@@ -144,6 +148,7 @@ var Admin = new Class({
         
         self.app.iaid = ObjectID();
         req.session.iaid = self.app.iaid;
+        
         res.redirect('/admin/tags'); 
         
       } else {
@@ -166,16 +171,53 @@ var Admin = new Class({
     
     // Settings route
     this.router.get('/admin/settings', this.validate.bind(this), function(req, res) {
+      
       // Unlock images older than x ms
       self.unlockImages(function() {
         
         // Return index.html
         Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
           
-          var tpl = Dot.template(text);
-          res.send(tpl({auto_approve_users: self.app.options.instagram.auto_approve_users}));
+          var collection = self.app.db.collection('settings');
+          var result = collection.find({}).limit(1);
+          
+          result.toArray(function(err, docs) {
+            
+            var tpl = Dot.template(text);
+            res.send(tpl({
+              auto_approve_users: self.app.options.instagram.auto_approve_users
+              ,host: self.app.options.http.host
+              ,port: self.app.options.http.port
+              ,show_mosaic: docs[0].show_mosaic
+            }));
+          });
+          
         });
       }, (30*60*1000));
+    });
+    
+    // Settings route
+    this.router.post('/settings/update', BodyParser.json(), function(req, res) {
+      
+      if(req.body.show_mosaic) {
+        
+        var collection = self.app.db.collection('settings');
+        collection.update({}, {$set: {'show_mosaic': req.body.show_mosaic}}, {w:1, upsert:true}, function(err) {
+         
+          res.json({updated:(self.app.iaid) ? true : false});
+        });
+      } else {
+        res.json({updated:(self.app.iaid) ? true : false}); 
+      }
+    });
+    
+    this.router.get('/settings/get', BodyParser.json(), function(req, res) {
+   
+      var collection = self.app.db.collection('settings');
+      var result = collection.find({}).limit(1);
+      result.toArray(function(err, docs) {
+        res.json({show_mosaic: docs[0].show_mosaic});
+      });
     });
     
     // Tags route
@@ -224,7 +266,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(req.session.iaid && (req.session.iaid != undefined)) {
+    if(this.app.iaid && (this.app.iaid != undefined)) {
       
       next();
       
@@ -436,7 +478,7 @@ var Images = new Class({
           }
           ,{w:1}
           ,function() {
-            res.json({updated:true});
+            res.json({updated:(req.session.iaid)});
         });
       }
     });
