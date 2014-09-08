@@ -50,7 +50,7 @@ namespace top {
       RX_ERROR("Cannot init the raw dir watcher.");
       return -1;
     }
-    
+
     return 0;
   }
   
@@ -62,6 +62,11 @@ namespace top {
       ::exit(EXIT_FAILURE); 
     }
 #endif
+
+    if (NULL == on_rename) {
+      RX_ERROR("on_rename not set. no need to update");
+      return;
+    }
 
     dir_watcher.update();
     
@@ -155,6 +160,7 @@ namespace top {
       files.pop_front();
     }
   }
+
   /* ------------------------------------------------------------------------- */
 
 } /* namespace top */

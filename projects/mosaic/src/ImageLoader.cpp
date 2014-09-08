@@ -324,7 +324,7 @@ namespace mos {
           continue;
         }
 
-#if 1
+#if 0
         RX_VERBOSE("Loaded: %s", t->filepath.c_str());
         RX_VERBOSE("width: %d, height: %d, channels: %d, capacity: %d, nbytes: %d", 
                    t->width, t->height, t->channels, t->capacity, t->nbytes);

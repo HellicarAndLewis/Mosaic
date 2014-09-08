@@ -7,7 +7,7 @@ namespace top {
   /* ----------------------------------------------------------------------- */
 
   static void* image_processor_thread(void* user);
-  static int image_processor_process_file(CollectedFile& file);
+  static int image_processor_process_file(ImageProcessor* proc, CollectedFile& file);
   static void free_image_processor_tasks(std::vector<ProcessTask*>& tasks);
 
   /* ----------------------------------------------------------------------- */
@@ -165,7 +165,7 @@ namespace top {
       for (size_t i = 0; i < todo.size(); ++i) {
         CollectedFile& file = todo[i]->file;
         // RX_VERBOSE("Processing: %s", file.filename.c_str());
-        if ( 0 != image_processor_process_file(file)) {
+        if ( 0 != image_processor_process_file(proc, file)) {
           RX_ERROR("Processing went wrong; see above log");
         }
       }
@@ -189,22 +189,45 @@ namespace top {
     tasks.clear();
   }
 
-  static int image_processor_process_file(CollectedFile& file) {
+  static int image_processor_process_file(ImageProcessor* proc, CollectedFile& file) {
 
     std::string filepath = file.dir +"/" +file.filename;
+
+    if (NULL == proc) {
+      RX_ERROR("The ImageProcessor handle is invalid.");
+      return -1;
+    }
+
+    /* create the polaroid images. */
+    std::string json_filepath = top::config.json_filepath +"/" +rx_strip_file_ext(file.filename) +".json";
+    if (false == rx_file_exists(json_filepath)) {
+      RX_ERROR("Cannot find the json for %s", json_filepath.c_str());
+      return -5;
+    }
+    
+    ImageInfo img_info;
+    if (0 != proc->img_json.parse(json_filepath, img_info)) {
+      RX_ERROR("Failed to parse json: %s", json_filepath.c_str());
+      return -6;
+    }
+
+    RX_VERBOSE("Username: %s", img_info.username.c_str());
 
     switch (file.type) {
       case COL_FILE_TYPE_NONE: {
         RX_ERROR("The collected file type isn't set!");
-        return -1;
+        return -4;
       }
       case COL_FILE_TYPE_LEFT_GRID: { 
+
         std::stringstream ss;
         ss << "./preprocess_left_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.left_grid_filepath        /* this is where the files are stored. */
            << " " << fex::config.raw_filepath              /* images from the left grid are added to the mosaic after preprocessing */
+           << " " << top::config.polaroid_filepath          /* path where the big versions of the polaroids are stored.*/
+           << " " << img_info.username                     /* username, used to create polaroid. */
            << "";
 
         std::string command = ss.str();
@@ -213,12 +236,15 @@ namespace top {
       }
 
       case COL_FILE_TYPE_RIGHT_GRID: {
+
         std::stringstream ss;
         ss << "./preprocess_right_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.right_grid_filepath        /* this is where the files are stored. */
            << " " << fex::config.raw_filepath               /* images from the left grid are added to the mosaic after preprocessing */
+           << " " << top::config.polaroid_filepath          /* path where the big versions of the polaroids are stored.*/
+           << " " << img_info.username                      /* username, used to create polaroid. */
            << "";
 
         std::string command = ss.str();

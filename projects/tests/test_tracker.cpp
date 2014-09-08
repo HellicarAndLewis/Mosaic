@@ -104,10 +104,26 @@ int main() {
   fex::config.rows = 4;
   fex::config.cols = 10;
 
+  track::TrackingSettings cfg;
+  cfg.webcam_width = mos::config.webcam_width;
+  cfg.webcam_height = mos::config.webcam_height;
+  cfg.webcam_device = 0;
+
+#if USE_POLAROID
+  cfg.tile_width = 284;
+  cfg.tile_height = 347;
+  cfg.tile_nlayers = 10;
+#else 
+  cfg.tile_width = 64;
+  cfg.tile_height = 64;
+  cfg.tile_nlayers = 100;
+#endif
+
   track::Tracking tracking;
   tracking_ptr = &tracking;
 
-  if (0 != tracking.init(0, mos::config.webcam_width, mos::config.webcam_height)) {
+  if (0 != tracking.init(cfg)) {
+    RX_ERROR("Cannot setup tracking.");
     exit(EXIT_FAILURE);
   }
 
@@ -164,7 +180,7 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       opt.tween_angle.set(1.0f, 0.0, rx_random(-HALF_PI, HALF_PI));
       opt.tween_size.set(1.0f, 0.0f, 200.0f);
 
-      tracking_ptr->tiles.load(opt);
+      tracking_ptr->load(opt);
 
 #else
       if (image_index >= image_files.size()) {
@@ -176,13 +192,13 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       opt.x = rx_random(0, 400);
       opt.y = rx_random(0, 400);
       opt.mode = track::IMAGE_MODE_BOINK;
-      opt.mode = track::IMAGE_MODE_FLY;
+      //      opt.mode = track::IMAGE_MODE_FLY;
       opt.tween_x.set(1.0f, 0.0f, rx_random(0, 600));
       opt.tween_y.set(1.0f, 0.0f, rx_random(0, 600));
       opt.tween_angle.set(1.0f, 0.0, rx_random(0, HALF_PI));
       opt.tween_size.set(1.0f, 0.0f, 100.0f);
 
-      tracking_ptr->tiles.load(opt);
+      tracking_ptr->load(opt);
       ++image_index %= image_files.size();
 #endif
       break;

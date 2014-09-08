@@ -18,13 +18,13 @@
   Create the big version of the polaroid:
   ----------------------------------------
 
-    ./AppPolaroid -x 55 -y 62 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 60 -t 578 -w 28 -a 458 -c ./polaroid_overlay_big.png
+    ./AppPolaroid -x 55 -y 62 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 60 -t 578 -w 28 -a 458 -c ./polaroid_overlay_big.png -o out_big.png
 
     
   Create the small version of the polaroid
   ----------------------------------------
 
-    ./AppPolaroid -x 10 -y 10 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 10 -t 187 -w 10 -a 180 -c ./polaroid_overlay_small.png
+    ./AppPolaroid -x 10 -y 10 -f ./background.png -r 0.0 -g 0.0 -b 0.0 -n "roxlu" -s 10 -t 187 -w 10 -a 180 -c ./polaroid_overlay_small.png -o out_small.png
 
 
  */
@@ -398,8 +398,10 @@ int main(int argc, char** argv) {
 
 
   /* fill background. */
+  /*
   cairo_set_source_rgba(cr, 1, 1, 1, 1);
   cairo_paint(cr);
+  */
 
   float scale_factor = opt.visible_size / source_width;
   printf("+ Scale factor: %f\n", scale_factor);
@@ -418,7 +420,7 @@ int main(int argc, char** argv) {
   cairo_surface_flush(surf_out);
 
   /* font settings. */
-  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_source_rgba(cr, opt.name_r, opt.name_g, opt.name_b, 1.0); 
 
   /* name */

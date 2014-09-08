@@ -91,15 +91,28 @@ namespace track {
     must_update = false;
   }
 
-  int Tiles::init(int texW, int texH) {
+  int Tiles::init(int texW, int texH, int texLayers) {
 
     tex_width = texW;
     tex_height = texH;
-    tex_ntotal = 5;
+    tex_ntotal = texLayers;
 
+    /* validate input */
     if (true == is_init) {
       RX_ERROR("Tiles already initialized, first shutdown");
       return -1;
+    }
+    if (0 == tex_ntotal) {
+      RX_ERROR("Invalid number of texture layers");
+      return -10;
+    }
+    if (0 == tex_width) {
+      RX_ERROR("Invalid texture width: %d", tex_width);
+      return -11;
+    }
+    if (0 == tex_height) {
+      RX_ERROR("Invalid texture height: %d", tex_height);
+      return -12;
     }
 
     /* check if we can store the requested number of textures */
@@ -226,6 +239,7 @@ namespace track {
 
           if (0 == free_layers.size()) {
             RX_VERBOSE("No free layers! The image will be shown as soon as we have a free layer");
+            img->is_free = true;
             continue;
           }
 

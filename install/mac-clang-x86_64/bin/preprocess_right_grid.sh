@@ -7,6 +7,7 @@ tile_width=${2}
 tile_height=${3}
 output_dir=${4}
 raw_mosaic_dir=${5}
+username=${6}
 
 function log {
     dat=$(date +%Y.%m.%d.%H.%M.%S)
@@ -36,3 +37,5 @@ ${magickdir}/convert ${infile} \
 mv tmp.png ${grid_filepath}
 
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
+
+echo "USERNAME ------------------------------------------------------ ${username} "

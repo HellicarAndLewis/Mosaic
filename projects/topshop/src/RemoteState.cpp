@@ -1,6 +1,7 @@
 #include <err.h>
 #include <stdlib.h>
 #include <topshop/RemoteState.h>
+#include <topshop/Config.h>
 
 namespace top {
 
@@ -8,6 +9,13 @@ namespace top {
 
   static void* remote_thread(void* user);
   static int parse_json(RemoteState* state, std::string json);
+
+  /* ------------------------------------------------------------- */
+
+  RemoteSettings::RemoteSettings() 
+    :show_mosaic(0)
+  {
+  }
 
   /* ------------------------------------------------------------- */
 
@@ -66,6 +74,11 @@ namespace top {
       return -1;
     }
 
+    if (0 == top::config.remote_state_url.size()) {
+      RX_ERROR("Cannot init the remote state because the remote_state_url setting is empty.");
+      return -2;
+    }
+
     is_init = true;
     must_stop = false;
 
@@ -74,7 +87,7 @@ namespace top {
       RX_ERROR("Cannot start the remote state thread: %s", strerror(r));
       must_stop = true;
       is_init = false;
-      return -2;
+      return -3;
     }
 
     return 0;
@@ -112,6 +125,13 @@ namespace top {
     return 0;
   }
 
+  /* copies the remote settings. */
+  void RemoteState::getRemoteSettings(RemoteSettings& result) {
+    lock();
+      result = settings;
+    unlock();
+  }
+
   /* ------------------------------------------------------------- */
 
   static void* remote_thread(void* user) {
@@ -124,6 +144,7 @@ namespace top {
 
     bool must_stop = false;
     bool must_poll = false;
+    std::string url = top::config.remote_state_url;
 
     while (false == rem->must_stop) {
       rem->lock();
@@ -147,7 +168,7 @@ namespace top {
       }
 
       /* check the remote state */
-      std::string url = "http://test.localhost/test.json";
+
       std::string result;
       if (false == rx_fetch_url(url, result)) {
         RX_ERROR("Failed to get the url %s", url.c_str());
@@ -187,9 +208,13 @@ namespace top {
       root = NULL;
       return -3;
     }
-    
-    int show_mosaic = json_integer_value(el);
-    RX_VERBOSE("Show mosaic: %d", show_mosaic);
+
+    /* update the state */
+    state->lock();
+     state->settings.show_mosaic = json_integer_value(el);
+    state->unlock();
+
+    RX_VERBOSE("Show mosaic: %d", state->settings.show_mosaic);
 
     json_decref(root);
     root = NULL;

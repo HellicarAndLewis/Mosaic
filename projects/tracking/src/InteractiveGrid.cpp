@@ -110,15 +110,16 @@ namespace track {
     for (size_t i = 0; i < tracker->blobs.blobs.size(); ++i) {
 
       Blob& blob = tracker->blobs.blobs[i];
-      /*
+
+#if 0
       if (false == blob.matched) {
         continue;
       }
       
-      if (5 > blob.trail.size()) {
+      if (15 > blob.trail.size()) {
         continue;
-        }
-      */
+      }
+#endif
       
       /* convert the position of the blob to a cell index. */
       cv::Point& pt = blob.position;

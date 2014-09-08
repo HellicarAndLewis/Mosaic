@@ -37,6 +37,15 @@
 
 namespace top {
 
+  /* ------------------------------------------------------------- */
+
+  struct RemoteSettings {
+    RemoteSettings();
+    int show_mosaic;
+  };
+
+  /* ------------------------------------------------------------- */
+
   class RemoteState {
   public:
     RemoteState();
@@ -44,6 +53,7 @@ namespace top {
     int init();
     void update();
     int shutdown();
+    void getRemoteSettings(RemoteSettings& result);
     void lock();
     void unlock();
 
@@ -56,6 +66,7 @@ namespace top {
     pthread_cond_t cond;
     uint64_t timeout;
     uint64_t delay;
+    RemoteSettings settings;
   };
 
   inline void RemoteState::lock() {

@@ -153,6 +153,7 @@ set(topshop_lib_sources
   ${ts_sd}/ImageProcessor.cpp
   ${ts_sd}/GridApp.cpp
   ${ts_sd}/RemoteState.cpp
+  ${ts_sd}/ImageJSON.cpp
 )
 
 macro(create_test name)
@@ -163,7 +164,6 @@ macro(create_test name)
   target_link_libraries(test_${name} ${app_libs} gfx fex vid mosaic grid videocapture shop tracker tracking)
   install(TARGETS test_${name} DESTINATION bin/test/)
 endmacro()
-
 
   # The graphics library
   add_library(gfx ${gfx_lib_sources})
@@ -227,8 +227,10 @@ install(TARGETS AppPolaroid DESTINATION bin)
 #create_test(grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
-create_test(tracker)
+#create_test(tracker)
+#create_test(image_json)
 #create_test(cairo_png)
+#create_test(cairo_jpg)
 
 
 

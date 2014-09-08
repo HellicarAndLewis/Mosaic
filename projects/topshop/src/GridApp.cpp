@@ -65,7 +65,7 @@ namespace top {
     }
 
     /* init the dir watcher. */
-    r = img_collector.init(cfg.watch_path);
+    r = img_collector.init(cfg.watch_path); 
     if (0 != r) {
       RX_ERROR("Cannot start the image collector: %d.", r);
       grid.shutdown();

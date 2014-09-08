@@ -199,7 +199,7 @@ namespace track {
   public:
     Tiles();
     ~Tiles();
-    int init(int texW, int texH);
+    int init(int texW, int texH, int texLayers);
     void update();
     void draw();
     int shutdown();
@@ -209,7 +209,7 @@ namespace track {
     void unlock();
     void updateVertexState();
     int showTileAtPosition(std::string filename, int x, int y);
-
+    int hasFreeLayer();                         /* 0 == yes, -1 = no */
   public:
     bool is_init;
     int tex_width;
@@ -246,6 +246,14 @@ namespace track {
     if (0 != r) {
       RX_ERROR("Cannot unlock: %s", strerror(r));
     }
+  }
+
+  inline int Tiles::hasFreeLayer() {
+    int has;
+    lock();
+      has = (free_layers.size() > 0) ? 0 : -1;
+    unlock();
+    return has;
   }
 
 } /* namespace track */

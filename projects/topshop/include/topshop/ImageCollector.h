@@ -22,7 +22,6 @@
   The ImageCollector watches a couple of directories that are used by the 
   TopShop application to generate the mosaic and the left/right grids. We're 
   watching the following directories (see settings.xml for more info):
-
   
   raw_filepath: 
              This is the main directory. When files are added to this 

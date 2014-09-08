@@ -140,8 +140,8 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   
   GLFWwindow* win = NULL;
-  int w = top::config.window_width;
-  int h = top::config.window_height;
+  int w = top::config.grid_win_width;
+  int h = top::config.grid_win_height;
   int used_w = 0;
   int used_h = 0;
 

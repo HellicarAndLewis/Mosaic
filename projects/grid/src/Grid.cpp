@@ -66,6 +66,8 @@ namespace grid {
     ,tex_height(0)
     ,col_hidden(0)
     ,prev_col_hidden(-1)
+    ,filled_cells(0)
+    ,preloaded_timeout(0)
     ,vert(0)
     ,frag(0)
     ,prog(0)
@@ -101,6 +103,7 @@ namespace grid {
     cols = cls * 2; /* we need to duplicate the number of columns so we can update cells which are hidden. */
     tex_width = img_width * cols;
     tex_height = img_height * rows;
+    filled_cells = 0;
     
     if (GRID_DIR_LEFT != direction && GRID_DIR_RIGHT != direction) {
       RX_ERROR("Invalid direction value.");
@@ -165,7 +168,6 @@ namespace grid {
       return -102;
     }
 
-
     /* create a texture */
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -205,6 +207,8 @@ namespace grid {
           index_order[c++] = j * cols + ((cols-1) - i);
           cells[dx].col = (cols-1) - i;
         }
+
+        RX_VERBOSE("INDEX_ORDER: %lu", index_order[c-1]);
 
         cells[dx].row = j;
         vertices[dx].col = i;
@@ -263,13 +267,21 @@ namespace grid {
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
 
+
     /* load initial files. */
     std::vector<std::string> files = rx_get_files(path, "*");
     for (size_t i = 0; i < files.size(); ++i) {
-      on_dir_changed(path, rx_strip_dir(files[i]), this);
+      Source src;
+      src.filepath = files[i];
+      src.mtime = rx_get_file_mtime(files[i]);
+      preloaded.push_back(src);
       if (i > cells.size()) {
         break;
       }
+    }
+    std::sort(preloaded.begin(), preloaded.end(), source_sorter);
+    if (0 != preloaded.size()) {
+      preloaded_timeout = rx_hrtime() + 300e6; /* XXe6 millis */
     }
 
     is_init = true;
@@ -282,6 +294,17 @@ namespace grid {
     if (0 == tex_width) {
       RX_WARNING("No tex_width set, probably not yet initialized.");
       return;
+    }
+
+    /* do we still have preloaded images that we can load? */
+    if (0 != preloaded.size()) {
+      uint64_t now = rx_hrtime();
+      if (now > preloaded_timeout) {
+        preloaded_timeout = now + 50e6; /* XXe6 millis */
+        Source& preloaded_source = preloaded.front();
+        on_dir_changed(dir_watcher.directory, rx_strip_dir(preloaded_source.filepath), this);
+        preloaded.pop_front();
+      }
     }
 
     dir_watcher.update();
@@ -299,14 +322,14 @@ namespace grid {
     size_t dx;
     while (0 != sources.size() && true == getUsableCell(dx, CELL_STATE_NONE, CELL_STATE_RESERVED)) {
       Source& source = *sources.begin();
-      RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
+      //      RX_VERBOSE("We can load a source: %s, %lu", source.filepath.c_str(), dx);
       img_loader.load(source.filepath);
       sources.erase(sources.begin());
     }
 
     /* for each of the loaded images, we need to update the texture. */
     glBindTexture(GL_TEXTURE_2D, tex_id);
-
+    
     lock();
     {
       for (size_t i = 0; i < index_order.size(); ++i) {
@@ -398,7 +421,12 @@ namespace grid {
     int scroll_width = img_width + padding.x;
     col_hidden = (abs(int(pos_a.x)) / scroll_width) - 1;
 
-    if (col_hidden >= 0 && col_hidden != prev_col_hidden) {
+    lock();
+       uint64_t fc = filled_cells;
+    unlock();
+
+    if (fc >= (cells.size()-1)
+        &&  col_hidden >= 0 && col_hidden != prev_col_hidden) {
       lock();
       {
         for (size_t i = 0; i < cells.size(); ++i) {
@@ -478,6 +506,8 @@ namespace grid {
     img_height = 0;
     col_hidden = 0;
     prev_col_hidden = -1;
+    filled_cells = 0;
+    preloaded_timeout = 0; 
     pos_a.set(0,0);
     pos_b.set(0,0);
 
@@ -503,7 +533,7 @@ namespace grid {
 
     return 0;
   }
-
+  
   bool Grid::getUsableCell(size_t& dx, int currState, int newState) {
     bool result = false;
 
@@ -580,7 +610,7 @@ namespace grid {
       return;
     }
 
-    //RX_VERBOSE("Image loaded: %s", task->filepath.c_str());
+    // RX_VERBOSE("Image loaded: %s", task->filepath.c_str());
 
     /* find a free cell. */
     int found_cell = 0;
@@ -609,6 +639,8 @@ namespace grid {
     {
       Cell& cell = grid->cells.at(cdx);
       memcpy(cell.pixels, task->pixels, nbytes);
+      grid->filled_cells++;
+      RX_VERBOSE("Cells filed: %llu, total: %lu, INDEX: %lu", grid->filled_cells, grid->cells.size(), cdx);
     }
     grid->unlock();
   }
@@ -632,7 +664,7 @@ namespace grid {
     }
   
     /* add the new source. */
-    RX_VERBOSE("Dir changed, dir: %s, adding: %s", dir.c_str(), filename.c_str());
+    // RX_VERBOSE("Dir changed, dir: %s, adding: %s", dir.c_str(), filename.c_str());
 
     grid->sources.push_back(source);
     std::sort(grid->sources.begin(), grid->sources.end(), source_sorter);

@@ -23,12 +23,14 @@ namespace top {
     int grid_right_monitor;
     int mosaic_monitor;
     int log_level;                           /* any of the RX_LOG_LEVEL values, 0-4 */
-    int window_width;
-    int window_height;
+    int mosaic_win_width;
+    int mosaic_win_height;
     int mosaic_width;
     int mosaic_height;
     int mosaic_x;
     int mosaic_y;
+    int grid_win_width;
+    int grid_win_height;
     int grid_rows;
     int grid_cols;
     int grid_padding_x;
@@ -40,6 +42,9 @@ namespace top {
     int right_grid_x;
     int right_grid_y;
 
+    std::string remote_state_url;          /* we fetch an JSON state object every X seconds which changes the behavior of the application; at the time of writing it's only used to toggle between video and mosaic */
+    std::string polaroid_filepath;         /* where we store the big polaroid version of the image */
+    std::string json_filepath;             /* the path where the meta data for the image files is stored. */
     std::string raw_left_grid_filepath;    /* we watch for new files to pre-process in this directory for the left grid.*/
     std::string raw_right_grid_filepath;   /* we watch for new files to pre-process in this directory for the right grid. */
     std::string left_grid_filepath;        /* processed files for the left grid are moved to this directory. */
