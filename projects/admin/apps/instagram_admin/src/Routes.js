@@ -216,7 +216,7 @@ var Admin = new Class({
       var collection = self.app.db.collection('settings');
       var result = collection.find({}).limit(1);
       result.toArray(function(err, docs) {
-        res.json({show_mosaic: (docs.length == 0) ? docs[0].show_mosaic : true});
+        res.json({show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : true});
       });
     });
     
