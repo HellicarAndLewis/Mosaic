@@ -188,7 +188,7 @@ var Admin = new Class({
               auto_approve_users: self.app.options.instagram.auto_approve_users
               ,host: self.app.options.http.host
               ,port: self.app.options.http.port
-              ,show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : 1
+              ,show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1
             }));
           });
           
@@ -202,7 +202,7 @@ var Admin = new Class({
       if(req.body.show_mosaic) {
         
         var collection = self.app.db.collection('settings');
-        collection.update({}, {$set: {'show_mosaic': req.body.show_mosaic}}, {w:1, upsert:true}, function(err) {
+        collection.update({}, {$set: {'show_mosaic': parseInt(req.body.show_mosaic)}}, {w:1, upsert:true}, function(err) {
          
           res.json({updated:(self.app.iaid) ? true : false});
         });
@@ -216,7 +216,7 @@ var Admin = new Class({
       var collection = self.app.db.collection('settings');
       var result = collection.find({}).limit(1);
       result.toArray(function(err, docs) {
-        res.json({show_mosaic: (docs.length > 0) ? docs[0].show_mosaic : 1});
+        res.json({show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1});
       });
     });
     
