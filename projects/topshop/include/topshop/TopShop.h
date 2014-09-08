@@ -27,7 +27,7 @@
 #include <topshop/ImageJSON.h>
 #include <tracking/Tracking.h>
 
-#define USE_POLAROID 1   /* when set to 1 we use the polaroid interaction effect */
+#define USE_POLAROID 0   /* when set to 1 we use the polaroid interaction effect */
 
 namespace top {
   

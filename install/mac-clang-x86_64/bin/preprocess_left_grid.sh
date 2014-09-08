@@ -33,25 +33,36 @@ grid_filepath=${output_dir}/${filename}.png
 ${magickdir}/convert ${infile} ${png_filename}
 
 # Big polaroid
-./AppPolaroid \
-    -x 77 -y 75 -f ${png_filename} \
-    -r 0.247 -g 0.447 -b 0.608 \
-    -n "${username}" -s 60 -t 508 -w 20 \
-    -a 458 -c ./data/assets/polaroid_overlay_big.png \
-    -o ${tmp_filename}
+# ./AppPolaroid \
+#     -x 77 -y 75 -f ${png_filename} \
+#     -r 0.247 -g 0.447 -b 0.608 \
+#     -n "${username}" -s 60 -t 508 -w 20 \
+#     -a 458 -c ./data/assets/polaroid_overlay_big.png \
+#     -o ${tmp_filename}
+# 
+# mv ${tmp_filename} ${polaroid_dir}/${filename}.png
 
-mv ${tmp_filename} ${polaroid_dir}/${filename}.png
-
-# Small polaroid
+# Small Polaroid
 ./AppPolaroid \
     -x 35 -y 10 -f ${png_filename} \
-    -r 0.247 -g 0.447 -b 0.608 \
-    -n "${username}" \
-    -s 10 -t 187 -w 10 \
+    -r 0.0 -g 0.0 -b 0.0 \
+    -n "${username} " -s 14 -t 14 -w 13 \
+    -h "#topshopwindow" -i 14 -j 193 \
     -a 180 -c ./data/assets/polaroid_overlay_small.png \
     -o ${tmp_filename}
 
 # Move the files to the correct dirs; cleanup
+cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 mv ${tmp_filename} ${grid_filepath}
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
 rm ${png_filename}
+
+
+# Small polaroid
+# ./AppPolaroid \
+#     -x 35 -y 10 -f ${png_filename} \
+#     -r 0.247 -g 0.447 -b 0.608 \
+#     -n "${username}" \
+#     -s 10 -t 187 -w 10 \
+#     -a 180 -c ./data/assets/polaroid_overlay_small.png \
+#     -o ${tmp_filename}

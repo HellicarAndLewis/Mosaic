@@ -1,6 +1,6 @@
 /*
 
-  Used to create the polaroid images for the girds and interactive layer. 
+  Used to create the polaroid images for the grids and interactive layer. 
 
   -c = the background 'canvas', must be png (this is the instagram image)
   -f = the foreground overlay, must be png. 
@@ -13,7 +13,10 @@
   -r,-g, -b = color for then name
   -a = the size in pixels of the squale that is visible
   -h = hashtag
+  -i = hashtag x
+  -j = hashtag y
   -o = output path
+
 
   Create the big version of the polaroid:
   ----------------------------------------
@@ -420,7 +423,30 @@ int main(int argc, char** argv) {
   cairo_surface_flush(surf_out);
 
   /* font settings. */
-  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //  cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_font_options_t* font_options = cairo_font_options_create();
+  if (NULL == font_options) {
+    printf("+ Error: cannot create font options. Cannot create polaroid.\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  //cairo_font_options_set_hint_metrics (font_options, CAIRO_HINT_METRICS_ON);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_NONE);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GRAY);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_SUBPIXEL);
+  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GOOD);
+  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_SLIGHT);
+  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_FULL);
+
+  cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_BEST);
+
+  cairo_font_options_set_hint_metrics(font_options, CAIRO_HINT_METRICS_DEFAULT);
+  cairo_set_font_options (cr, font_options);
+
+  //cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  //  cairo_font_options_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
   cairo_set_source_rgba(cr, opt.name_r, opt.name_g, opt.name_b, 1.0); 
 
   /* name */

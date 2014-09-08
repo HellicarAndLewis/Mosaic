@@ -43,8 +43,8 @@ namespace top {
     cfg.tile_height = 568;
     cfg.tile_nlayers = 10;
 #else
-    cfg.tile_width = fex::config.file_tile_width; 
-    cfg.tile_height = fex::config.file_tile_height; 
+    cfg.tile_width = 200; // fex::config.file_tile_width; 
+    cfg.tile_height = 200; // fex::config.file_tile_height; 
     cfg.tile_nlayers = 150;
 #endif
 
@@ -217,7 +217,7 @@ namespace top {
 #if USE_POLAROID
     std::string filepath = top::config.polaroid_filepath +"/" +desc.getFilename();
 #else
-    std::string filepath = fex::config.resized_filepath +"/" +desc.getFilename();
+    std::string filepath = top::config.polaroid_filepath +"/" +desc.getFilename();
 #endif
 
     if (false == rx_file_exists(filepath)) {
@@ -244,7 +244,7 @@ namespace top {
     img_opt.y = col_h * j;
     img_opt.filepath = filepath;
     img_opt.mode = track::IMAGE_MODE_BOINK;
-    img_opt.tween_size.set(1.0f, 0.0f, 100.0f);
+    img_opt.tween_size.set(0.6f, 0.0f, 125.0f);
 #endif
 
     if (0 != shop->tracking.load(img_opt)) {

@@ -185,7 +185,7 @@ int main() {
   /* make sure the created window has the resolution we want it to be */
   glfwGetWindowSize(win, &used_w, &used_h);
   if (used_w != w || used_h != h) {
-    RX_VERBOSE("The used window size is not the same as you asked for (%d x %d), we're using %d x %d. This is probably because you're not running fullscreen on Mac", w, h, used_w, used_h);
+    RX_ERROR("The used window size is not the same as you asked for (%d x %d), we're using %d x %d. This is probably because you're not running fullscreen on Mac", w, h, used_w, used_h);
     exit(EXIT_FAILURE);
   }
 

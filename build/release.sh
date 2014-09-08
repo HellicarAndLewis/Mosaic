@@ -70,7 +70,7 @@ fi
 #./test/test_cairo
 #./test/test_image_json
 #./test/test_cairo_jpg
-./AppMosaic
+#./AppMosaic
 #./AppGridLeft
 #./AppGridRight
 
