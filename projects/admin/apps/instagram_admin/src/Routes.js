@@ -64,6 +64,8 @@ var TagSubscription = new Class({
 
 module.exports.TagSubscription = TagSubscription;
 
+var UNLOCK_TIME = (20*60*1000);
+
 // Admin router
 // --------------------------------------------------------
 var Admin = new Class({
@@ -90,7 +92,7 @@ var Admin = new Class({
     // Modules
     this.router.use(MethodOverride());
     this.router.use(CookieParser());
-    this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD', expires:new Date(Date.now() + 900000), httpOnly:true}));
+    this.router.use(CookieSession({secret:'$3cr3tp@$$W0rD'}));
     this.router.use(BodyParser.urlencoded({extended: false}));
     
     // Login form
@@ -194,7 +196,7 @@ var Admin = new Class({
           });
           
         });
-      }, (30*60*1000));
+      }, UNLOCK_TIME);
     });
     
     // Settings route
@@ -208,7 +210,7 @@ var Admin = new Class({
           res.json({updated:(self.app.iaid) ? true : false});
         });
       } else {
-        res.json({updated:(self.app.iaid) ? true : false}); 
+        res.json({updated:(self.app.iaid != '') ? true : false}); 
       }
     });
     
@@ -238,7 +240,7 @@ var Admin = new Class({
             ,port: self.app.options.http.port
           }));
         });
-      }, (30*60*1000));
+      }, UNLOCK_TIME);
     });
     
     // Users route
@@ -258,7 +260,7 @@ var Admin = new Class({
             ,port: self.app.options.http.port
           }));
         });
-      }, (30*60*1000));
+      }, UNLOCK_TIME);
     });
   
   }
@@ -267,7 +269,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(this.app.iaid && (this.app.iaid != undefined)) {
+    if(this.app.iaid && (this.app.iaid != '')) {
       
       next();
       
@@ -308,6 +310,7 @@ var Admin = new Class({
             locked: false
             ,reviewed: false
             ,approved: false
+            ,queue_id: ObjectID()
           }}
           ,{w:1, multi:true}
           ,function() {
@@ -344,7 +347,7 @@ var Images = new Class({
     
     // Create get route
     this.router.get('/images/:action/:type/:min_id/:max_id/:limit', function(req, res) {
-      
+
       // Set type
       var type = ['user', 'tag'];
       if(req.params.type == 'user') {
@@ -356,40 +359,44 @@ var Images = new Class({
       // Get queued images
       if(req.params.action == 'queued') {
        
-        var collection = self.app.db.collection('instagram');
-        
-        var result = collection.find({
-          locked: false
-          ,approved: false
-          ,reviewed: false
-          ,msg_type: {$in: type}
-        }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
-        
-        result.toArray(function(err, docs) {
-          
-          var docs_ids = new Array();
-          
-          // Lock documents
-          docs.each(function(doc, i) {
-            docs_ids.push(doc._id);
-          });
-          
-          collection.update(
-            {_id:{$in:docs_ids}}
-            ,{
-              $set:{
-                locked: true
-                ,locked_time: Date.now()
+        self.unlockImages(function() {
+          var collection = self.app.db.collection('instagram');
+
+          var result = collection.find({
+            locked: false
+            ,approved: false
+            ,reviewed: false
+            ,msg_type: {$in: type}
+          }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+
+          result.toArray(function(err, docs) {
+
+            var docs_ids = new Array();
+
+            // Lock documents
+            docs.each(function(doc, i) {
+              docs_ids.push(doc._id);
+            });
+
+            collection.update(
+              {_id:{$in:docs_ids}}
+              ,{
+                $set:{
+                  locked: true
+                  ,locked_time: Date.now()
+                }
               }
-            }
-            ,{w:1, multi:true}
-            ,function() {
-            
-              // Output json docs
-              res.json(docs);
+              ,{w:1, multi:true}
+              ,function() {
+
+                // Output json docs
+                res.json(docs);
+            });
+
+
           });
-          
-        });
+        
+        }, UNLOCK_TIME);
         
       }
       
@@ -462,9 +469,9 @@ var Images = new Class({
       
       // Check for id
       if(req.body.id) {
-        
+
         var collection = self.app.db.collection('instagram');  
-        
+
         // Update
         collection.update(
           {_id: ObjectID(req.body.id)}
@@ -479,10 +486,53 @@ var Images = new Class({
           }
           ,{w:1}
           ,function() {
-            res.json({updated:(req.session.iaid)});
+            res.json({updated:(self.app.iaid != '') ? true : false});
         });
       }
     });
+  }
+  
+  // Unlock images older than 30 min
+  // --------------------------------------------------------
+  ,unlockImages: function(callback, ms) {
+
+      var collection = this.app.db.collection('instagram');
+      
+      // Find all images that are locked
+      var result = collection.find({
+ 
+        locked: true
+        ,approved: false
+        ,reviewed: false
+        ,locked_time: {$lt: Date.now()-ms}
+      })
+      .sort({lock_time:1});
+
+      result.toArray(function(err, docs) {
+
+        var docs_ids = new Array();
+
+        // Unlock documents
+        docs.each(function(doc, i) {
+          docs_ids.push(doc._id);
+        });
+
+        collection.update(
+          {_id:{$in:docs_ids}}
+          ,{$set:{
+            locked: false
+            ,reviewed: false
+            ,approved: false
+            ,queue_id: ObjectID()
+          }}
+          ,{w:1, multi:true}
+          ,function() {
+
+            Console.status(docs.length + ' images unlocked');
+            callback();
+        });
+      });
+    
   }
 });
 

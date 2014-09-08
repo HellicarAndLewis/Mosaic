@@ -23,6 +23,7 @@ var MosaicInstagramAdmin = Class.extend({
     var self = this;
     
     this.messageType = msgType;
+    this.queue = [];
     
     this.options.http.host = host;
     this.options.http.port = port;
@@ -35,57 +36,123 @@ var MosaicInstagramAdmin = Class.extend({
 
       e.preventDefault();
       var last_id = $('#instagram-images li:first-child').data('item-id');
+      
       if(last_id == undefined) { last_id = 0 };
+      
       window.location.href = '/logout/' + last_id;
     });
     
+    // Get new image
     this.getQueuedImages(this.messageType, 1, function() {
+      
+      // review callback
+      var review_callback = function(btn, approved) {
+        
+        $('#instagram-images-result').hide();
+        
+        if(!self.locked) {
+          
+          self.locked = true;
+          
+          btn.addClass('highlight');
+         
+          if(self.queue.length > 0) {
+            
+            var img = self.queue.shift();
+            var id = $('#instagram-images li:first-child').data('item-id');
+            var url = $('#instagram-images li:first-child').data('media-url');
+            var item = $('#instagram-images li:first-child').data('item');
+            
+            self.queue.push({
+              id: id
+              ,approved: approved
+              ,url: url
+              ,item: item
+            });
+            self.updateImage(img.id, img.approved, approved);
+            
+            return;
+          }
+          
+          var el = $('#instagram-images li:first-child');
+          $('#instagram-images-overlay div.inner-error').hide();
+          $('#instagram-images-overlay div.inner-update').show();
+          $('#instagram-images-overlay').fadeIn(100);
+          
+          $('#instagram-images-result').empty();
+      
+          if(approved) {  
+            $('#instagram-images-result').css('background', 'green');
+            $('#instagram-images-result').text('Approved');
+          } else {
+            $('#instagram-images-result').css('background', 'red');
+            $('#instagram-images-result').text('Declined');
+          }
+          
+          $('#instagram-images-result').show();
+          
+          self.queue.push({
+            id: el.data('item-id')
+            ,approved: true
+            ,url: el.data('media-url')
+            ,item: el.data('item')
+          });
+          
+          setTimeout(function() {
+          
+            self.getQueuedImages(self.messageType, 1, function() {
+
+              $('#instagram-images').fadeOut(100, function() {
+
+                if($('#instagram-images li').length > 1 ) {
+                  el.remove();
+                }
+                $('#instagram-images-overlay').fadeOut(100);
+                $('#instagram-images').fadeIn(100, function() {
+                  self.locked = false; 
+                  $('.control-btn').removeClass('highlight');
+                });
+              });
+            });
+            
+          }, 1000);
+        }
+      };
       
       // Approve / decline buttons events
       $('div#approved-btn').click(function(e) {
-        if(!self.locked) {
-          $(this).addClass('highlight');
-          self.updateImage($('#instagram-images li:first-child'), true);
-        }
+        review_callback($(this), true);
       });
 
       $('div#declined-btn').click(function(e) {
-        if(!self.locked) {
-          $(this).addClass('highlight');
-          self.updateImage($('#instagram-images li:first-child'), false);
-        }
+        review_callback($(this), false);
       });
       
-      // Touch
-      /*
-      // Approve
-      $('#instagram-images').hammer().bind('swipeleft', function() {
-        
-        if(!self.locked) {
-          $('div#approved-btn').addClass('highlight');
-          self.updateImage($('#instagram-images li:first-child'), true);
-        }
-      });
-      
-      // Decline
+    
       $('#instagram-images').hammer().bind('swiperight', function() {
         
         if(!self.locked) {
-          $('div#declined-btn').addClass('highlight');
-          self.updateImage($('#instagram-images li:first-child'), false);
+          if(self.queue.length > 0) {
+            self.undoImage(); 
+          }
         }
       });
-      */
       
       $(document).keyup(function(e) {
         
+        // Undo (arrow up)
+        if(e.keyCode == 37) {
+          if(!self.locked) {
+            if(self.queue.length > 0) {
+              self.undoImage(); 
+            }
+          }
+        }
+        
         // Approve (arrow up)
         if(e.keyCode == 38) {
-          
-          if(!self.locked) {
-            $('div#approved-btn').addClass('highlight');
-            self.updateImage($('#instagram-images li:first-child'), true);
-          }
+          $('div#approved-btn').addClass('highlight');
+          review_callback($(this), true);
         }
         
         // Decline (arrow down)
@@ -93,7 +160,7 @@ var MosaicInstagramAdmin = Class.extend({
           
           if(!self.locked) {
             $('div#declined-btn').addClass('highlight');
-            self.updateImage($('#instagram-images li:first-child'), false);
+            review_callback($(this), false);
           }
         }
       });
@@ -147,6 +214,7 @@ var MosaicInstagramAdmin = Class.extend({
       
       $('#controls').hide();
       $('#instagram-images').fadeOut(100, function() {
+        
         $('#instagram-images').empty();
         self.retryRequest(type, limit, function() {
 
@@ -156,6 +224,27 @@ var MosaicInstagramAdmin = Class.extend({
         });
       });
     });
+  }
+  
+  // 
+  // --------------------------------------------------------
+  ,undoImage: function() {
+    
+    this.addImages([this.queue[0].item], function() {
+      
+      $('#instagram-images').fadeOut(100, function() {
+          
+        if($('#instagram-images li').length > 1 ) {
+          $('#instagram-images li:first-child').remove();
+        }
+        $('#instagram-images-overlay').fadeOut(100);
+        $('#instagram-images').fadeIn(100, function() {
+          self.locked = false; 
+          $('.control-btn').removeClass('highlight');
+        });
+      });
+    });
+   
   }
   
   // 
@@ -175,7 +264,7 @@ var MosaicInstagramAdmin = Class.extend({
           return;
         }
         
-        $('#error-timeout').text(secondsLeft);
+        $('#error-timeout').text('Retry in '+secondsLeft+' seconds.');
         secondsLeft--;
         
         setTimeout(function() {
@@ -205,7 +294,7 @@ var MosaicInstagramAdmin = Class.extend({
         
         self.logoutTimer = setTimeout(function() {
           window.location.href = '/logout/' + last_id;
-        }, 60000);
+        }, 600000);
         
         cb();
         return;
@@ -215,9 +304,35 @@ var MosaicInstagramAdmin = Class.extend({
       var url = image.images.low_resolution.url;
       
       var img = new Image();
+      var img_loaded = false;
+      
+      img.onerror = function() { 
+        
+        if(img_loaded) return;
+        
+        $('#error-timeout').text('Please wait while we look for new images...');
+        $('#instagram-images-overlay div.inner-error').show();
+        $('#instagram-images-overlay div.inner-update').hide();
+        
+        $('#instagram-images-overlay').fadeIn(0, function() {
+          
+          setTimeout(function() {
+            
+            self.getQueuedImages(self.messageType, 1, function() {
+          
+              $('#instagram-images-overlay').hide();
+              cb();
+            });
+            
+          }, 1500);
+        });
+
+      };
       
       img.onload = function() { 
-
+        
+        img_loaded = true;
+        
         var li = $('<li/>');
         var info = $('<div/>');
         info.addClass('instagram-image-info');
@@ -232,6 +347,8 @@ var MosaicInstagramAdmin = Class.extend({
 
         li.data('media-id', image.media_id);
         li.data('item-id', image._id);
+        li.data('media-url', image.images.low_resolution.url);
+        li.data('item', image);
 
         li.css({
           'background-image': 'url(' + url + ')'
@@ -243,23 +360,7 @@ var MosaicInstagramAdmin = Class.extend({
         check_img(queue, cb);
 
       };
-      
-      img.onerror = function() { 
-        
-        self.retryRequest(self.messageType, 1, function() {
-        
-          $('#instagram-images').fadeOut(100, function() {
-        
-            $('#instagram-images-overlay').fadeOut(100);
-            $('#instagram-images').fadeIn(100, function() {
-              self.locked = false; 
-              $('.control-btn').removeClass('highlight');
-            });
-          });
-        });
 
-      };
-      
       img.src = url;
     };
     
@@ -268,12 +369,10 @@ var MosaicInstagramAdmin = Class.extend({
 
   // 
   // --------------------------------------------------------
-  ,updateImage: function(el, approved) {
-    
-    this.locked = true;
-    
+  ,updateImage: function(id, approved, currentApproved) {
+  
     var self = this;
-    
+    $('#instagram-images-result').hide();
     $('#instagram-images-overlay div.inner-error').hide();
     $('#instagram-images-overlay div.inner-update').show();
     $('#instagram-images-overlay').fadeIn(100);
@@ -286,25 +385,29 @@ var MosaicInstagramAdmin = Class.extend({
       + this.options.http.port 
       + '/images/update/' 
       ,{
-        id: el.data('item-id')
+        id: id
         ,approved: approved
       }).done(function() {
       
       $('#instagram-images-result').empty();
       
-      if(approved) {  
+      if(currentApproved) {  
         $('#instagram-images-result').css('background', 'green');
         $('#instagram-images-result').text('Approved');
       } else {
         $('#instagram-images-result').css('background', 'red');
         $('#instagram-images-result').text('Declined');
       }
+      
+      $('#instagram-images-result').show();
   
       self.getQueuedImages(self.messageType, 1, function() {
         
         $('#instagram-images').fadeOut(100, function() {
           
-          el.remove();
+          if($('#instagram-images li').length > 1 ) {
+            $('#instagram-images li:first-child').remove();
+          }
           $('#instagram-images-overlay').fadeOut(100);
           $('#instagram-images').fadeIn(100, function() {
             self.locked = false; 
@@ -316,7 +419,9 @@ var MosaicInstagramAdmin = Class.extend({
       
       self.retryRequest(self.messageType, 1, function() {
         
-        el.remove();
+        if($('#instagram-images li').length > 1 ) {
+          $('#instagram-images li:first-child').remove();
+        }
         $('#instagram-images-overlay').fadeOut(100);
         $('#instagram-images').fadeIn(100, function() {
           self.locked = false; 
