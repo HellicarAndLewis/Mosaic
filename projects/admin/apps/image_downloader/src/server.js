@@ -342,9 +342,13 @@ var ImageDownloader = new Class({
     
     // Start download request
     Request.head(uri, function(err, res, body) {
-
-      var r = Request(uri).pipe(Fs.createWriteStream(filename));
-      r.on('close', callback);
+      
+      try {
+        var r = Request(uri).pipe(Fs.createWriteStream(filename));
+        r.on('close', callback);
+      } catch(err) {
+        callback(err);
+      }
     });
   }
 });
