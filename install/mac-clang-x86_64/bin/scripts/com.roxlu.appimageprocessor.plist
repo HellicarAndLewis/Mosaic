@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.roxlu.appmosaic</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/roxlu/Documents/programming/topshop/install/mac-clang-x86_64/bin/scripts/auto_start_AppMosaic.sh</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true></true>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/app_mosaic.err</string>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/app_mosaic.log</string>
+
+</dict>
+</plist>

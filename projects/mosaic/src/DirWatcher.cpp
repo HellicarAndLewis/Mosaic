@@ -59,6 +59,32 @@ namespace mos {
     return 0;
   }
 
+  /* scans the watch dir, just call this ones to process files which for which no event was given */
+  int DirWatcher::scandir() {
+
+    if (0 == directory.size()) {
+      RX_ERROR("Directory is not set, cannot scan the dir.");
+      return -1;
+    }
+
+    if (NULL == on_rename) {
+      RX_ERROR("Not sanning director: %s because the on_rename callback is not set.", directory.c_str());
+      return -2;
+    }
+    
+    if (false == rx_is_dir(directory)) {
+      RX_ERROR("Cannot scan the directory because it's not a dir: %s", directory.c_str());
+      return -3;
+    }
+
+    std::vector<std::string> files = rx_get_files(directory, "*");    
+    for (size_t i = 0; i < files.size(); ++i) {
+      on_rename(directory, rx_strip_dir(files[i]), user);
+    }
+
+    return 0;
+  }
+
   void DirWatcher::update() {
     if (NULL != loop) {
       uv_run(loop, UV_RUN_NOWAIT);

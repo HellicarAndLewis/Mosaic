@@ -307,10 +307,11 @@ namespace fex {
     std::string filename = rx_strip_file_ext(rx_strip_dir(task->filepath)) +".png";
     std::string basename = rx_strip_file_ext(filename);
     std::string resized_filepath = fex::config.resized_filepath +"/" +basename +".png";
+    std::string exe_path = rx_get_exe_path();
 
     /* create the command line the preprocess task.*/
     std::stringstream ss;
-    ss << "./preprocess.sh " << task->filepath 
+    ss << exe_path +"/scripts/preprocess_mosaic.sh " << task->filepath 
        << " " << fex::config.file_tile_width 
        << " " << fex::config.file_tile_height
        << " " << fex::config.resized_filepath;

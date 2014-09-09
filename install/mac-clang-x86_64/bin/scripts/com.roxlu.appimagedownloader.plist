@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.roxlu.appimagedownloader</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/roxlu/Documents/programming/topshop/install/mac-clang-x86_64/bin/scripts/auto_start_ImageDownloader.sh</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true></true>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/app_image_downloader.err</string>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/app_image_downloader.log</string>
+
+</dict>
+</plist>

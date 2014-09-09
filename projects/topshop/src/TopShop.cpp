@@ -62,7 +62,7 @@ namespace top {
       return -101;
     }
 
-    /* init the dir watcher. */
+    /* init the dir watcher for the mosaic images. */
     r = img_collector.init(fex::config.raw_filepath);
     if (0 != r) {
       RX_ERROR("Cannot start the image collector: %d.", r);
@@ -84,6 +84,11 @@ namespace top {
     img_collector.on_file = on_new_file;
     tracking.user = this;
     tracking.on_activate = topshop_activate_cell;
+
+    /* scan the watch dir ones. */
+    if (0 != img_collector.scandir()) {
+      RX_ERROR("Failed to scan the image collector dir for the mosaic. No biggy, but shouldn't happen.");
+    }
 
     return 0;
   }
@@ -242,6 +247,9 @@ namespace top {
 #else
     img_opt.x = col_w * i;
     img_opt.y = col_h * j;
+    img_opt.tween_x.set(2.0f, img_opt.x, rx_random(-60, 60));
+    img_opt.tween_y.set(2.0f, img_opt.y, rx_random(-40, -70));
+
     img_opt.filepath = filepath;
     img_opt.mode = track::IMAGE_MODE_BOINK;
     img_opt.tween_size.set(0.6f, 0.0f, rx_random(150.0f, 195.0f));

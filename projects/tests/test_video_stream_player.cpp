@@ -105,7 +105,8 @@ int main() {
   vid::Player player;
   player_ptr = &player;
   player.on_frame = on_video_frame;
-  std::string url = "rtmp://localhost";
+  //std::string url = "rtmp://localhost";
+  std::string url = "rtmp://cp123195.live.edgefcs.net/live/topshop@27056";
   //if (0 != player.init("rtmp://edge01.fms.dutchview.nl/botr/bunny.flv")) {
   //if (0 != player.init("rtmp://cp123195.live.edgefcs.net/live/topshop@27056")) {
   if (0 != player.init(url)) {
@@ -247,7 +248,8 @@ static void on_video_frame(AVFrame* frame, void* user) {
 
   /* initialize yuv when not done yet. */
   if (0 == yuv->w) {
-    RX_VERBOSE("Initialize the YUV420P shader.");
+
+    RX_VERBOSE("Initialize the YUV420P shader, width: %d, height: %d.", frame->width, frame->height);
     if (0 != yuv->init(frame->width, frame->height)) {
       RX_ERROR("Cannot initialize the yuv decoder");
       exit(1);
@@ -258,6 +260,7 @@ static void on_video_frame(AVFrame* frame, void* user) {
     RX_VERBOSE("Invalid data.");
     return;
   }
+
 
 #if USE_TIMER
   timer_ptr->start("upload");

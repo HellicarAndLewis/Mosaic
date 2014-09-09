@@ -160,7 +160,6 @@ namespace track {
     glUseProgram(prog);
 
     /* set ortho matrix. */
-    GLint vp[4];
     glGetIntegerv(GL_VIEWPORT, vp);
     if (0 == vp[2] || 0 == vp[3]) {
       RX_ERROR("Cannot get the viewport info");
@@ -277,6 +276,8 @@ namespace track {
           if (IMAGE_MODE_BOINK == p->mode) {
             p->position.set(img->x, img->y);
             p->tween_angle.set(img->tween_angle.d, img->tween_angle.b, img->tween_angle.c);
+            p->tween_x.set(img->tween_x.d, img->tween_x.b, img->tween_x.c);
+            p->tween_y.set(img->tween_y.d, img->tween_y.b, img->tween_y.c);
           }
 
           if (IMAGE_MODE_FLY == p->mode) {
@@ -310,8 +311,12 @@ namespace track {
       
       if (IMAGE_MODE_BOINK == p.mode) {
         p.tween_angle.update(now);
-        p.angle = p.tween_angle.value;
+        p.tween_x.update(now);
+        p.tween_y.update(now);
+
         p.size.set(p.tween_size.value, p.tween_size.value);
+        p.angle = p.tween_angle.value;
+        p.position.set(p.tween_x.value, p.tween_y.value);
       }
       else if (IMAGE_MODE_FLY == p.mode) {
 
@@ -361,7 +366,8 @@ namespace track {
       /* start the tween out with a `dt` sec delay */
       if (VERTEX_STATE_TWEEN_IN == p.state && dt > 0.4) {
         p.state = VERTEX_STATE_TWEEN_OUT;
-        p.tween_size.set(0.5f, p.tween_size.b + p.tween_size.c, -100);
+        p.tween_size.set(1.5f, p.tween_size.b + p.tween_size.c, -100);
+        p.tween_y.set(rx_random(1.5f,2.5f), p.position.y, vp[3]);
       }
       ++it;
     }

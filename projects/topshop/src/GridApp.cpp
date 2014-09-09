@@ -77,13 +77,19 @@ namespace top {
 
     /* init the image processor */
     r = img_processor.init();
-    if (r != 0) {
+    if (0 != r) {
       RX_ERROR("Cannot init the image processor: %d", r);
       grid.shutdown();
       img_collector.shutdown();
       return -4;
     }
-    
+
+    /* make sure newly added files are processed. */
+    r = img_collector.scandir();
+    if (0 != r) {
+      RX_ERROR("Failed to perform the initial scandir(). Not fatal but this shouldn't happen.");
+    }
+
     return 0;
   }
 
