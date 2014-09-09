@@ -73,5 +73,5 @@ fi
 #./AppMosaic
 #./AppGridLeft
 #./AppGridRight
-./AppImageProcessor
+#./AppImageProcessor
 

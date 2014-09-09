@@ -1,7 +1,9 @@
 #!/bin/sh
 #set -x
 d=${PWD}
+bindir=${d}/../
 magickdir=${d}/../../imagemagick/
+
 infile=${1}
 tile_width=${2}
 tile_height=${3}
@@ -9,7 +11,7 @@ output_dir=${4}
 
 function log {
     dat=$(date +%Y.%m.%d.%H.%M.%S)
-    echo "${dat}: ${1}" >> ${d}/../data/log/preprocess.log
+    echo "${dat}: ${1}" >> ${bindir}/data/log/preprocess_mosaic.log
 }
 
 # Make sure the file exists.

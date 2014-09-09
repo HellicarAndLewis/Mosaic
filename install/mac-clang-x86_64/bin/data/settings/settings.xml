@@ -1,4 +1,4 @@
-<settings group="testing">
+<settings group="development">
 
   <group name="production">
     <!-- GENERAL -->
@@ -86,8 +86,8 @@
     <memory_pool_size>2000</memory_pool_size>
     <!-- STREAM -->
     <stream_url>rtmp://cp123195.live.edgefcs.net/live/topshop@27056</stream_url>
-    <stream_width>720</stream_width>
-    <stream_height>480</stream_height>
+    <stream_width>1280</stream_width>
+    <stream_height>720</stream_height>
     <!-- MOSAIC -->
     <analyzer_width>720</analyzer_width>
     <analyzer_height>480</analyzer_height>

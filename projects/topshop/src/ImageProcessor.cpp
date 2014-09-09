@@ -221,7 +221,6 @@ namespace top {
     std::string username_upper = img_info.username;
     std::transform(username_upper.begin(), username_upper.end(), username_upper.begin(), toupper);
 
-
     switch (file.type) {
       case COL_FILE_TYPE_NONE: {
         RX_ERROR("The collected file type isn't set!");
@@ -230,7 +229,7 @@ namespace top {
       case COL_FILE_TYPE_LEFT_GRID: { 
 
         std::stringstream ss;
-        ss << "./scripts/preprocess_left_grid.sh " << filepath.c_str() 
+        ss << rx_get_exe_path() +"/scripts/preprocess_left_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.left_grid_filepath        /* this is where the files are stored. */
@@ -247,7 +246,7 @@ namespace top {
       case COL_FILE_TYPE_RIGHT_GRID: {
 
         std::stringstream ss;
-        ss << "./scripts/preprocess_right_grid.sh " << filepath.c_str() 
+        ss << rx_get_exe_path() +"/scripts/preprocess_right_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.right_grid_filepath        /* this is where the files are stored. */
