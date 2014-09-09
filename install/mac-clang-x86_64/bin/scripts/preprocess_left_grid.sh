@@ -29,8 +29,11 @@ tmp_filename="tmp_${filename}.png"
 png_filename="png_${filename}.png"
 grid_filepath=${output_dir}/${filename}.png
 
-# Convert to png
-${magickdir}/convert ${infile} ${png_filename}
+# Convert to png and make sure the input image is 640x640 because the positioning depends on these dimensions
+${magickdir}/convert ${infile} \
+    -resize 640x640^ \
+    -gravity center \
+    ${png_filename}
 
 # Small Polaroid for left grid.
 ./AppPolaroid \
@@ -56,22 +59,3 @@ cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
 rm ${png_filename}
 rm ${tmp_filename}
-
-# Big polaroid
-# ./AppPolaroid \
-#     -x 77 -y 75 -f ${png_filename} \
-#     -r 0.247 -g 0.447 -b 0.608 \
-#     -n "${username}" -s 60 -t 508 -w 20 \
-#     -a 458 -c ./data/assets/polaroid_overlay_big.png \
-#     -o ${tmp_filename}
-# 
-# mv ${tmp_filename} ${polaroid_dir}/${filename}.png
-
-# Small polaroid
-# ./AppPolaroid \
-#     -x 35 -y 10 -f ${png_filename} \
-#     -r 0.247 -g 0.447 -b 0.608 \
-#     -n "${username}" \
-#     -s 10 -t 187 -w 10 \
-#     -a 180 -c ./data/assets/polaroid_overlay_small.png \
-#     -o ${tmp_filename}

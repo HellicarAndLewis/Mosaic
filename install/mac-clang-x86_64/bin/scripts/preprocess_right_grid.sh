@@ -28,8 +28,11 @@ tmp_filename="tmp_${filename}.png"
 png_filename="png_${filename}.png"
 grid_filepath=${output_dir}/${filename}.png
 
-# Convert to png
-${magickdir}/convert ${infile} ${png_filename}
+# Convert to png and make sure the input image is 640x640 because the positioning depends on these dimensions
+${magickdir}/convert ${infile} \
+    -resize 640x640^ \
+    -gravity center \
+    ${png_filename}
 
 # Small Polaroid for left grid.
 ./AppPolaroid \
@@ -55,12 +58,3 @@ cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
 rm ${png_filename}
 rm ${tmp_filename}
-
-# Resize 
-# ${magickdir}/convert ${infile} \
-#     -resize ${tile_width}x${tile_height}^ \
-#     -gravity center \
-#     -extent ${tile_width}x${tile_height} \
-#     -colors 256 \
-#     PNG8:tmp.png
-

@@ -310,7 +310,7 @@ namespace fex {
 
     /* create the command line the preprocess task.*/
     std::stringstream ss;
-    ss << "./preprocess.sh " << task->filepath 
+    ss << "./scripts/preprocess_mosaic.sh " << task->filepath 
        << " " << fex::config.file_tile_width 
        << " " << fex::config.file_tile_height
        << " " << fex::config.resized_filepath;

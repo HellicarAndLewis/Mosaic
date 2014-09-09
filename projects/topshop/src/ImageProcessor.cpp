@@ -212,7 +212,6 @@ namespace top {
     }
 
     RX_VERBOSE("Username: %s", img_info.username.c_str());
-
     if (0 == img_info.username.size()) {
       RX_ERROR("The username is empty, not supposed to happen.");
       img_info.username = "anonymous";
@@ -231,7 +230,7 @@ namespace top {
       case COL_FILE_TYPE_LEFT_GRID: { 
 
         std::stringstream ss;
-        ss << "./preprocess_left_grid.sh " << filepath.c_str() 
+        ss << "./scripts/preprocess_left_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.left_grid_filepath        /* this is where the files are stored. */
@@ -248,7 +247,7 @@ namespace top {
       case COL_FILE_TYPE_RIGHT_GRID: {
 
         std::stringstream ss;
-        ss << "./preprocess_right_grid.sh " << filepath.c_str() 
+        ss << "./scripts/preprocess_right_grid.sh " << filepath.c_str() 
            << " " << top::config.grid_file_width 
            << " " << top::config.grid_file_height 
            << " " << top::config.right_grid_filepath        /* this is where the files are stored. */
