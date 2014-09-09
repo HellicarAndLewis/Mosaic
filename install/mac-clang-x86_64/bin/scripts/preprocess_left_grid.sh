@@ -1,8 +1,14 @@
 #!/bin/sh
 set -x
+
+# Check mosaic dir
 d=${MOSAIC_BINDIR}
-bindir=${MOSAIC_BINDIR}  # see /etc/launchd.conf and http://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-mac-os-x-slash-etc-slash-launchd-dot-conf/
-magickdir=${MOSAIC_BINDIR}/../imagemagick/
+if [ -z "${d}" ] ; then
+    d=${PWD}/../
+fi
+
+bindir=${d}  # see /etc/launchd.conf and http://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-mac-os-x-slash-etc-slash-launchd-dot-conf/
+magickdir=${d}/../imagemagick/
 
 infile=${1}
 tile_width=${2}
@@ -55,6 +61,10 @@ ${bindir}/AppPolaroid \
     -a 180 -c ${bindir}/data/assets/polaroid_overlay_small_for_interaction.png \
     -o ${tmp_filename}
 cp ${tmp_filename} ${polaroid_dir}/${filename}.png
+
+# BEGIN DEBUG - COPY OVER TO RIGHT SCREEN FOR TESTING
+# cp ${infile} ${bindir}/data/raw_right
+# END DEBUG 
 
 # Move to mosaic dir too.
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
