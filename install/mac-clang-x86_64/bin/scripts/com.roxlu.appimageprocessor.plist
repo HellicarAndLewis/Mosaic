@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.roxlu.appmosaic</string>
+  <string>com.roxlu.appimageprocessor</string>
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/roxlu/Documents/programming/topshop/install/mac-clang-x86_64/bin/scripts/auto_start_AppMosaic.sh</string>
+    <string>/Users/roxlu/Documents/programming/topshop/install/mac-clang-x86_64/bin/scripts/auto_start_AppImageProcessor.sh</string>
   </array>
 
   <key>RunAtLoad</key>
   <true></true>
 
   <key>StandardErrorPath</key>
-  <string>/tmp/app_mosaic.err</string>
+  <string>/tmp/app_image_processor.err</string>
 
   <key>StandardOutPath</key>
-  <string>/tmp/app_mosaic.log</string>
+  <string>/tmp/app_image_processor.log</string>
 
 </dict>
 </plist>
