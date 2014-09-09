@@ -20,5 +20,7 @@
     "host": "localhost"
     ,"port": 27017
     ,"db": "mosaic"
+    ,"username": "mosaic"
+    ,"password": "bsEn%283DyD.{uV"
   }
 }

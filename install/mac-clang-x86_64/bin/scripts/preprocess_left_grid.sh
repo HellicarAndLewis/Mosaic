@@ -1,8 +1,8 @@
 #!/bin/sh
 set -x
-d=${PWD}
-bindir=${d}/../
-magickdir=${d}/../../imagemagick/
+d=${MOSAIC_BINDIR}
+bindir=${MOSAIC_BINDIR}  # see /etc/launchd.conf and http://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-mac-os-x-slash-etc-slash-launchd-dot-conf/
+magickdir=${MOSAIC_BINDIR}/../imagemagick/
 
 infile=${1}
 tile_width=${2}

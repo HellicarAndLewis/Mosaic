@@ -83,6 +83,10 @@ var Server = new Class({
     MongoClient.connect(
       
       'mongodb://' 
+      + this.options.mongodb.username 
+      + ':'
+      + this.options.mongodb.password 
+      + '@'
       + this.options.mongodb.host 
       + ':' + this.options.mongodb.port 
       + '/' + this.options.mongodb.db
