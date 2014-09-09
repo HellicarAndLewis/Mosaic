@@ -123,8 +123,6 @@ var Admin = new Class({
         return;
       }
       
-      console.log(req.params);
-      
       if(req.params.unlockid != '0' || req.params.unlockid != 0) {
         
         var collection = self.app.db.collection('instagram');
