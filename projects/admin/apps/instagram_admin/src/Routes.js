@@ -123,6 +123,8 @@ var Admin = new Class({
         return;
       }
       
+      console.log(req.params);
+      
       if(req.params.unlockid != '0' || req.params.unlockid != 0) {
         
         var collection = self.app.db.collection('instagram');
@@ -132,6 +134,7 @@ var Admin = new Class({
             locked: false
             ,reviewed: false
             ,approved: false
+            ,queue_id: ObjectID()
           }}
           ,{w:1}
           ,function() {
@@ -166,15 +169,6 @@ var Admin = new Class({
       
     };
     
-    this.router.get('/logout/:unlockid/:queueid/:approved', function(req, res) {
-      
-      req.session.iaid = '';
-      self.app.iaid = '';
-      
-      reset_fn(req, res, true);
-      
-    });
-    
     this.router.get('/reset/:unlockid/:queueid/:approved', function(req, res) {
       
       reset_fn(req, res, false);
@@ -186,6 +180,7 @@ var Admin = new Class({
       
       // Unlock images older than x ms
       self.unlockImages(function() {
+        
         if(req.body.username == self.app.options.admin.username 
            && req.body.password == self.app.options.admin.password) {
 
@@ -299,7 +294,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(this.app.iaid && (this.app.iaid != '')) {
+    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
       
       next();
       
