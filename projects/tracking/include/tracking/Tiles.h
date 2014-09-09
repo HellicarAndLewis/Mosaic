@@ -204,17 +204,17 @@ namespace track {
     void draw();
     int shutdown();
     int load(ImageOptions& options);
-    Image* getFreeImage();                      /* the images are loaded in a separate thread and when loaded the data is copied to the main thread so we can update the texture data. We reuse preallocated Images for this. Returns NULL on error */
+    Image* getFreeImage();                                                      /* the images are loaded in a separate thread and when loaded the data is copied to the main thread so we can update the texture data. We reuse preallocated Images for this. Returns NULL on error */
     void lock();
     void unlock();
     void updateVertexState();
     int showTileAtPosition(std::string filename, int x, int y);
-    int hasFreeLayer();                         /* 0 == yes, -1 = no */
+    int hasFreeLayer();                                                        /* 0 = yes, -1 = no */
   public:
     bool is_init;
     int tex_width;
     int tex_height;
-    int tex_ntotal;                            /* how many textures are allowed to be stored on the gpu in total */ 
+    int tex_ntotal;                                                            /* how many textures are allowed to be stored on the gpu in total */ 
     mos::ImageLoader img_loader;
     std::vector<Image*> images;
     std::vector<Vertex> vertices;
@@ -228,9 +228,10 @@ namespace track {
     GLuint vao;
     GLuint vbo;
     GLuint tex;
+    GLint vp[4];                                                               /* viewport sizes, set once in init() */
 
     /* threading - we need to sync with the image loader thread. */
-    bool must_update;                       /* is set to true when an new image was loaded. */
+    bool must_update;                                                          /* is set to true when an new image was loaded. */
     pthread_mutex_t mutex;
   };
 

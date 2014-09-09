@@ -25,13 +25,15 @@ filename="${filename%.*}"
 #resized_filepath=${d}/data/input_resized/${filename}.png
 resized_filepath=${output_dir}/${filename}.png
 
-# Resize 
+# Resize to tile format
 ${magickdir}/convert ${infile} \
     -resize ${tile_width}x${tile_height}^ \
     -gravity center \
     -extent ${tile_width}x${tile_height} \
     -colors 256 \
     PNG24:${resized_filepath}
+
+rm ${infile}
 
 # ${magickdir}/convert ${infile} \
 #     -resize 64x64^ \

@@ -55,7 +55,7 @@ cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 # Move to mosaic dir too.
 mv ${infile} ${raw_mosaic_dir}/${filename}.${extension}
 rm ${png_filename}
-
+rm ${tmp_filename}
 
 # Big polaroid
 # ./AppPolaroid \

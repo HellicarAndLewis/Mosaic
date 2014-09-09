@@ -212,6 +212,7 @@ namespace top {
     }
 
     RX_VERBOSE("Username: %s", img_info.username.c_str());
+
     if (0 == img_info.username.size()) {
       RX_ERROR("The username is empty, not supposed to happen.");
       img_info.username = "anonymous";

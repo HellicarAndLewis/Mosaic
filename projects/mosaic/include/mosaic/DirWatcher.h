@@ -40,8 +40,9 @@ namespace mos {
     DirWatcher();
     ~DirWatcher();
     int init(std::string watchdir, dirwatch_on_rename_callback cb, void* user);   /* start listening the given dir */
-    void update();                                                           /* call this often to process events. */
-    int shutdown();                                                          /* shutdown and stop listening. */
+    void update();                                                                /* call this often to process events. */
+    int shutdown();                                                               /* shutdown and stop listening. */
+    int scandir();                                                                /* scan the watch dir and see if it contains any files. */
 
   public:
     /* watch the directories */

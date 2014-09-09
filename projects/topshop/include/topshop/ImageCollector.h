@@ -54,7 +54,6 @@
 #define COL_FILE_TYPE_LEFT_GRID 0x02
 #define COL_FILE_TYPE_RIGHT_GRID 0x03
 
-
 namespace top {
 
   /* ------------------------------------------------------------------------- */
@@ -84,6 +83,7 @@ namespace top {
     ImageCollector();
     ~ImageCollector();
     int init(std::string filepath);
+    int scandir();                            /* wraps around mos::DirWatcher::scandir() */
     void update();
     int shutdown();
 
@@ -95,6 +95,12 @@ namespace top {
     void* user;
     image_collector_callback on_file;
   };
+
+  /* ------------------------------------------------------------------------- */
+
+  inline int ImageCollector::scandir() {
+    return dir_watcher.scandir();
+  }
 
 } /* namespace top */
 
