@@ -1,7 +1,7 @@
 {
   "debug": true
 
-  ,"queue_url": "http://localhost:3333/images/approved"
+  ,"queue_url": "http://80.85.84.140/images/approved"
   ,"limit": 10
   ,"request_delay": 2000
   ,"image_save_delay": 500
