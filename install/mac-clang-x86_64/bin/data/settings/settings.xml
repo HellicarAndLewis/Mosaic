@@ -10,8 +10,8 @@
     <mosaic_width>1920</mosaic_width>
     <mosaic_height>1080</mosaic_height>
     <log_level>1</log_level>
-    <grid_left_monitor>1</grid_left_monitor>
-    <grid_right_monitor>0</grid_right_monitor>
+    <grid_left_monitor>0</grid_left_monitor>
+    <grid_right_monitor>1</grid_right_monitor>
     <mosaic_monitor>0</mosaic_monitor>
     <remote_state_url>http://80.85.84.140/settings/get</remote_state_url>
     <!-- WEBCAM -->
