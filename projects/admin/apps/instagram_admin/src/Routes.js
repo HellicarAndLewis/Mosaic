@@ -114,20 +114,20 @@ var Admin = new Class({
       res.redirect('/login');
     });
     
-    this.router.get('/logout/:resetid', function(req, res) {
+    var reset_fn = function(req, res, redirect) {
       
-      req.session.iaid = '';
-      self.app.iaid = '';
+      if((req.params.unlockid == '0' || req.params.unlockid == 0) 
+         && (req.params.queueid == '0' || req.params.queueid == 0)) {
+        
+        if(redirect) { res.redirect('/login'); }
+        return;
+      }
       
-      if(req.params.resetid == '0' || req.params.resetid == 0) {
-        
-        res.redirect('/login');
-        
-      } else {
+      if(req.params.unlockid != '0' || req.params.unlockid != 0) {
         
         var collection = self.app.db.collection('instagram');
         collection.update(
-          {_id:ObjectID(req.params.resetid)}
+          {_id:ObjectID(req.params.unlockid)}
           ,{$set:{
             locked: false
             ,reviewed: false
@@ -135,11 +135,49 @@ var Admin = new Class({
           }}
           ,{w:1}
           ,function() {
-
-            Console.status('image unlocked: ' + req.params.resetid);
-            res.redirect('/login');
+            
+            Console.status('image unlocked: ' + req.params.unlockid);
+            
+            if((req.params.queueid != '0' || req.params.queueid != 0)) {
+              
+              // Update
+              collection.update(
+                {_id: ObjectID(req.params.queueid)}
+                ,{
+                  $set:{
+                    queue_id: ObjectID()
+                    ,locked: false
+                    ,approved: (req.params.approved == 'true') ? true : false
+                    ,modified_time: Date.now()
+                    ,reviewed: true
+                  }
+                }
+                ,{w:1}
+                ,function() {
+                  Console.status('image saved: ' + req.params.queueid);
+                  if(redirect) { res.redirect('/login'); }
+              });
+            } else {
+               if(redirect) { res.redirect('/login'); }
+            }
+            
         });
       }
+      
+    };
+    
+    this.router.get('/logout/:unlockid/:queueid/:approved', function(req, res) {
+      
+      req.session.iaid = '';
+      self.app.iaid = '';
+      
+      reset_fn(req, res, true);
+      
+    });
+    
+    this.router.get('/reset/:unlockid/:queueid/:approved', function(req, res) {
+      
+      reset_fn(req, res, false);
       
     });
     
