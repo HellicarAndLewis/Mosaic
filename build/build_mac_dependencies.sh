@@ -13,6 +13,7 @@ export CFLAGS="-I${bd}/include"
 export LDFLAGS="-L${bd}/lib"
 cfcopy=${CFLAGS}
 ldcopy=${LDFLAGS}
+pathcopy=${PATH}
 
 
 # ----------------------------------------------------------------------- #
@@ -658,6 +659,10 @@ if [ ! -f ${bd}/lib/libfreetype.a ] ; then
     ./configure --prefix=${bd}
     make
     make install
+    
+    export PATH=${pathcopy}
+    export CFLAGS=${cfcopy}
+    export LDFLAGS=${ldcopy}
 fi
 
 # Compile pkg config
@@ -707,20 +712,19 @@ if [ ! -f ${bd}/lib/libjansson.a ] ; then
 fi
 
 # Compile graphics magick, needs to use system paths/libs, cant use our png
-if [ ! -f ${bd}/bin/gm ] ; then
-    export PATH=${pathorig}
-    export CFLAGS=${cflagsorig}
-    export LDFLAGS=${ldflagsorig}
-    
-    cd ${sd}/graphicsmagick
-    ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
-    make
-    make install
-    export PATH=${pathcopy}
-    export CFLAGS=${cfcopy}
-    export LDFLAGS=${ldcopy}
-fi
-
+# if [ ! -f ${bd}/bin/gm ] ; then
+#     export PATH=${pathorig}
+#     export CFLAGS=${cflagsorig}
+#     export LDFLAGS=${ldflagsorig}
+#     
+#     cd ${sd}/graphicsmagick
+#     ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
+#     make
+#     make install
+#     export PATH=${pathcopy}
+#     export CFLAGS=${cfcopy}
+#     export LDFLAGS=${ldcopy}
+# fi
 
 # Compile pixman
 if [ ! -d ${bd}/include/pixman-1 ] ; then

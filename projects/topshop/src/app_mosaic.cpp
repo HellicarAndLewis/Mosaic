@@ -30,8 +30,8 @@
 #define RXP_PLAYER_GL_IMPLEMENTATION
 #include <rxp_player/PlayerGL.h>
  
-#include <Topshop/Config.h>
-#include <TopShop/TopShop.h>
+#include <topshop/Config.h>
+#include <topshop/TopShop.h>
 
 void button_callback(GLFWwindow* win, int bt, int action, int mods);
 void cursor_callback(GLFWwindow* win, double x, double y);

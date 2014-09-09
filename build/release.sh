@@ -44,13 +44,21 @@ if [ "$(uname)" == "Darwin" ] ; then
     if [ ! -d ${id}/bin/data/raw_left ] ; then 
         mkdir -p ${id}/bin/data/raw_left
     fi
+    if [ ! -d ${id}/bin/data/raw_json ] ; then 
+        mkdir -p ${id}/bin/data/raw_json
+    fi
+    if [ ! -d ${id}/bin/data/polaroids ] ; then
+        mkdir -p ${id}/bin/data/polaroids
+    fi
     if [ ! -d ${id}/bin/data/raw_right ] ; then 
         mkdir -p ${id}/bin/data/raw_right
     fi
     if [ ! -d ${id}/bin/data/raw_mosaic ] ; then 
         mkdir -p ${id}/bin/data/raw_mosaic
     fi
-
+    if [ ! -f ${id}/bin/data/descriptors.txt ] ; then
+        touch ${id}/bin/data/descriptors.txt
+    fi
 else
     cd ./../../install/linux-gcc-x86_64/bin/
 fi

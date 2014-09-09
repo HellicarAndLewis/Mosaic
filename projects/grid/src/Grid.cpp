@@ -416,7 +416,6 @@ namespace grid {
     unlock();
 
     if (fc >= cells.size()  &&  col_hidden >= 0 && col_hidden != prev_col_hidden) {
-      RX_VERBOSE("YES");
       lock();
       {
         for (size_t i = 0; i < cells.size(); ++i) {
