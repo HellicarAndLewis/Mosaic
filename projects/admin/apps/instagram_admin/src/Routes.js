@@ -64,7 +64,7 @@ var TagSubscription = new Class({
 
 module.exports.TagSubscription = TagSubscription;
 
-var UNLOCK_TIME = (20*60*1000);
+var UNLOCK_TIME = (60*60*1000);
 
 // Admin router
 // --------------------------------------------------------
