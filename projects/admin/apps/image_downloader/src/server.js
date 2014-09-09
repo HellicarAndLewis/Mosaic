@@ -331,8 +331,10 @@ var ImageDownloader = new Class({
   
   ,log: function(s) {
     
-    if(this.settings.debug) {
-      console.log(s);
+    if(this.settings) {
+      if(this.settings.debug) {
+        console.log(s);
+      }
     }
   }
   

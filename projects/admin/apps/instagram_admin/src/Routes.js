@@ -184,18 +184,21 @@ var Admin = new Class({
     // Login form post
     this.router.post('/login', function(req, res) {
       
-      if(req.body.username == self.app.options.admin.username 
-         && req.body.password == self.app.options.admin.password) {
-        
-        self.app.iaid = ObjectID();
-        req.session.iaid = self.app.iaid;
-        
-        res.redirect('/admin/tags'); 
-        
-      } else {
-        
-        res.redirect('/login');
-      }
+      // Unlock images older than x ms
+      self.unlockImages(function() {
+        if(req.body.username == self.app.options.admin.username 
+           && req.body.password == self.app.options.admin.password) {
+
+          self.app.iaid = ObjectID();
+          req.session.iaid = self.app.iaid;
+
+          res.redirect('/admin/tags'); 
+
+        } else {
+
+          res.redirect('/login');
+        }
+      }, UNLOCK_TIME);
     });
     
     // Redirect after login
@@ -212,29 +215,25 @@ var Admin = new Class({
     
     // Settings route
     this.router.get('/admin/settings', this.validate.bind(this), function(req, res) {
-      
-      // Unlock images older than x ms
-      self.unlockImages(function() {
         
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
-          
-          var collection = self.app.db.collection('settings');
-          var result = collection.find({}).limit(1);
-          
-          result.toArray(function(err, docs) {
-            
-            var tpl = Dot.template(text);
-            res.send(tpl({
-              auto_approve_users: self.app.options.instagram.auto_approve_users
-              ,host: self.app.options.http.host
-              ,port: self.app.options.http.port
-              ,show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1
-            }));
-          });
-          
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
+
+        var collection = self.app.db.collection('settings');
+        var result = collection.find({}).limit(1);
+
+        result.toArray(function(err, docs) {
+
+          var tpl = Dot.template(text);
+          res.send(tpl({
+            auto_approve_users: self.app.options.instagram.auto_approve_users
+            ,host: self.app.options.http.host
+            ,port: self.app.options.http.port
+            ,show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1
+          }));
         });
-      }, UNLOCK_TIME);
+
+      });
     });
     
     // Settings route
@@ -264,41 +263,34 @@ var Admin = new Class({
     // Tags route
     this.router.get('/admin/tags', this.validate.bind(this), function(req, res) {
       
-      // Unlock images older than x ms
-      self.unlockImages(function() {
-        
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
-          
-          var tpl = Dot.template(text);
-          res.send(tpl({
-            msg_type: 'tag'
-            ,auto_approve_users: self.app.options.instagram.auto_approve_users
-            ,host: self.app.options.http.host
-            ,port: self.app.options.http.port
-          }));
-        });
-      }, UNLOCK_TIME);
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
+
+        var tpl = Dot.template(text);
+        res.send(tpl({
+          msg_type: 'tag'
+          ,auto_approve_users: self.app.options.instagram.auto_approve_users
+          ,host: self.app.options.http.host
+          ,port: self.app.options.http.port
+        }));
+      });
     });
     
     // Users route
     this.router.get('/admin/users', this.validate.bind(this), function(req, res) {
       
-      // Unlock images older than x ms
-      self.unlockImages(function() {
-        
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
-          
-          var tpl = Dot.template(text);
-          res.send(tpl({
-            msg_type: 'user'
-            ,auto_approve_users: self.app.options.instagram.auto_approve_users
-            ,host: self.app.options.http.host
-            ,port: self.app.options.http.port
-          }));
-        });
-      }, UNLOCK_TIME);
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
+
+        var tpl = Dot.template(text);
+        res.send(tpl({
+          msg_type: 'user'
+          ,auto_approve_users: self.app.options.instagram.auto_approve_users
+          ,host: self.app.options.http.host
+          ,port: self.app.options.http.port
+        }));
+      });
+
     });
   
   }
