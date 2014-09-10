@@ -474,7 +474,8 @@ var Images = new Class({
           // Find next images in queue
           var result = collection.find({
             reviewed: true
-          }).hint({queue_id:1}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+            ,approved: true
+          }).hint({queue_id:1, reviewed:1, approved:1}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           /*result.toArray(function(err, docs) {
 
