@@ -314,7 +314,7 @@ var Admin = new Class({
         locked: true
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
-      })
+      },{hint:{locked_time:1}})
       .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
@@ -531,7 +531,8 @@ var Images = new Class({
         ,approved: false
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
-      })
+        
+      }, {hint:{locked_time:1}})
       .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
