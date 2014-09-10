@@ -433,7 +433,7 @@ var Images = new Class({
             ,reviewed: true
             ,queue_id: {$gt: ObjectID(req.params.max_id)}
             ,msg_type: {$in: type}
-          }, {hint:{queue_id:1}}).sort({queue_id:1}).limit(parseInt(req.params.limit));
+          }, {hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
           
           // Find images later than the max queue id
           max_result.toArray(function(err, docs) {
@@ -452,7 +452,7 @@ var Images = new Class({
                 ,approved: true
                 ,reviewed: true
                 ,queue_id: {$lt: ObjectID(req.params.min_id)}
-              },{hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+              },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
               
               min_result.toArray(function(err, docs) {
                 
@@ -470,7 +470,7 @@ var Images = new Class({
           var result = collection.find({
             reviewed: true
             ,approved: true
-          },{hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
             
