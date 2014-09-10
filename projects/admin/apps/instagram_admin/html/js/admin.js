@@ -301,7 +301,7 @@ var MosaicInstagramAdmin = Class.extend({
         
         clearTimeout(self.logoutTimer);
         self.logoutTimer = setTimeout(function() {
-          self.logout_cb();
+          window.location.href = '/logout'; 
         }, 600000);
         
         self.locked = false;
