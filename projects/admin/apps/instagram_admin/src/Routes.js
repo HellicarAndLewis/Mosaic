@@ -482,7 +482,7 @@ var Images = new Class({
             // Output json docs
             res.json(docs);
           });
-          res.json([]);
+        
         }
       }
       
