@@ -102,19 +102,20 @@ var Server = new Class({
         
         var collection = db.collection('instagram');
         
-        collection.ensureIndex({queue_id:1, media_id:1}, function() {
-             
-          self.db = db;
-        
-          // Setup server
-          self.setupServer();
+        collection.ensureIndex({queue_id:1}, function() {
+          
+          collection.ensureIndex({media_id:1}, function() {
 
-          // Setup Instagram api
-          self.setupInstagramApi();                 
+            self.db = db;
+
+            // Setup server
+            self.setupServer();
+
+            // Setup Instagram api
+            self.setupInstagramApi();   
+          });   
+                        
         });
-        
-        
-        
       }
     
     );
