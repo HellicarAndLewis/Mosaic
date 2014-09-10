@@ -287,7 +287,7 @@ var Server = new Class({
             
             // New images added
             Console.status(new_medias.length + ' images added for tag ' + tag);
-            
+            /*
             collection.insert(new_medias, {w:1}, function(err, result) {
 
               if(err) throw err;
@@ -306,7 +306,14 @@ var Server = new Class({
                 retry();
               }  
             });
-            
+            */
+            if(pagination.next) { 
+              setTimeout(function() {
+                pagination.next(rm_callback); 
+              }, self.options.instagram.request_delay);
+            } else { 
+              retry(); 
+            }
           // No new images found..
           } else {
             Console.status('No new images found for tag ' + tag);
