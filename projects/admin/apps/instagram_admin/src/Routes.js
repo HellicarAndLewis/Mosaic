@@ -468,13 +468,16 @@ var Images = new Class({
           
         } else {
           
+          var d = new Date();
+          console.log(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > Get all approved request');
+          
           // Find next images in queue
           var result = collection.find({
             locked: false
             ,approved: true
             ,reviewed: true
-            ,msg_type: {$in: type}
-          }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+            ,msg_type: 'tag'
+          }).sort({queue_id:-1}).limit(10);
 
           result.toArray(function(err, docs) {
 
