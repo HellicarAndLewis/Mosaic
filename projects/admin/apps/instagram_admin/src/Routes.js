@@ -230,7 +230,7 @@ var Admin = new Class({
     });
     
     // Settings route
-    this.router.post('/settings/update', BodyParser.json(), function(req, res) {
+    this.router.post('/settings/update', this.validate.bind(this), BodyParser.json(), function(req, res) {
       
       if(req.body.show_mosaic) {
         
@@ -490,7 +490,7 @@ var Images = new Class({
     
     
     // Create post route (update)
-    this.router.post('/images/update', function(req, res) {
+    this.router.post('/images/update', this.validate.bind(this), function(req, res) {
       
       // Check for id
       if(req.body.id) {
@@ -516,6 +516,20 @@ var Images = new Class({
         });
       }
     });
+  }
+  
+  // Validate user
+  // --------------------------------------------------------
+  ,validate: function(req, res, next) {
+    
+    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
+      
+      next();
+      
+    } else {
+      
+      res.redirect('/login');
+    }
   }
   
   // Unlock images older than 30 min

@@ -205,7 +205,7 @@ var MosaicInstagramAdmin = Class.extend({
           
           $('#controls').hide();
           $('#instagram-images').fadeOut(100, function() {
-            $('#instagram-images').empty();
+           
             self.retryRequest(type, limit, function() {
             
               $('#instagram-images-overlay').fadeOut(100);
