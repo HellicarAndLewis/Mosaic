@@ -238,44 +238,40 @@ var Server = new Class({
           if((media.type == 'image' && media.id)) {
             
             // Check if media already exists
-            var exists = collection.find({media_id: media.id}, {media_id:1}).limit(1);
-            
-            exists.count(function(err, count) {
-             
+            var exists = collection.find({media_id: media.id}, {media_id:1}).limit(1).size();
               
-              // If media doesn't exist
-              if(count==0) {
-                
-                // Check type (tag or user)
-		            var mtype = (self.options.instagram.users.indexOf(media.user.username) < 0) ? 'tag' : 'user';
-                
-                // Create media object
-                new_medias.push({
+            // If media doesn't exist
+            if(exists==0) {
 
-                  media_id: media.id
-                  ,msg_type: mtype
-                  ,queue_id: ObjectID()
-                  ,images: media.images
-                  ,user: media.user
-                  ,filter: media.filter
-                  ,tags: media.tags
-                  ,link: media.link
-                  ,likes: media.likes.count
-                  ,location: media.location
-                  ,created_time: parseInt(media.created_time)
-                  ,modified_time: Date.now()
-                  ,locked_time: Date.now()
-                  ,locked: false
-                  ,approved: (mtype == 'user' && self.options.instagram.auto_approve_users)
-                  ,reviewed: false
-                });
-              }
-              
-              next_media(list, callback);
-              
-            });
-        
+              // Check type (tag or user)
+              var mtype = (self.options.instagram.users.indexOf(media.user.username) < 0) ? 'tag' : 'user';
+
+              // Create media object
+              new_medias.push({
+
+                media_id: media.id
+                ,msg_type: mtype
+                ,queue_id: ObjectID()
+                ,images: media.images
+                ,user: media.user
+                ,filter: media.filter
+                ,tags: media.tags
+                ,link: media.link
+                ,likes: media.likes.count
+                ,location: media.location
+                ,created_time: parseInt(media.created_time)
+                ,modified_time: Date.now()
+                ,locked_time: Date.now()
+                ,locked: false
+                ,approved: (mtype == 'user' && self.options.instagram.auto_approve_users)
+                ,reviewed: false
+              });
+            }
+
             next_media(list, callback);
+              
+
+            
           } else {
             next_media(list, callback); 
           }
