@@ -33,7 +33,7 @@ var MosaicInstagramAdmin = Class.extend({
     
     // Logout
     
-    var logout_cb = function() {
+    this.logout_cb = function() {
 
       
       var last_id = $('#instagram-images li:first-child').data('item-id');
@@ -52,7 +52,7 @@ var MosaicInstagramAdmin = Class.extend({
     
     window.onbeforeunload = function() {
     
-      logout_cb();
+      self.logout_cb();
     }
     
     // Get new image
@@ -300,19 +300,11 @@ var MosaicInstagramAdmin = Class.extend({
       if(queue.length == 0) {
         
         clearTimeout(self.logoutTimer);
-        
-        var queue_id = (self.queue.length > 0) ? self.queue[0].id : 0;
-        var appr = (self.queue.length > 0) ? self.queue[0].approved : 0;
-        var last_id = $('#instagram-images li:first-child').data('item-id');
-        
-        if(last_id == undefined) { last_id = 0 };
-        
-        self.locked = false;
-        
         self.logoutTimer = setTimeout(function() {
-          window.location.href = '/logout/' + last_id + '/' + queue_id + '/' + appr;
+          self.logout_cb();
         }, 600000);
         
+        self.locked = false;
         cb();
         return;
       }

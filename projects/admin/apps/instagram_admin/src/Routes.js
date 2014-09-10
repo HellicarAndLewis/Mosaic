@@ -381,47 +381,43 @@ var Images = new Class({
  
       // Get queued images
       if(req.params.action == 'queued') {
-       
-        self.unlockImages(function() {
-          
-          var collection = self.app.db.collection('instagram');
+         
+        var collection = self.app.db.collection('instagram');
 
-          var result = collection.find({
-            locked: false
-            ,approved: false
-            ,reviewed: false
-            ,msg_type: {$in: type}
-          }, {hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+        var result = collection.find({
+          locked: false
+          ,approved: false
+          ,reviewed: false
+          ,msg_type: {$in: type}
+        }, {hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
-          result.toArray(function(err, docs) {
+        result.toArray(function(err, docs) {
 
-            var docs_ids = new Array();
+          var docs_ids = new Array();
 
-            // Lock documents
-            docs.each(function(doc, i) {
-              docs_ids.push(doc._id);
-            });
-
-            collection.update(
-              {_id:{$in:docs_ids}}
-              ,{
-                $set:{
-                  locked: true
-                  ,locked_time: Date.now()
-                }
-              }
-              ,{w:1, multi:true}
-              ,function() {
-
-                // Output json docs
-                res.json(docs);
-                res.end();
-            });
-
-
+          // Lock documents
+          docs.each(function(doc, i) {
+            docs_ids.push(doc._id);
           });
-        
-        }, UNLOCK_TIME);
+
+          collection.update(
+            {_id:{$in:docs_ids}}
+            ,{
+              $set:{
+                locked: true
+                ,locked_time: Date.now()
+              }
+            }
+            ,{w:1, multi:true}
+            ,function() {
+
+              // Output json docs
+              res.json(docs);
+              res.end();
+          });
+
+
+        });
         
       }
       
