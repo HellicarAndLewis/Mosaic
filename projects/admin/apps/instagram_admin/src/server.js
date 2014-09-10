@@ -100,13 +100,21 @@ var Server = new Class({
         
         Console.info('MongoDb connected');
         
-        self.db = db;
+        var collection = db.collection('instagram');
         
-        // Setup server
-        self.setupServer();
+        collection.ensureIndex({queue_id:1, media_id:1}, function() {
+             
+          self.db = db;
         
-        // Setup Instagram api
-        self.setupInstagramApi();
+          // Setup server
+          self.setupServer();
+
+          // Setup Instagram api
+          self.setupInstagramApi();                 
+        });
+        
+        
+        
       }
     
     );

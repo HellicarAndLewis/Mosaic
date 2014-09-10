@@ -29,6 +29,15 @@ Fire up mongodb
 $ mongod
 ```
 
+Connect with db, set collection and set index
+
+```sh
+$ mongo mosaic
+> db.createCollection('instagram')
+> db.instagram.ensureIndex({queue_id:1})
+> db.instagram.ensureIndex({media_id:1})
+```
+
 Now the admin is ready to start
 
 ```sh
