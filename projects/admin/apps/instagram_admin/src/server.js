@@ -307,13 +307,6 @@ var Server = new Class({
               }  
             });
            
-            if(pagination.next) { 
-              setTimeout(function() {
-                pagination.next(rm_callback); 
-              }, self.options.instagram.request_delay);
-            } else { 
-              retry(); 
-            }
           // No new images found..
           } else {
             Console.status('No new images found for tag ' + tag);
