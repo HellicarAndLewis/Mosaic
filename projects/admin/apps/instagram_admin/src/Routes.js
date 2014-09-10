@@ -504,7 +504,7 @@ var Images = new Class({
           ,{
             $set:{
               queue_id: ObjectID()
-              ,locked: false
+              ,locked: true
               ,approved: (req.body.approved == 'true') ? true : false
               ,modified_time: Date.now()
               ,reviewed: true
