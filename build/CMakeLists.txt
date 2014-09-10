@@ -155,6 +155,7 @@ set(topshop_lib_sources
   ${ts_sd}/ImageCollector.cpp
   ${ts_sd}/ImageProcessor.cpp
   ${ts_sd}/GridApp.cpp
+  ${ts_sd}/GridAppSimple.cpp
   ${ts_sd}/RemoteState.cpp
   ${ts_sd}/ImageJSON.cpp
 )
@@ -222,6 +223,13 @@ install(TARGETS AppImageProcessor DESTINATION bin)
 add_executable(AppPolaroid ${bd}/projects/polaroid/main.cpp)
 target_link_libraries(AppPolaroid ${app_libs})
 install(TARGETS AppPolaroid DESTINATION bin)
+
+# The "simple" left grid application
+add_executable(AppSimpleGridLeft ${ts_sd}/app_simple_grid.cpp  ${extern_source_dir}/glad.c)
+set_target_properties (AppSimpleGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
+target_link_libraries(AppSimpleGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+install(TARGETS AppSimpleGridLeft DESTINATION bin)
+
 
 # The tests used during development
 #create_test(mosaic)

@@ -1,3 +1,23 @@
+/*
+
+---------------------------------------------------------------------------------
+ 
+                                               oooo
+                                               `888
+                oooo d8b  .ooooo.  oooo    ooo  888  oooo  oooo
+                `888""8P d88' `88b  `88b..8P'   888  `888  `888
+                 888     888   888    Y888'     888   888   888
+                 888     888   888  .o8"'88b    888   888   888
+                d888b    `Y8bod8P' o88'   888o o888o  `V88V"V8P'
+ 
+                                                  www.roxlu.com
+                                             www.apollomedia.nl
+                                          www.twitter.com/roxlu
+ 
+---------------------------------------------------------------------------------
+
+
+*/
 #ifndef ROXLU_SIMPLE_GRID_H
 #define ROXLU_SIMPLE_GRID_H
 
@@ -63,20 +83,21 @@ static const char* SG_FS = ""
 
 namespace grid { 
 
-  
+  class SimpleGrid;
+  typedef void(*simplegrid_event_callback)(SimpleGrid* grid, SimpleLayer* layer, int event);
+
   class SimpleGrid {
   public:
     SimpleGrid();
     ~SimpleGrid();
+    int addImage(SimpleImage img);
     int init(SimpleSettings cfg);
-    void update(float dt);
+    void updatePhysics(float dt);
+    void updateVertices(SimpleLayer* from, std::vector<SimpleVertex>& vertices);
+    void update();
     void draw();
     int shutdown();
-      
-    int addImage(SimpleImage img);
-    int prepare();
-    int flip();
-    bool isFull();
+    bool isFull();                                                                   /* checks if the current back_layer has enough images to switch */
 
   public:
     SimpleSettings settings;
@@ -91,45 +112,18 @@ namespace grid {
     GLuint vao;
     GLuint vbo;
     size_t vbo_allocated;
-    size_t num_cells; /* how many cells are in use. */
-  };
+    size_t num_cells;                                                                 /* how many cells are in use. */
 
-  /* after calling flip, call prepare to prepare the new layer before it becomes visible */
-  inline int SimpleGrid::prepare() {
-    if (NULL == front_layer) {
-      RX_ERROR("No front layer set.");
-      return -1;
-    }
-    return front_layer->prepare();
-  }
+    simplegrid_event_callback on_event;                                               /* passes layer events through to a user. */
+    void* user;                                                                       /* user data. */
+  };
 
   inline bool SimpleGrid::isFull() {
     if (NULL == back_layer) {
-      RX_ERROR("No back layer set.");
+      RX_ERROR("Back layer not set.");
       return false;
     }
     return back_layer->isFull();
-  }
-
-  inline int SimpleGrid::flip() {
-    if (front_layer == NULL && back_layer == NULL) {
-      RX_ERROR("front_layer && back_layer are not set.");
-      return -1;
-    }
-
-    if (NULL == front_layer) {
-      /* this is for the first switch; by default front_layer is null */
-      front_layer = back_layer;
-      back_layer = &layer_b;
-      back_layer->reset();
-    }
-    else {
-      SimpleLayer* tmp = front_layer;
-      front_layer = back_layer;
-      back_layer = tmp;
-      back_layer->reset();
-    }
-    return 0;
   }
 
 } /* namespace grid */

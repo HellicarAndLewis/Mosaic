@@ -85,10 +85,13 @@ int main() {
   grid::SimpleSettings cfg;
   cfg.img_width = 200;
   cfg.img_height = 200;
-  cfg.cols = 10;
+  cfg.cols = 9;
   cfg.rows = 5;
   cfg.padding_x = 10;
   cfg.padding_y = 10;
+  cfg.offset_x = 10;
+  cfg.offset_y = 15;
+  cfg.direction = grid::SIMPLE_GRID_DIRECTION_LEFT;
 
   grid::SimpleGrid gr;
   grid_ptr = &gr;
@@ -108,12 +111,16 @@ int main() {
   img_collector.on_file = on_new_file;
   img_collector.user = &gr;
 
+  /* load some files. */
+  images = rx_get_files(path, "png");
+
   while(!glfwWindowShouldClose(win)) {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     img_collector.update();
-    gr.update(0.16);
+    gr.updatePhysics(0.16);
+    gr.update();
     gr.draw();
 
     glfwSwapBuffers(win);
@@ -139,6 +146,22 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
 
   switch(key) {
+    case GLFW_KEY_SPACE: {
+      for (size_t i = 0; i < images.size(); ++i) {
+        RX_VERBOSE("Adding: %s", rx_strip_dir(images[i]).c_str());
+        grid::SimpleImage img;
+        img.filepath = images[i];
+        grid_ptr->addImage(img);
+      }
+      /*
+      if (grid_ptr->isFull()) {
+        grid_ptr->flip();
+        grid_ptr->prepare();
+      }
+      */
+      RX_VERBOSE("Added %lu images", images.size());
+      break;
+    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;
@@ -163,27 +186,4 @@ static void on_new_file(top::ImageCollector* col, top::CollectedFile& file) {
 
   std::string filepath = file.dir +"/" +file.filename;
 
-#if 0
-  images.push_back(filepath);
-
-  RX_VERBOSE("We've got: %lu images now.", images.size());
-
-  if (images.size() == 10) {
-    for (size_t i = 0; i < images.size(); ++i) {
-      grid::SimpleImage img;
-      img.filepath = images[i];
-      grid_ptr->addImage(img);
-    }
-    grid_ptr->prepare();
-    images.clear();
-  }
-#else 
-  grid::SimpleImage img;
-  img.filepath = filepath;
-  grid_ptr->addImage(img);
-  if (grid_ptr->isFull()) {
-    grid_ptr->flip();
-    grid_ptr->prepare();
-  }
-#endif
 }
