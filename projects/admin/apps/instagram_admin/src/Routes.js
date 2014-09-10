@@ -469,7 +469,7 @@ var Images = new Class({
         } else {
           
           var d = new Date();
-          console.log(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > Get all approved request');
+         // console.log(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > Get all approved request');
           
           // Find next images in queue
           var result = collection.find({
