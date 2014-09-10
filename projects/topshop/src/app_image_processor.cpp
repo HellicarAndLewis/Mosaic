@@ -230,6 +230,13 @@ static void on_new_file(top::ImageCollector* col, top::CollectedFile& file) {
 
   file.type = app->file_type;
 
+  /*
+  RX_ERROR("GOT FILETYPE: %d, COL_FILE_TYPE_LEFT_GRID: %d, COL_FILE_TYPE_RIGHT_GRID: %d",
+           file.type,
+           COL_FILE_TYPE_LEFT_GRID,
+           COL_FILE_TYPE_RIGHT_GRID);
+  */
+
   if (0 != app->img_processor.process(file)) {
     RX_ERROR("Something went wrong in the image processor; see log above.");
   }

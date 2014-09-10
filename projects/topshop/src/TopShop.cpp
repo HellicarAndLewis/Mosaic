@@ -38,13 +38,14 @@ namespace top {
     cfg.webcam_width = mos::config.webcam_width;
     cfg.webcam_height = mos::config.webcam_height;
 
+    /* @todo move these sizes to a settings file. */
 #if USE_POLAROID
     cfg.tile_width = 568;
     cfg.tile_height = 568;
     cfg.tile_nlayers = 10;
 #else
-    cfg.tile_width = 255; 
-    cfg.tile_height = 255; 
+    cfg.tile_width = 190; 
+    cfg.tile_height = 223; 
     cfg.tile_nlayers = 150;
 #endif
 
@@ -126,7 +127,7 @@ namespace top {
 
 
     /* TEMPORARY SETTING DEBUG DRAW SO WE CAN TOGGLE BETWEEN MOSAIC OR VIDEO */
-    top::config.is_debug_draw = 0;
+    //top::config.is_debug_draw = 1; /* 0 = mosaic, 1 = video */
 
     /* only track when we're not showing the video. */
     if (0 == top::config.is_debug_draw) {
