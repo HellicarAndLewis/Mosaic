@@ -414,6 +414,7 @@ var Images = new Class({
 
                 // Output json docs
                 res.json(docs);
+                res.end();
             });
 
 
@@ -461,6 +462,7 @@ var Images = new Class({
                 
                 // Output json docs
                 res.json(docs);
+                res.end();
               });
               
             }
@@ -485,6 +487,7 @@ var Images = new Class({
             }
             // Output json docs
             res.json(docs);
+            res.end();
           });
         
         }
@@ -516,6 +519,7 @@ var Images = new Class({
           ,{w:1}
           ,function() {
             res.json({updated:(self.app.iaid != '') ? true : false});
+            res.end();
         });
       }
     });
