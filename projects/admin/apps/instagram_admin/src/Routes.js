@@ -470,7 +470,7 @@ var Images = new Class({
           var result = collection.find({
             reviewed: true
             ,approved: true
-          },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          },{_id:1, images:1, user:1, queue_id:1, hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
             
