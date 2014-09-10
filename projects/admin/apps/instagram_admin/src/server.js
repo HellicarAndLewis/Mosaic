@@ -272,11 +272,13 @@ var Server = new Class({
               
               setTimeout(function() {
                 next_media(list, callback);
-              }, 250);
+              }, 1000);
               
             });
           } else {
-            next_media(list, callback); 
+            setTimeout(function() {
+              next_media(list, callback);
+            }, 1000);
           }
         };
         
