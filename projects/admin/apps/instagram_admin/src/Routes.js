@@ -312,7 +312,6 @@ var Admin = new Class({
       var result = collection.find({
  
         locked: true
-        ,approved: false
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
       })
@@ -429,7 +428,7 @@ var Images = new Class({
         if(req.params.min_id != '0' && req.params.max_id != '0') {
   
           var max_result = collection.find({
-            locked: false
+            locked: true
             ,approved: true
             ,reviewed: true
             ,queue_id: {$gt: ObjectID(req.params.max_id)}
@@ -449,7 +448,7 @@ var Images = new Class({
               
               // Find images earlier than the min queue id
               var min_result = collection.find({
-                locked: false
+                locked: true
                 ,approved: true
                 ,reviewed: true
                 ,queue_id: {$lt: ObjectID(req.params.min_id)}
