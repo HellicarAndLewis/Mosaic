@@ -272,7 +272,7 @@ var Server = new Class({
               
               setTimeout(function() {
                 next_media(list, callback);
-              }, 1000);
+              }, 250);
               
             });
           } else {
@@ -288,7 +288,7 @@ var Server = new Class({
             
             // New images added
             Console.status(new_medias.length + ' images added for tag ' + tag);
-            /*
+           
             collection.insert(new_medias, {w:1}, function(err, result) {
 
               if(err) throw err;
@@ -307,7 +307,7 @@ var Server = new Class({
                 retry();
               }  
             });
-            */
+           
             if(pagination.next) { 
               setTimeout(function() {
                 pagination.next(rm_callback); 
