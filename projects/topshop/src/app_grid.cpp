@@ -119,7 +119,6 @@ int main() {
   }
   monitor = monitor_list[top::config.grid_right_monitor];
 
-  
 #else
 # error Unsupported direction
 #endif
@@ -133,7 +132,7 @@ int main() {
 
   /* --------------------------------------------------------------------- */
 
-  glfwWindowHint(GLFW_SAMPLES, 4);
+  //  glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -190,7 +189,6 @@ int main() {
   }
 
   int r = 0;
-  
 
 #if defined(APP_GRID_LEFT)  
 
@@ -228,22 +226,27 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  double start = rx_hrtime() / 1.0e6;
+  double now = 0;
+  double runtime = 0;
+  double simtime = 0;
+  double dt = 0;
 
-
-  /*
-  r = app_grid.init(top::config.left_grid_filepath, 
-                     top::config.grid_file_width, 
-                     top::config.grid_file_height, 
-                     top::config.grid_rows, 
-                     top::config.grid_cols);
-
-  app_grid.offset.set(top::config.left_grid_x, top::config.left_grid_y);
-  app_grid.padding.set(top::config.grid_padding_x, top::config.grid_padding_y);
-  */
+  double fps = (1.0f / 500.0f) * 1000.0;
+  int c = 0;
 
   while(!glfwWindowShouldClose(win)) {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    now = rx_hrtime() / 1.0e6;
+    dt = now - runtime;
+    runtime = now - start;
+
+    while ( (simtime + fps) < runtime) {
+      app.updatePhysics(fps);
+      simtime += fps;
+    }
 
     app.update();
     app.draw();
@@ -267,28 +270,6 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
  
   switch(key) {
-     case GLFW_KEY_1: {
-       //tmp_shutdown = true;
-       break;
-     }
-    case GLFW_KEY_2: {
-      // tmp_start = true;
-      break;
-    }
-    case GLFW_KEY_D: {
-      top::config.is_debug_draw = (1 == top::config.is_debug_draw) ? 0 : 1;
-      break;
-    }
-    case GLFW_KEY_L: {
-      break;
-    }
-    case GLFW_KEY_T: {
-      break;
-    }
-
-    case GLFW_KEY_3: {
-      break;
-    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;

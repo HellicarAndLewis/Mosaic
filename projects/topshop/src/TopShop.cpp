@@ -43,8 +43,8 @@ namespace top {
     cfg.tile_height = 568;
     cfg.tile_nlayers = 10;
 #else
-    cfg.tile_width = 255; // fex::config.file_tile_width; 
-    cfg.tile_height = 255; // fex::config.file_tile_height; 
+    cfg.tile_width = 255; 
+    cfg.tile_height = 255; 
     cfg.tile_nlayers = 150;
 #endif
 
@@ -123,6 +123,10 @@ namespace top {
     /* get remote settings. */
     remote_state.getRemoteSettings(remote_settings);
     top::config.is_debug_draw = (0 == remote_settings.show_mosaic) ? 1 : 0;
+
+
+    /* TEMPORARY SETTING DEBUG DRAW SO WE CAN TOGGLE BETWEEN MOSAIC OR VIDEO */
+    top::config.is_debug_draw = 0;
 
     /* only track when we're not showing the video. */
     if (0 == top::config.is_debug_draw) {
@@ -247,16 +251,16 @@ namespace top {
 #else
     img_opt.x = col_w * i;
     img_opt.y = col_h * j;
-    img_opt.tween_x.set(2.0f, img_opt.x, rx_random(-60, 60));
-    img_opt.tween_y.set(2.0f, img_opt.y, rx_random(-40, -70));
+    img_opt.tween_x.set(3.0f, img_opt.x, rx_random(-60, 60));
+    img_opt.tween_y.set(3.0f, img_opt.y, rx_random(-40, -70));
 
     img_opt.filepath = filepath;
     img_opt.mode = track::IMAGE_MODE_BOINK;
-    img_opt.tween_size.set(0.6f, 0.0f, rx_random(150.0f, 195.0f));
+    img_opt.tween_size.set(1.5f, 0.0f, rx_random(150.0f, 195.0f));
 
     float angle_range = PI * 0.25;
     float start_angle = rx_random(-angle_range, angle_range);
-    img_opt.tween_angle.set(1.3f, start_angle , (start_angle * -1) + rx_random(0.3)); //rx_random(-(0.5 *HALF_PI), 0.5 * HALF_PI));
+    img_opt.tween_angle.set(2.3f, start_angle , (start_angle * -1) + rx_random(0.3)); //rx_random(-(0.5 *HALF_PI), 0.5 * HALF_PI));
 #endif
 
     if (0 != shop->tracking.load(img_opt)) {

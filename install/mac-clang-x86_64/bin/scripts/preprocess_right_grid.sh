@@ -1,9 +1,12 @@
 #!/bin/sh
 #set -x
-d=${MOSAIC_BINDIR}
-d=${MOSAIC_BINDIR}
+d=${MOSAIC_BINDIR} # MOSAIC_BINDIR can be set in /etc/launchd.conf when using launch agents.
 if [ -z "${d}" ] ; then
-    d=${PWD}/../
+    if [ -f ${PWD}/AppGridLeft ] ; then
+        d=${PWD}
+    else
+        d=${PWD}/../
+    fi
 fi
 
 bindir=${d}  # see /etc/launchd.conf and http://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-mac-os-x-slash-etc-slash-launchd-dot-conf/
@@ -18,8 +21,12 @@ polaroid_dir=${6}
 username=${7}
 
 function log {
+    logfile=${bindir}/data/log/preprocess_right.log
+    if [ ! -f logfile ] ; then
+        touch ${logfile}
+    fi
     dat=$(date +%Y.%m.%d.%H.%M.%S)
-    echo "${dat}: ${1}" >> ${bindir}/data/log/preprocess_right.log
+    echo "${dat}: ${1}" >> ${logfile}
 }
 
 # Make sure the file exists.

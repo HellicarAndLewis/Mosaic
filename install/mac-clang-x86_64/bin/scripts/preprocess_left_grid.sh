@@ -1,10 +1,14 @@
 #!/bin/sh
-set -x
+#set -x
 
-# Check mosaic dir
+# Figure out the bin directory (this is different when executed through the scripts/auto_start* scripts.
 d=${MOSAIC_BINDIR}
 if [ -z "${d}" ] ; then
-    d=${PWD}/../
+    if [ -f ${PWD}/AppGridLeft ] ; then
+        d=${PWD}
+    else
+        d=${PWD}/../
+    fi
 fi
 
 bindir=${d}  # see /etc/launchd.conf and http://www.dowdandassociates.com/blog/content/howto-set-an-environment-variable-in-mac-os-x-slash-etc-slash-launchd-dot-conf/
@@ -19,8 +23,12 @@ polaroid_dir=${6}
 username=${7}
 
 function log {
+    logfile=${bindir}/data/log/preprocess_left.log
+    if [ ! -f logfile ] ; then
+        touch ${logfile}
+    fi
     dat=$(date +%Y.%m.%d.%H.%M.%S)
-    echo "${dat}: ${1}" >> ${bindir}/data/log/preprocess_left.log
+    echo "${dat}: ${1}" >> ${logfile}
 }
 
 # Make sure the file exists.
@@ -63,7 +71,7 @@ ${bindir}/AppPolaroid \
 cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 
 # BEGIN DEBUG - COPY OVER TO RIGHT SCREEN FOR TESTING
-# cp ${infile} ${bindir}/data/raw_right
+cp ${infile} ${bindir}/data/raw_right
 # END DEBUG 
 
 # Move to mosaic dir too.

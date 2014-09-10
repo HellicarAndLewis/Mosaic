@@ -10,6 +10,28 @@ namespace grid {
 
   /* ---------------------------------------------------------------------------------- */
 
+#if GRID_USE_ROW_OFFSET
+  RowOffset::RowOffset() 
+    :row(0)
+    ,speed_x(0)
+    ,offset_x(0)
+    ,pos_a(0)
+    ,pos_b(0)
+    ,pos(0)
+  {
+  }
+  RowOffset::~RowOffset() {
+    row = 0;
+    speed_x = 0;
+    offset_x = 0;
+    pos_a = 0;
+    pos_b = 0;
+    pos = 0;
+  }
+#endif
+
+  /* ---------------------------------------------------------------------------------- */
+
   Vertex::Vertex() 
     :size(0.0f)
   {
@@ -71,6 +93,11 @@ namespace grid {
     ,prog(0)
     ,vao(0)
     ,vbo(0)
+#if GRID_USE_PBO
+    ,pbo_dx(0)
+    ,pbo_n(0)
+    ,pbo_pixels(NULL)
+#endif
   {
     if (0 != pthread_mutex_init(&mutex, NULL)) {
       RX_ERROR("Something went wrong when trying to create the mutex.");
@@ -86,6 +113,14 @@ namespace grid {
     if (0 != pthread_mutex_destroy(&mutex)) {
       RX_ERROR("Something went wrong when trying to destroy the mutex.");
     }
+
+#if GRID_USE_PBO
+    if (NULL != pbo_pixels) {
+      delete[] pbo_pixels;
+      pbo_pixels = NULL;
+    }
+#endif
+
   }
 
   int Grid::init(std::string path, int imgWidth, int imgHeight, int rws, int cls) {
@@ -169,12 +204,36 @@ namespace grid {
     /* create a texture */
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
+#if GRID_USE_PBO
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex_width, tex_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, tmp_pixels);
+#else
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex_width, tex_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, tmp_pixels);
+#endif
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+#if GRID_USE_PBO
+    glGenBuffers(GRID_NUM_PBO, pbo);
+    for (int i = 0; i < GRID_NUM_PBO; ++i) {
+      glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[i]);
+      glBufferData(GL_PIXEL_UNPACK_BUFFER, tex_width * tex_height * 4, NULL, GL_STREAM_DRAW);
+    }
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    /* allocate pbo buffer. */
+    pbo_pixels = new unsigned char[tex_width * tex_height * 4];
+    if (NULL == pbo_pixels) {
+      RX_ERROR("Cannot allocated pbo_pixels");
+      delete tmp_pixels;
+      tmp_pixels = NULL;
+      return -104;
+    }
+    memset(pbo_pixels, 0xFF, tex_width * tex_height * 4);
+#endif
 
     delete[] tmp_pixels;
     tmp_pixels = NULL;
@@ -183,6 +242,16 @@ namespace grid {
     cells.resize(rows * cols);
     vertices.resize(rows *cols);
     index_order.resize(rows * cols);
+
+#if GRID_USE_ROW_OFFSET
+    row_offsets.resize(rows);
+    for (size_t i = 0; i < rows; ++i) {
+      RowOffset& ro = row_offsets[i];
+      ro.row = i;
+      ro.offset_x = rx_random(0,vp[2] * 0.5);
+      ro.speed_x = rx_random(0.01, 0.035);
+    }
+#endif
 
     /* allocate the pixel buffer for each cell. */
     int bytes_per_cell = img_width * img_height * 4;
@@ -321,7 +390,29 @@ namespace grid {
 
     /* for each of the loaded images, we need to update the texture. */
     glBindTexture(GL_TEXTURE_2D, tex_id);
-    
+
+#if GRID_USE_PBO
+
+    GLubyte* ptr = NULL;
+    pbo_dx = pbo_n % GRID_NUM_PBO;
+
+    if (pbo_n < GRID_NUM_PBO) {
+      glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[pbo_dx]);
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tex_width, tex_height, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+      glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    }
+    else {
+      glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[pbo_dx]);
+      ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    }
+    if (NULL == pbo_pixels) {
+      RX_ERROR("pbo pixels is invalid.");
+      return;
+    }
+
+    std::vector<Rect> to_update;
+#endif
+
     lock();
     {
       for (size_t i = 0; i < index_order.size(); ++i) {
@@ -346,14 +437,80 @@ namespace grid {
           /* upload the loaded texture into the correct position. */
           int x = cell.col * img_width;
           int y = cell.row * img_height;
+          
+
+#if GRID_USE_PBO
+
+          Rect r;
+          r.x = x;
+          r.y = y;
+          r.w = img_width;
+          r.h = img_height;
+          to_update.push_back(r);
+
+          if (NULL != ptr) {
+            int src_stride = img_width * 4;
+            int src_dx = 0;
+            int dest_stride = tex_width * 4;
+            int dest_dx = (y * dest_stride) + (x * 4);
+            for (int k = 0; k < img_height; ++k) {
+                memcpy(pbo_pixels + dest_dx + k * dest_stride, cell.pixels + k * src_stride, src_stride);
+            }
+          }
+#else
           glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, img_width, img_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, cell.pixels);
+#endif
         }
       }
     }
     unlock();
-     
-    /* @todo - we could optimize this a bit and keep track if we need to reposition; though this takes basically no time atm. */
 
+#if GRID_USE_PBO
+    if (NULL != ptr) {
+      /* @todo we could only update the pixels that were changed, but this seems slower; see the rect vector above */
+      memcpy(ptr, pbo_pixels, tex_width * tex_height * 4);
+      glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tex_width, tex_height, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+      ptr = NULL;
+    }
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    pbo_n++;
+#endif
+     
+#if GRID_USE_ROW_OFFSET
+    /* position the images. */
+    if (GRID_DIR_LEFT == direction) {
+      for (size_t i = 0; i < vertices.size(); ++i) {
+
+        Vertex& v = vertices[i];
+        if (v.row >= row_offsets.size()) {
+          RX_ERROR("The row of the vertex is bigger then the row offsets; not supposed to  happen.");
+          continue;
+        }
+        RowOffset& ro = row_offsets[v.row];
+        v.size = img_width; /* @todo - for now the cells are square */
+        v.pos.set(ro.offset_x + offset.x + img_width * 0.5 + v.col * img_width + v.col * padding.x,
+                                offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
+
+      }
+    }
+    else {
+      for (size_t i = 0; i < vertices.size(); ++i) {
+
+        Vertex& v = vertices[i];
+        if (v.row >= row_offsets.size()) {
+          RX_ERROR("The row of the vertex is bigger then the row offsets; not supposed to  happen.");
+          continue;
+        }
+        RowOffset& ro = row_offsets[v.row];
+        
+        //        Vertex& v = vertices[i];
+        v.size = img_width; /* @todo - for now the cells are square */
+        v.pos.set(ro.offset_x + ro.pos_a + offset.x - img_width * 0.5 - v.col * img_width - v.col * padding.x,
+                                           offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
+      }
+    }
+#else
     /* position the images. */
     if (GRID_DIR_LEFT == direction) {
       for (size_t i = 0; i < vertices.size(); ++i) {
@@ -372,8 +529,46 @@ namespace grid {
                   offset.y + img_height * 0.5 + v.row * img_height + v.row * padding.y);
       }
     }
+#endif
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * vertices.size(), vertices[0].pos.ptr());
+  }
+
+  void Grid::updatePhysics(double dt) {
+    
+    if (0 == tex_width) {
+      RX_ERROR("Cannot update physics, tex_width not set; so probabl not initialized yet.");
+      return;
+    }
+
+    /* check if we need to switch set A with B */
+    if (GRID_DIR_LEFT == direction && (fabs(pos_a.x) >= (cols * img_width + cols * padding.x))) {
+      vec2 tmp = pos_b;
+      pos_b = pos_a;
+      pos_a = tmp;
+    }
+    else if (GRID_DIR_RIGHT == direction && pos_a.x >= (cols * img_width + cols * padding.x)) {
+      vec2 tmp = pos_b;
+      pos_b = pos_a;
+      pos_a = tmp;
+    }
+
+    /* move into the correct direction. */
+    if (GRID_DIR_LEFT == direction) {
+      pos_a.x -= 0.15 * dt;  // 1.5, 3.5
+    }
+    else {
+      pos_a.x += 0.15 * dt; // 1.5, 3.5
+    }
+
+#if GRID_USE_ROW_OFFSET
+    for (size_t i = 0; i < row_offsets.size(); ++i) {
+      RowOffset& ro = row_offsets[i];
+      ro.pos_a += ro.speed_x * dt;
+    }
+#endif
+
   }
 
   void Grid::draw() {
@@ -382,6 +577,14 @@ namespace grid {
       return;
     }
 
+#if GRID_USE_ROW_OFFSET
+    for (size_t i = 0; i < row_offsets.size(); ++i) {
+      RowOffset& ro = row_offsets[i];
+      ro.pos_b = ro.pos_a - cols * img_width - cols * padding.x;
+    }
+#endif
+
+#if 0
     /* check if we need to switch set A with B */
     if (GRID_DIR_LEFT == direction && (fabs(pos_a.x) >= (cols * img_width + cols * padding.x))) {
       vec2 tmp = pos_b;
@@ -401,6 +604,7 @@ namespace grid {
     else {
       pos_a.x += 3.5; // 1.5, 3.5
     }
+#endif
 
     /* Detect which column is hidden, because the hidden column 
        can be reused. When a column is hidden we also need to disable
@@ -451,9 +655,13 @@ namespace grid {
     glUseProgram(prog);
 
     /* draw first set */
-    glUniform2fv(u_pos, 1, pos_a.ptr());
+    vec2 ivec(int(pos_a.x), int(pos_a.y));
+    glUniform2fv(u_pos, 1, ivec.ptr());
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, vertices.size());
 
+#if GRID_USE_ROW_OFFSET
+
+#else
     /* draw second set (copy) */
     if (GRID_DIR_LEFT == direction) {
       pos_b.x = pos_a.x + cols * img_width + cols * padding.x;
@@ -461,8 +669,8 @@ namespace grid {
     else {
       pos_b.x = pos_a.x - cols * img_width - cols * padding.x;
     }
-
     glUniform2fv(u_pos, 1, pos_b.ptr());
+#endif
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, vertices.size());
     glDisable(GL_SCISSOR_TEST);
   }

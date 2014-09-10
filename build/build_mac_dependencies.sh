@@ -15,7 +15,6 @@ cfcopy=${CFLAGS}
 ldcopy=${LDFLAGS}
 pathcopy=${PATH}
 
-
 # ----------------------------------------------------------------------- #
 #                D O W N L O A D   D E P E N D E N C I E S 
 # ----------------------------------------------------------------------- #
@@ -177,7 +176,6 @@ fi
 # Download GraphicsMagick
 if [ ! -d ${sd}/graphicsmagick ] ; then
     cd ${sd}
-    #curl -L -o gm.tar.gz ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-1.3.20.tar.gz
     curl -L -o gm.tar.gz http://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/1.3.20/GraphicsMagick-1.3.20.tar.gz
     tar -zxvf gm.tar.gz
     mv GraphicsMagick-1.3.20 graphicsmagick
@@ -249,11 +247,6 @@ fi
 # Download theora
 if [ ! -d ${sd}/theora ] ; then
     cd ${sd}
-    # git clone https://git.xiph.org/mirrors/theora.git  # configure error on mac, uses invalid flags.
-    #curl -o theora.zip http://downloads.xiph.org/releases/theora/libtheora-1.1.1.zip
-    #unzip theora
-    #mv libtheora-1.1.1 theora
-
     svn co http://svn.xiph.org/trunk/theora
 fi     
 
@@ -286,14 +279,6 @@ if [ ! -d ${sd}/opencv ] ; then
     unzip opencv.zip
     mv opencv-3.0.0-alpha opencv
 fi
-  
-# Download tcmalloc
-# if [ ! -d ${sd}/tcmalloc ] ; then
-#     cd ${sd}
-#     mkdir tcmalloc
-#     cd tcmalloc
-#     git clone https://code.google.com/p/gperftools/ .
-# fi
 
 # Download pkg-config
 if [ ! -d ${sd}/pkgconfig ] ; then 
@@ -306,11 +291,8 @@ fi
 
 
 # Download pixman 
-
 if [ ! -d ${sd}/pixman ] ; then
     cd ${sd}
-   # git clone git://anongit.freedesktop.org/git/pixman.git
-    #curl -o pixman.tar.gz http://www.cairographics.org/releases/pixman-0.16.2.tar.gz 
     curl -o pixman.tar.gz http://cairographics.org/releases/pixman-0.32.6.tar.gz
     tar -zxvf pixman.tar.gz
     mv ${sd}/pixman-0.32.6 ${sd}/pixman
@@ -327,13 +309,7 @@ fi
 # Download cairo
 if [ ! -d ${sd}/cairo ] ; then 
     cd ${sd}
-   # curl -o cairo.tar.gz http://cairographics.org/releases/rcairo-1.12.9.tar.gz
-   # tar -zxvf cairo.tar.gz
-   # mv rcairo-1.12.9 cairo
    git clone git://anongit.freedesktop.org/git/cairo
- #  curl -o cairo.tar.xz  http://cairographics.org/releases/cairo-1.12.6.tar.xz
-   #tar -zxvf cairo.tar.xz
-   #mv cairo-1.12.6 cairo
 fi 
 
 # Download freetype
@@ -417,9 +393,9 @@ if [ -f ${sd}/pixman.tar.gz ] ; then
     rm ${sd}/pixman.tar.gz
 fi
 if [ -f ${sd}/cairo.xz ] ; then 
-#    rm ${sd}/cairo.xz
-    echo "o"
+    rm ${sd}/cairo.xz
 fi
+
 # ----------------------------------------------------------------------- #
 #                C O M P I L E   D E P E N D E N C I E S 
 # ----------------------------------------------------------------------- #
@@ -711,21 +687,6 @@ if [ ! -f ${bd}/lib/libjansson.a ] ; then
     cmake --build . --target install
 fi
 
-# Compile graphics magick, needs to use system paths/libs, cant use our png
-# if [ ! -f ${bd}/bin/gm ] ; then
-#     export PATH=${pathorig}
-#     export CFLAGS=${cflagsorig}
-#     export LDFLAGS=${ldflagsorig}
-#     
-#     cd ${sd}/graphicsmagick
-#     ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
-#     make
-#     make install
-#     export PATH=${pathcopy}
-#     export CFLAGS=${cfcopy}
-#     export LDFLAGS=${ldcopy}
-# fi
-
 # Compile pixman
 if [ ! -d ${bd}/include/pixman-1 ] ; then
 
@@ -764,6 +725,25 @@ if [ ! -f ${bd}/lib/libcairo.a ] ; then
     make install
 fi
 
+# ----------------------------------------------------------------------- #
+#               F O R   F U T U R E  U S A G E  
+# ----------------------------------------------------------------------- #
+
+
+# Compile graphics magick, needs to use system paths/libs, cant use our png
+# if [ ! -f ${bd}/bin/gm ] ; then
+#     export PATH=${pathorig}
+#     export CFLAGS=${cflagsorig}
+#     export LDFLAGS=${ldflagsorig}
+#     
+#     cd ${sd}/graphicsmagick
+#     ./configure --prefix=${bd} --with-sysroot=${bd} --enable-static=yes --enable-shared=no
+#     make
+#     make install
+#     export PATH=${pathcopy}
+#     export CFLAGS=${cfcopy}
+#     export LDFLAGS=${ldcopy}
+# fi
 
 # Compile tcmalloc
 # if [ ! -f ${bd}/lib/libtcmalloc.a ] ; then
@@ -774,5 +754,11 @@ fi
 #     make install
 # fi
 
-
+# Download tcmalloc
+# if [ ! -d ${sd}/tcmalloc ] ; then
+#     cd ${sd}
+#     mkdir tcmalloc
+#     cd tcmalloc
+#     git clone https://code.google.com/p/gperftools/ .
+# fi
 
