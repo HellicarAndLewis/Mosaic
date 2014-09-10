@@ -473,11 +473,8 @@ var Images = new Class({
           
           // Find next images in queue
           var result = collection.find({
-            locked: false
-            ,approved: true
             ,reviewed: true
-            ,msg_type: 'tag'
-          }).sort({queue_id:-1}).limit(10);
+          }).hint({queue_id:1}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
 
