@@ -37,10 +37,9 @@ var Server = new Class({
       .option('-s, --settings [path]', 'Start with custom settings file')
       .option('-n, --nopolling', 'Start without media polling')
       .option('-d, --debug', 'Force debug console output')
+      .option('-r, --rebuild', 'Rebuild db index')
       .parse(process.argv);
-    
-    
-    
+
     var file = './settings.json';
     
     if(Program.settings) {
@@ -100,21 +99,35 @@ var Server = new Class({
         
         Console.info('MongoDb connected');
         
-        var collection = db.collection('instagram');
-        
-        collection.ensureIndex({queue_id:1, media_id:1}, function() {
-             
+        if(Program.rebuild) {
+          
+          var collection = db.collection('instagram');
+
+          collection.ensureIndex({queue_id:1}, function() {
+
+            collection.ensureIndex({media_id:1}, function() {
+
+              self.db = db;
+
+              // Setup server
+              self.setupServer();
+
+              // Setup Instagram api
+              self.setupInstagramApi();   
+            });   
+
+          });
+          
+        } else {
+          
           self.db = db;
-        
+
           // Setup server
           self.setupServer();
 
           // Setup Instagram api
-          self.setupInstagramApi();                 
-        });
-        
-        
-        
+          self.setupInstagramApi(); 
+        }
       }
     
     );

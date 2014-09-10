@@ -230,7 +230,7 @@ var Admin = new Class({
     });
     
     // Settings route
-    this.router.post('/settings/update', BodyParser.json(), function(req, res) {
+    this.router.post('/settings/update', this.validate.bind(this), BodyParser.json(), function(req, res) {
       
       if(req.body.show_mosaic) {
         
@@ -314,7 +314,7 @@ var Admin = new Class({
         locked: true
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
-      })
+      }, {_id:1})
       .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
@@ -388,7 +388,7 @@ var Images = new Class({
           ,approved: false
           ,reviewed: false
           ,msg_type: {$in: type}
-        }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+        },{_id:1, images:1, user:1, queue_id:1, hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
         result.toArray(function(err, docs) {
 
@@ -433,7 +433,7 @@ var Images = new Class({
             ,reviewed: true
             ,queue_id: {$gt: ObjectID(req.params.max_id)}
             ,msg_type: {$in: type}
-          }, {hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          }, {_id:1, images:1, user:1, queue_id:1, hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
           
           // Find images later than the max queue id
           max_result.toArray(function(err, docs) {
@@ -452,7 +452,7 @@ var Images = new Class({
                 ,approved: true
                 ,reviewed: true
                 ,queue_id: {$lt: ObjectID(req.params.min_id)}
-              },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+              },{_id:1, images:1, user:1, queue_id:1, hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
               
               min_result.toArray(function(err, docs) {
                 
@@ -470,7 +470,7 @@ var Images = new Class({
           var result = collection.find({
             reviewed: true
             ,approved: true
-          },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          },{_id:1, images:1, user:1, queue_id:1, hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
             
@@ -490,7 +490,7 @@ var Images = new Class({
     
     
     // Create post route (update)
-    this.router.post('/images/update', function(req, res) {
+    this.router.post('/images/update', this.validate.bind(this), function(req, res) {
       
       // Check for id
       if(req.body.id) {
@@ -518,6 +518,20 @@ var Images = new Class({
     });
   }
   
+  // Validate user
+  // --------------------------------------------------------
+  ,validate: function(req, res, next) {
+    
+    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
+      
+      next();
+      
+    } else {
+      
+      res.redirect('/login');
+    }
+  }
+  
   // Unlock images older than 30 min
   // --------------------------------------------------------
   ,unlockImages: function(callback, ms) {
@@ -531,7 +545,7 @@ var Images = new Class({
         ,approved: false
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
-      })
+      }, {_id:1})
       .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
