@@ -478,7 +478,11 @@ var Images = new Class({
           }, {hint: {reviewed: 1, approved:1, queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
-
+            
+            if(err) {
+              Console.log(err);
+              docs = [];
+            }
             // Output json docs
             res.json(docs);
           });
