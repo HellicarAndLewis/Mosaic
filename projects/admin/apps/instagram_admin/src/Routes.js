@@ -476,11 +476,12 @@ var Images = new Class({
             reviewed: true
           }).hint({queue_id:1}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
-          result.toArray(function(err, docs) {
+          /*result.toArray(function(err, docs) {
 
             // Output json docs
             res.json(docs);
-          });
+          });*/
+          res.json([]);
         }
       }
       
