@@ -316,7 +316,7 @@ var Admin = new Class({
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
       })
-      .sort({lock_time:1});
+      .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
 
@@ -383,6 +383,7 @@ var Images = new Class({
       if(req.params.action == 'queued') {
        
         self.unlockImages(function() {
+          
           var collection = self.app.db.collection('instagram');
 
           var result = collection.find({
@@ -456,7 +457,7 @@ var Images = new Class({
                 ,approved: true
                 ,reviewed: true
                 ,queue_id: {$lt: ObjectID(req.params.min_id)}
-              },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+              },{hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
               
               min_result.toArray(function(err, docs) {
                 
@@ -470,14 +471,11 @@ var Images = new Class({
           
         } else {
           
-          var d = new Date();
-         // console.log(d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' > Get all approved request');
-          
           // Find next images in queue
           var result = collection.find({
             reviewed: true
             ,approved: true
-          },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          },{hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
             
@@ -539,7 +537,7 @@ var Images = new Class({
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
       })
-      .sort({lock_time:1});
+      .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
 
