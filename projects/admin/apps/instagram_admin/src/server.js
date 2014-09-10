@@ -199,7 +199,7 @@ var Server = new Class({
       
       // 503 error
       if(err) {
-        
+        Console.error(err);
         // Check for 503 status code
         if(err.status_code == 503) {
           Console.error('503 Service Unavailable. No server is available to handle this request.');
