@@ -100,13 +100,21 @@ var Server = new Class({
         
         Console.info('MongoDb connected');
         
-        self.db = db;
+        var collection = db.collection('instagram');
         
-        // Setup server
-        self.setupServer();
+        collection.ensureIndex({queue_id:1, media_id:1}, function() {
+             
+          self.db = db;
         
-        // Setup Instagram api
-        self.setupInstagramApi();
+          // Setup server
+          self.setupServer();
+
+          // Setup Instagram api
+          self.setupInstagramApi();                 
+        });
+        
+        
+        
       }
     
     );
@@ -199,7 +207,7 @@ var Server = new Class({
       
       // 503 error
       if(err) {
-        
+        Console.error(err);
         // Check for 503 status code
         if(err.status_code == 503) {
           Console.error('503 Service Unavailable. No server is available to handle this request.');
@@ -238,9 +246,10 @@ var Server = new Class({
           if((media.type == 'image' && media.id)) {
             
             // Check if media already exists
-            var exists = collection.find({media_id: media.id}, {_id: 1}).limit(1);
+            var exists = collection.find({media_id: media.id}, {hint:{media_id:1}}).limit(1);
+            
             exists.count(function(err, count) {
-             
+           
               // If media doesn't exist
               if(count==0) {
                 
@@ -270,10 +279,11 @@ var Server = new Class({
               }
               
               next_media(list, callback);
-              
+
             });
           } else {
-            next_media(list, callback); 
+  
+            next_media(list, callback);
           }
         };
         
@@ -285,7 +295,7 @@ var Server = new Class({
             
             // New images added
             Console.status(new_medias.length + ' images added for tag ' + tag);
-            
+           
             collection.insert(new_medias, {w:1}, function(err, result) {
 
               if(err) throw err;
@@ -304,7 +314,7 @@ var Server = new Class({
                 retry();
               }  
             });
-            
+           
           // No new images found..
           } else {
             Console.status('No new images found for tag ' + tag);

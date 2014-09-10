@@ -64,7 +64,7 @@ var TagSubscription = new Class({
 
 module.exports.TagSubscription = TagSubscription;
 
-var UNLOCK_TIME = (20*60*1000);
+var UNLOCK_TIME = (60*60*1000);
 
 // Admin router
 // --------------------------------------------------------
@@ -132,6 +132,7 @@ var Admin = new Class({
             locked: false
             ,reviewed: false
             ,approved: false
+            ,queue_id: ObjectID()
           }}
           ,{w:1}
           ,function() {
@@ -166,15 +167,6 @@ var Admin = new Class({
       
     };
     
-    this.router.get('/logout/:unlockid/:queueid/:approved', function(req, res) {
-      
-      req.session.iaid = '';
-      self.app.iaid = '';
-      
-      reset_fn(req, res, true);
-      
-    });
-    
     this.router.get('/reset/:unlockid/:queueid/:approved', function(req, res) {
       
       reset_fn(req, res, false);
@@ -184,18 +176,22 @@ var Admin = new Class({
     // Login form post
     this.router.post('/login', function(req, res) {
       
-      if(req.body.username == self.app.options.admin.username 
-         && req.body.password == self.app.options.admin.password) {
+      // Unlock images older than x ms
+      self.unlockImages(function() {
         
-        self.app.iaid = ObjectID();
-        req.session.iaid = self.app.iaid;
-        
-        res.redirect('/admin/tags'); 
-        
-      } else {
-        
-        res.redirect('/login');
-      }
+        if(req.body.username == self.app.options.admin.username 
+           && req.body.password == self.app.options.admin.password) {
+
+          self.app.iaid = ObjectID();
+          req.session.iaid = self.app.iaid;
+
+          res.redirect('/admin/tags'); 
+
+        } else {
+
+          res.redirect('/login');
+        }
+      }, UNLOCK_TIME);
     });
     
     // Redirect after login
@@ -212,29 +208,25 @@ var Admin = new Class({
     
     // Settings route
     this.router.get('/admin/settings', this.validate.bind(this), function(req, res) {
-      
-      // Unlock images older than x ms
-      self.unlockImages(function() {
         
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
-          
-          var collection = self.app.db.collection('settings');
-          var result = collection.find({}).limit(1);
-          
-          result.toArray(function(err, docs) {
-            
-            var tpl = Dot.template(text);
-            res.send(tpl({
-              auto_approve_users: self.app.options.instagram.auto_approve_users
-              ,host: self.app.options.http.host
-              ,port: self.app.options.http.port
-              ,show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1
-            }));
-          });
-          
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/settings.html', 'utf8', function(err, text) {
+
+        var collection = self.app.db.collection('settings');
+        var result = collection.find({}).limit(1);
+
+        result.toArray(function(err, docs) {
+
+          var tpl = Dot.template(text);
+          res.send(tpl({
+            auto_approve_users: self.app.options.instagram.auto_approve_users
+            ,host: self.app.options.http.host
+            ,port: self.app.options.http.port
+            ,show_mosaic: (docs.length > 0) ? parseInt(docs[0].show_mosaic) : 1
+          }));
         });
-      }, UNLOCK_TIME);
+
+      });
     });
     
     // Settings route
@@ -264,41 +256,34 @@ var Admin = new Class({
     // Tags route
     this.router.get('/admin/tags', this.validate.bind(this), function(req, res) {
       
-      // Unlock images older than x ms
-      self.unlockImages(function() {
-        
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
-          
-          var tpl = Dot.template(text);
-          res.send(tpl({
-            msg_type: 'tag'
-            ,auto_approve_users: self.app.options.instagram.auto_approve_users
-            ,host: self.app.options.http.host
-            ,port: self.app.options.http.port
-          }));
-        });
-      }, UNLOCK_TIME);
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
+
+        var tpl = Dot.template(text);
+        res.send(tpl({
+          msg_type: 'tag'
+          ,auto_approve_users: self.app.options.instagram.auto_approve_users
+          ,host: self.app.options.http.host
+          ,port: self.app.options.http.port
+        }));
+      });
     });
     
     // Users route
     this.router.get('/admin/users', this.validate.bind(this), function(req, res) {
       
-      // Unlock images older than x ms
-      self.unlockImages(function() {
-        
-        // Return index.html
-        Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
-          
-          var tpl = Dot.template(text);
-          res.send(tpl({
-            msg_type: 'user'
-            ,auto_approve_users: self.app.options.instagram.auto_approve_users
-            ,host: self.app.options.http.host
-            ,port: self.app.options.http.port
-          }));
-        });
-      }, UNLOCK_TIME);
+      // Return index.html
+      Fs.readFile(__dirname + '/../html/index.html', 'utf8', function(err, text) {
+
+        var tpl = Dot.template(text);
+        res.send(tpl({
+          msg_type: 'user'
+          ,auto_approve_users: self.app.options.instagram.auto_approve_users
+          ,host: self.app.options.http.host
+          ,port: self.app.options.http.port
+        }));
+      });
+
     });
   
   }
@@ -307,7 +292,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(this.app.iaid && (this.app.iaid != '')) {
+    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
       
       next();
       
@@ -327,11 +312,10 @@ var Admin = new Class({
       var result = collection.find({
  
         locked: true
-        ,approved: false
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
       })
-      .sort({lock_time:1});
+      .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
 
@@ -396,45 +380,43 @@ var Images = new Class({
  
       // Get queued images
       if(req.params.action == 'queued') {
-       
-        self.unlockImages(function() {
-          var collection = self.app.db.collection('instagram');
+         
+        var collection = self.app.db.collection('instagram');
 
-          var result = collection.find({
-            locked: false
-            ,approved: false
-            ,reviewed: false
-            ,msg_type: {$in: type}
-          }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+        var result = collection.find({
+          locked: false
+          ,approved: false
+          ,reviewed: false
+          ,msg_type: {$in: type}
+        }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
-          result.toArray(function(err, docs) {
+        result.toArray(function(err, docs) {
 
-            var docs_ids = new Array();
+          var docs_ids = new Array();
 
-            // Lock documents
-            docs.each(function(doc, i) {
-              docs_ids.push(doc._id);
-            });
-
-            collection.update(
-              {_id:{$in:docs_ids}}
-              ,{
-                $set:{
-                  locked: true
-                  ,locked_time: Date.now()
-                }
-              }
-              ,{w:1, multi:true}
-              ,function() {
-
-                // Output json docs
-                res.json(docs);
-            });
-
-
+          // Lock documents
+          docs.each(function(doc, i) {
+            docs_ids.push(doc._id);
           });
-        
-        }, UNLOCK_TIME);
+
+          collection.update(
+            {_id:{$in:docs_ids}}
+            ,{
+              $set:{
+                locked: true
+                ,locked_time: Date.now()
+              }
+            }
+            ,{w:1, multi:true}
+            ,function() {
+
+              // Output json docs
+              res.json(docs);
+              res.end();
+          });
+
+
+        });
         
       }
       
@@ -446,12 +428,12 @@ var Images = new Class({
         if(req.params.min_id != '0' && req.params.max_id != '0') {
   
           var max_result = collection.find({
-            locked: false
+            locked: true
             ,approved: true
             ,reviewed: true
             ,queue_id: {$gt: ObjectID(req.params.max_id)}
             ,msg_type: {$in: type}
-          }).sort({_id:1}).limit(parseInt(req.params.limit));
+          }, {hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
           
           // Find images later than the max queue id
           max_result.toArray(function(err, docs) {
@@ -466,16 +448,17 @@ var Images = new Class({
               
               // Find images earlier than the min queue id
               var min_result = collection.find({
-                locked: false
+                locked: true
                 ,approved: true
                 ,reviewed: true
                 ,queue_id: {$lt: ObjectID(req.params.min_id)}
-              }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+              },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
               
               min_result.toArray(function(err, docs) {
                 
                 // Output json docs
                 res.json(docs);
+                res.end();
               });
               
             }
@@ -485,17 +468,21 @@ var Images = new Class({
           
           // Find next images in queue
           var result = collection.find({
-            locked: false
+            reviewed: true
             ,approved: true
-            ,reviewed: true
-            ,msg_type: {$in: type}
-          }).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+          },{hint:{queue_id:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
           result.toArray(function(err, docs) {
-
+            
+            if(err) {
+              Console.log(err);
+              docs = [];
+            }
             // Output json docs
             res.json(docs);
+            res.end();
           });
+        
         }
       }
       
@@ -516,7 +503,7 @@ var Images = new Class({
           ,{
             $set:{
               queue_id: ObjectID()
-              ,locked: false
+              ,locked: true
               ,approved: (req.body.approved == 'true') ? true : false
               ,modified_time: Date.now()
               ,reviewed: true
@@ -525,6 +512,7 @@ var Images = new Class({
           ,{w:1}
           ,function() {
             res.json({updated:(self.app.iaid != '') ? true : false});
+            res.end();
         });
       }
     });
@@ -544,7 +532,7 @@ var Images = new Class({
         ,reviewed: false
         ,locked_time: {$lt: Date.now()-ms}
       })
-      .sort({lock_time:1});
+      .sort({locked_time:1});
 
       result.toArray(function(err, docs) {
 
