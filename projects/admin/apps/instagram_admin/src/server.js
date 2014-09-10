@@ -241,6 +241,8 @@ var Server = new Class({
             var exists = collection.find({media_id: media.id}).hint({media_id:1}).limit(1);
             exists.count(function(err, count) {
              
+              console.log(count);
+              
               // If media doesn't exist
               if(count==0) {
                 
