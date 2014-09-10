@@ -389,7 +389,7 @@ var Images = new Class({
           ,approved: false
           ,reviewed: false
           ,msg_type: {$in: type}
-        }, {hint:{queue_id:-1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
+        }, {hint:{reviewed:1}}).sort({queue_id:-1}).limit(parseInt(req.params.limit));
 
         result.toArray(function(err, docs) {
 
