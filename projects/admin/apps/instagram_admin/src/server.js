@@ -242,7 +242,6 @@ var Server = new Class({
             
             exists.count(function(err, count) {
              
-              console.log(count);
               
               // If media doesn't exist
               if(count==0) {
