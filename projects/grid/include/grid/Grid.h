@@ -57,6 +57,10 @@
 #define GRID_DIR_RIGHT 0x01
 #define GRID_DIR_LEFT 0x02
 
+#define GRID_USE_ROW_OFFSET 0 /* testing with offset per row */
+#define GRID_USE_PBO 0
+#define GRID_NUM_PBO 3
+
 namespace grid {
 
   static const char* GRID_VS = ""
@@ -113,14 +117,35 @@ namespace grid {
     "in vec2 v_pos;"
 
     "void main() {"
-    "   float index_col = (v_row * 20.0 + v_col) / 200.0; "
-    "   fragcolor = vec4(1.0, 0.0, 0.0, 1.0);"
     "   vec2 texcoord = vec2(v_tex.x * u_scalex  + v_col * u_scalex, 1.0 - (v_tex.y * u_scaley + v_row * u_scaley));"
     "   vec4 tc = texture(u_tex, texcoord);"
-    "   fragcolor.rgb = tc.rgb;"
-    //    "   fragcolor.rgb = vec3(index_col, 0, 0);"
+    "   fragcolor = vec4(tc.rgb, 1.0);"
     "}"
     "";
+
+  /* ---------------------------------------------------------------------------------- */
+
+#if GRID_USE_PBO 
+  struct Rect {
+    int x;
+    int y;
+    int w; 
+    int h;
+  };
+#endif
+
+#if GRID_USE_ROW_OFFSET
+  struct RowOffset {
+    RowOffset();
+    ~RowOffset();
+    int row;
+    float pos_a;
+    float pos_b;
+    float pos;
+    float speed_x;
+    int offset_x;
+  };
+#endif
 
   /* ---------------------------------------------------------------------------------- */
 
@@ -165,6 +190,7 @@ namespace grid {
     ~Grid();
     int init(std::string path, int imgWidth, int imgHeight, int rows, int cols);
     void update();
+    void updatePhysics(double dt);
     void draw();
     int shutdown();
     
@@ -213,8 +239,19 @@ namespace grid {
     vec2 pos_b;                                   /* position of second set */
     vec2 offset;                                  /* top left position where we start drawing (relative to the current position) */
     vec2 padding;                                 /* padding between cells. */
-    
-  }; 
+
+#if GRID_USE_ROW_OFFSET
+    std::vector<RowOffset> row_offsets;           /* contains a row offset for each of the rows that we use to displace the rows a bit. */
+#endif
+
+#if GRID_USE_PBO
+    unsigned char* pbo_pixels; /* the texture in CPU RAM */
+    GLuint pbo[GRID_NUM_PBO];
+    int pbo_dx;
+    uint64_t pbo_n;
+#endif
+
+}; 
 
   inline void Grid::lock() {
     if (0 != pthread_mutex_lock(&mutex)) {
@@ -231,3 +268,10 @@ namespace grid {
 } /* namespace grid */
 
 #endif
+
+
+
+
+
+
+

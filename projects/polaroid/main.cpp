@@ -16,7 +16,7 @@
   -i = hashtag x
   -j = hashtag y
   -o = output path
-
+  -v = verbose 
 
   Create the big version of the polaroid:
   ----------------------------------------
@@ -98,6 +98,7 @@ struct Options {
   std::string hashtag; /* -h */
   int hashtag_x; /* -i */
   int hashtag_y; /* -j */
+  int verbose; /* -v */
 };
 
 Options::Options() {
@@ -112,9 +113,15 @@ Options::Options() {
   visible_size = -1.0f;
   hashtag_x = 0;
   hashtag_y = 0;
+  verbose = -1;
 }
 
 void Options::print() {
+
+  if (-1 == verbose) {
+    return;
+  }
+
   printf("\n\n-------------------------------\n");
   printf("+ background_file (-k): %s\n", background_file.c_str());
   printf("+ foreground_file (-c): %s\n", foreground_file.c_str());
@@ -130,6 +137,7 @@ void Options::print() {
   printf("+ hashtag (-h): %s\n", hashtag.c_str());
   printf("+ hashtag_x (-i): %d\n", hashtag_x);
   printf("+ hashtag_y (-j): %d\n", hashtag_y);
+  printf("+ verbose (-v): %d\n", verbose);
   printf("-------------------------------\n\n");
 }
 
@@ -156,8 +164,14 @@ int main(int argc, char** argv) {
   float col_r, col_g, col_b = -1.0f;
   Options opt;
 
-  while ((c = getopt(argc, argv, "a:x:y:f:s:t:n:w:r:g:b:c:h:i:j:o:")) != -1) {
+  while ((c = getopt(argc, argv, "a:x:y:f:s:t:n:w:r:g:b:c:h:i:j:o:v")) != -1) {
     switch(c) {
+      /* verbose */
+      /* ------------------------------------------------------- */
+      case 'v': {
+        opt.verbose = 0;
+        break;
+      }
 
       /* color */
       /* ------------------------------------------------------- */
@@ -383,7 +397,9 @@ int main(int argc, char** argv) {
   int dest_width = cairo_image_surface_get_width(surf_overlay);
   int dest_height = cairo_image_surface_get_height(surf_overlay);
 
-  printf("+ Output size: %d x %d\n", dest_width, dest_height);
+  if (0 == opt.verbose) {
+    printf("+ Output size: %d x %d\n", dest_width, dest_height);
+  }
 
   cairo_surface_t* surf_out = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, dest_width, dest_height);
   if (NULL == surf_out) {
@@ -391,7 +407,9 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  printf("+ Info: creating output surface: %d x %d\n", dest_width, dest_height);
+  if (0 == opt.verbose) {
+    printf("+ Info: creating output surface: %d x %d\n", dest_width, dest_height);
+  }
 
   cairo_t* cr = cairo_create(surf_out);
   if (NULL == cr) { 
@@ -399,15 +417,10 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-
-  /* fill background. */
-  /*
-  cairo_set_source_rgba(cr, 1, 1, 1, 1);
-  cairo_paint(cr);
-  */
-
   float scale_factor = opt.visible_size / source_width;
-  printf("+ Scale factor: %f\n", scale_factor);
+  if (0 == opt.verbose) {
+    printf("+ Scale factor: %f\n", scale_factor);
+  }
 
   /* paint background */  
   cairo_save(cr);
@@ -423,29 +436,17 @@ int main(int argc, char** argv) {
   cairo_surface_flush(surf_out);
 
   /* font settings. */
-  //  cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  //  cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_font_options_t* font_options = cairo_font_options_create();
   if (NULL == font_options) {
     printf("+ Error: cannot create font options. Cannot create polaroid.\n");
     exit(EXIT_FAILURE);
   }
   
-  //cairo_font_options_set_hint_metrics (font_options, CAIRO_HINT_METRICS_ON);
-  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_NONE);
-  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GRAY);
-  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_SUBPIXEL);
-  //cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GOOD);
-  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_SLIGHT);
-  //cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_FULL);
 
   cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_BEST);
   cairo_font_options_set_hint_metrics(font_options, CAIRO_HINT_METRICS_DEFAULT);
   cairo_set_font_options (cr, font_options);
-
   cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  //cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  //  cairo_font_options_set_antialias(cr, CAIRO_ANTIALIAS_NONE);
   cairo_set_source_rgba(cr, opt.name_r, opt.name_g, opt.name_b, 1.0); 
 
   /* name */
@@ -480,8 +481,10 @@ int main(int argc, char** argv) {
   cairo_surface_destroy(surf_bg);
   cairo_surface_destroy(surf_overlay);
   cairo_destroy(cr);
-
-  printf("\n");
+  
+  if (0 == opt.verbose) {
+    printf("\n");
+  }
   return 0;
 }
 
@@ -498,3 +501,16 @@ template<class T> static T convert_type(char* input) {
   ss >> out;
   return out;
 }
+
+
+//cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+//cairo_select_font_face(cr, "Platform", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+//cairo_font_options_set_hint_metrics (font_options, CAIRO_HINT_METRICS_ON);
+//cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_NONE);
+//cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GRAY);
+//cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_SUBPIXEL);
+//cairo_font_options_set_antialias(font_options, CAIRO_ANTIALIAS_GOOD);
+//cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_SLIGHT);
+//cairo_font_options_set_hint_style(font_options, CAIRO_HINT_STYLE_FULL);
+//cairo_select_font_face(cr, "Open Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+//cairo_font_options_set_antialias(cr, CAIRO_ANTIALIAS_NONE);

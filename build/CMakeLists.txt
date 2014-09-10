@@ -127,6 +127,9 @@ set(vid_lib_sources
 # The grid
 set(grid_lib_sources
   ${grid_sd}/Grid.cpp
+  ${grid_sd}/SimpleGrid.cpp
+  ${grid_sd}/SimpleLayer.cpp
+  ${grid_sd}/SimpleSettings.cpp
   )
 
 # The mosaic visualizer (uses all of above)
@@ -230,12 +233,14 @@ install(TARGETS AppPolaroid DESTINATION bin)
 #create_test(async_upload)
 #create_test(image_loader)
 #create_test(grid)
+create_test(simple_grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
 #create_test(tracker)
 #create_test(image_json)
 #create_test(cairo_png)
 #create_test(cairo_jpg)
+
 
 
 

@@ -260,7 +260,6 @@ namespace track {
           free_layer = free_layers.front();
           free_layers.pop_front();
 
-
           /* update the texture layer */
           glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, free_layer, tex_width, tex_height, 1, GL_BGRA, GL_UNSIGNED_BYTE, img->pixels);
 
@@ -310,13 +309,12 @@ namespace track {
       p.tween_size.update(now);
       
       if (IMAGE_MODE_BOINK == p.mode) {
-        p.tween_angle.update(now);
-        p.tween_x.update(now);
-        p.tween_y.update(now);
-
+        //p.tween_angle.update(now);
+        //p.tween_x.update(now);
+        //p.tween_y.update(now);
         p.size.set(p.tween_size.value, p.tween_size.value);
-        p.angle = p.tween_angle.value;
-        p.position.set(p.tween_x.value, p.tween_y.value);
+        //p.angle = p.tween_angle.value;
+        //p.position.set(p.tween_x.value, p.tween_y.value);
       }
       else if (IMAGE_MODE_FLY == p.mode) {
 
@@ -333,7 +331,7 @@ namespace track {
         RX_ERROR("Unhandled animation mode.");
       }
 
-      /* remote the particle and free the layer. */
+      /* remove the particle and free the layer. */
       if (VERTEX_STATE_TWEEN_OUT == p.state && p.tween_size.t >= 1.0f) {
         free_layers.push_back(p.layer);
         delete *it;
@@ -364,10 +362,10 @@ namespace track {
       Particle& p = *(*it);
       float dt = now - (p.tween_size.start_time + p.tween_size.d);
       /* start the tween out with a `dt` sec delay */
-      if (VERTEX_STATE_TWEEN_IN == p.state && dt > 0.4) {
+      if (VERTEX_STATE_TWEEN_IN == p.state && dt > 1.0) {
         p.state = VERTEX_STATE_TWEEN_OUT;
         p.tween_size.set(1.5f, p.tween_size.b + p.tween_size.c, -100);
-        p.tween_y.set(rx_random(1.5f,2.5f), p.position.y, vp[3]);
+        //p.tween_y.set(rx_random(1.5f,2.5f), p.position.y, vp[3]);
       }
       ++it;
     }

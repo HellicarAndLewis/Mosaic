@@ -56,6 +56,7 @@ namespace top {
     int init(GridAppSettings& cfg);
     int shutdown();
     void update();
+    void updatePhysics(double dt);
     void draw();
 
   public:
@@ -64,6 +65,13 @@ namespace top {
     top::ImageCollector img_collector;
     top::ImageProcessor img_processor;
   };
+
+  /* ------------------------------------------------------------------------- */
+
+  inline void GridApp::updatePhysics(double dt) {
+    grid.updatePhysics(dt);
+  }
+
 } /* namespace top */
 
 #endif

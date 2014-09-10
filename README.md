@@ -25,6 +25,7 @@ create the mosaic and the smoothly scrolling grids.
 | AppGridLeft        | A smooth scrolling grid of images                          | `projects/grid`                        |
 | AppGridRight       | Same as AppGridLeft, other scrolling direction             | `projects/grid`                        |
 | AppImageProcessor  | Performs image analysis                                    | `projects/topshop`                     |
+| AppPolaroid        | Generates the polaroid style images                        | `projects/polaroid`                    |
 | Image Downloaded   | Downloads approved images from instagran (node.js)         | `projects/admin/apps/image_downloader` |
 | Administrion Panel | Approve / decline instagram images (node.js)               | `projects/admin/apps/instagram_admin`  |
 
@@ -69,7 +70,7 @@ image downloader see the README in `projects/admin/apps/instagram_admin`.
 | librxp_player     | ccd77f4302ecf315bff7ba8b66f593fa42fb38bf    | [rxp_player](https://github.com/roxlu/rxp_player)                                                                      |
 | libtheora         | r19181                                      | [libtheora svn](https://github.com/roxlu/rxp_player)                                                                   |
 | libvorbis         | 1.3.3                                       | [libvorbis](http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz)                                          |
-| libogg            | 1.3.1                                       | [libor](http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz)                                                    |
+| libogg            | 1.3.1                                       | [libogg](http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz)                                                   |
 | libcurl           | 7.37.1                                      | [libcurl](http://curl.haxx.se/download/curl-7.37.1.tar.gz)                                                             |
 | yasm              | 1.3.0                                       | [yasm](http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz)                                                |
 | libjansson        | 2.6                                         | [jansson](http://www.digip.org/jansson/releases/jansson-2.6.tar.gz)                                                    |
