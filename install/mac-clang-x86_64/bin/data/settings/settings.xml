@@ -1,4 +1,4 @@
-<settings group="development">
+<settings group="production">
 
   <group name="production">
     <!-- GENERAL -->
@@ -26,7 +26,7 @@
     <polaroid_filepath>polaroids</polaroid_filepath>
     <resized_filepath>input_mosaic</resized_filepath>
     <blurred_filepath>input_blurred</blurred_filepath>
-    <input_tile_size>5</input_tile_size>
+    <input_tile_size>5</input_tile_size> <!-- the lower this value the more resolution the mosaic has -->
     <file_tile_width>64</file_tile_width>  
     <file_tile_height>64</file_tile_height>
     <memory_pool_size>2000</memory_pool_size>
