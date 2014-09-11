@@ -99,7 +99,6 @@ var Admin = new Class({
     this.router.get('/login', function(req, res) {
       
       req.session.iaid = '';
-      self.app.iaid = '';
       Fs.readFile(__dirname + '/../html/login.html', 'utf8', function(err, text) {
         res.send(text);
       });
@@ -109,8 +108,6 @@ var Admin = new Class({
     this.router.get('/logout', function(req, res) {
       
       req.session.iaid = '';
-      self.app.iaid = '';
-      
       res.redirect('/login');
     });
     
@@ -183,8 +180,6 @@ var Admin = new Class({
            && req.body.password == self.app.options.admin.password) {
 
           self.app.iaid = ObjectID();
-          req.session.iaid = self.app.iaid;
-
           res.redirect('/admin/tags'); 
 
         } else {
@@ -292,7 +287,7 @@ var Admin = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
+    if(req.session.iaid != '') {
       
       next();
       
@@ -522,7 +517,7 @@ var Images = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if((this.app.iaid && (this.app.iaid != '')) && req.session.iaid == this.app.iaid) {
+    if(req.session.iaid == '') {
       
       next();
       
