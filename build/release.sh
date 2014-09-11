@@ -83,9 +83,9 @@ fi
 #./test/test_image_json
 #./test/test_cairo_jpg
 #./test/test_simple_grid
-./AppMosaic
+#./AppMosaic
 #./AppGridLeft
-#./AppGridRight
+./AppGridRight
 #./AppImageProcessor
 #./AppSimpleGridLeft
 

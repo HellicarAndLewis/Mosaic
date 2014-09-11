@@ -50,23 +50,22 @@ ${magickdir}/convert ${infile} \
 
 # Small Polaroid for left grid.
 ${bindir}/AppPolaroid \
-    -x 35 -y 10 -f ${png_filename} \
+    -x 12 -y 60 -f ${png_filename} \
     -r 0.0 -g 0.0 -b 0.0 \
-    -n "${username} " -s 12 -t 15 -w 13 \
-    -h "#TOPSHOPWINDOW" -i 11 -j 193 \
+    -n "${username} " -s 35 -t 21 -w 13 \
+    -h "#TOPSHOPWINDOW" -i 32 -j 210 \
     -a 180 -c ${bindir}/data/assets/polaroid_overlay_small.png \
     -o ${tmp_filename}
 cp ${tmp_filename} ${grid_filepath}
 
 # Small polaroid for interaction
-# DISABLED ON REQUEST
-# ${bindir}/AppPolaroid \
-#     -x 130 -y 115 -f ${png_filename} \
-#     -r 0.0 -g 0.0 -b 0.0 \
-#     -n "${username}" -s 36 -t 42 -w 13 \
-#     -h "#TOPSHOPWINDOW" -i 36 -j 221 \
-#     -a 180 -c ${bindir}/data/assets/polaroid_overlay_small_for_interaction.png \
-#     -o ${tmp_filename}
+${bindir}/AppPolaroid \
+    -x 130 -y 115 -f ${png_filename} \
+     -r 0.0 -g 0.0 -b 0.0 \
+     -n "${username}" -s 66 -t 37 -w 13 \
+     -h "#TOPSHOPWINDOW" -i 63 -j 226 \
+     -a 180 -c ${bindir}/data/assets/polaroid_overlay_small_for_interaction.png \
+     -o ${tmp_filename}
 cp ${tmp_filename} ${polaroid_dir}/${filename}.png
 
 # Move to mosaic dir
