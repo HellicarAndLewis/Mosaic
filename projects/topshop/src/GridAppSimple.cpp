@@ -12,7 +12,7 @@ namespace top {
   GridAppSimple::GridAppSimple() 
     :max_files(0)
     ,auto_change_timeout(0)
-    ,auto_change_delay(6e9)
+    ,auto_change_delay(7e9)
   {
   }
 
