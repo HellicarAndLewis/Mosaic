@@ -1,4 +1,4 @@
-<settings group="production">
+<settings group="development">
 
   <group name="production">
     <!-- GENERAL -->

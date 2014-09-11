@@ -34,7 +34,5 @@ cd ${d}/../data/polaroids
 rm *.jpg
 rm *.png
 
-
-
-
-
+rm ${d}/../data/descriptors.txt
+touch ${d}/../data/descriptors.txt
