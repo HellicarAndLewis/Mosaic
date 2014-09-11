@@ -517,7 +517,7 @@ var Images = new Class({
   // --------------------------------------------------------
   ,validate: function(req, res, next) {
     
-    if(req.session.iaid == '') {
+    if(req.session.iaid != '') {
       
       next();
       
