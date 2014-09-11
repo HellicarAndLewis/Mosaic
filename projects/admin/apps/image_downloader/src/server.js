@@ -132,10 +132,10 @@ var ImageDownloader = new Class({
       if(!error) {
         
         // Filter images
-        images.filter(function(image, i) {
+        //images.filter(function(image, i) {
           
-          return (!image.locked && (image.reviewed && image.approved));
-        });
+          //return (!image.locked && (image.reviewed && image.approved));
+        //});
         
         // Check for images
         if(images.length > 0) {

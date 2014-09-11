@@ -309,12 +309,7 @@ namespace track {
       p.tween_size.update(now);
       
       if (IMAGE_MODE_BOINK == p.mode) {
-        //p.tween_angle.update(now);
-        //p.tween_x.update(now);
-        //p.tween_y.update(now);
         p.size.set(p.tween_size.value, p.tween_size.value);
-        //p.angle = p.tween_angle.value;
-        //p.position.set(p.tween_x.value, p.tween_y.value);
       }
       else if (IMAGE_MODE_FLY == p.mode) {
 

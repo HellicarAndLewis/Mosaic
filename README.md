@@ -113,3 +113,14 @@ We're using the following Mac 10.9 frameworks
 | crypto                    |
 | ldap                      |
 | bz1                       |
+
+#### Authors
+
+[Martin Bartels](http://www.apollomedia.nl)
+[Diederick Huijbers](http://www.apollomedia.nl) ([roxlu](http://www.roxlu.com))
+
+# Thanks
+
+Huge thanks to Max Rupp for his advise and code examples on high performance openGL and
+[James Acres](http://jamesacres.com/) & [Victor Martin](http://www.pixelnerve.com/)
+for their listening ears and especially Victor for testing super smooth scrolling.

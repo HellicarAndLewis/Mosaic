@@ -359,7 +359,6 @@ namespace mos {
 #if USE_BACKUP_PLAYER
       /* restart the backup player if necessary */
       if (0 != backup_player.isInit()) {
-        RX_VERBOSE("START PLAYING");
         backup_player.init(backup_file);
         backup_player.play();
       }

@@ -20,6 +20,7 @@ namespace grid {
   {
 
   }
+
   SimpleCell::~SimpleCell() {
 
     if (pixels) {
@@ -44,11 +45,21 @@ namespace grid {
 
   SimpleLayer::SimpleLayer() 
     :cell_dx(0)
+    ,nimages(0)
     ,tex(0)
+    ,timeout(0)
+    ,state(SIMPLE_STATE_NONE)
+    ,on_event(NULL)
+    ,user(NULL)
   {
   }
 
   SimpleLayer::~SimpleLayer() {
+    on_event = NULL;
+    user = NULL;
+    if (0 != cells.size()) {
+      shutdown();
+    }
   }
 
   int SimpleLayer::init(SimpleSettings cfg) {
@@ -69,8 +80,8 @@ namespace grid {
         cells[dx].layer = layer++;
         cells[dx].row = j;
         cells[dx].col = i;
-        cells[dx].x = settings.img_width * 0.5 + i * settings.img_width + i * settings.padding_x;
-        cells[dx].y = settings.img_height * 0.5 + j * settings.img_height + j * settings.padding_y;
+        cells[dx].x = settings.offset_x + settings.img_width * 0.5 + i * settings.img_width + i * settings.padding_x;
+        cells[dx].y = settings.offset_y + settings.img_height * 0.5 + j * settings.img_height + j * settings.padding_y;
       }
     }
 
@@ -94,6 +105,11 @@ namespace grid {
       return -1;
     }
 
+    if (nimages >= cells.size()) {
+      RX_ERROR("We cannot add a new image because we're full. You need to flip!");
+      return -2;
+    }
+
     /* laod the image in the next free cell. */
     SimpleCell& cell = cells[cell_dx];
     rx_load_png(img.filepath, 
@@ -106,11 +122,11 @@ namespace grid {
     
     if (cell.img_width != settings.img_width) { 
       RX_ERROR("Loaded file has invalid image width: %d, we expect: %d", cell.img_width, settings.img_width);
-      return -2;
+      return -3;
     }
     if (cell.img_height != settings.img_height) {
       RX_ERROR("Loaded file has invalid image height: %d, we expect: %d", cell.img_height, settings.img_height);
-      return -3;
+      return -4;
     }
 
     /* update texture. */
@@ -118,68 +134,238 @@ namespace grid {
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, cell.layer, settings.img_width, settings.img_height, 1, GL_BGRA, GL_UNSIGNED_BYTE, cell.pixels);
     
     cell.in_use = true;
-
     ++cell_dx %= cells.size();
+    nimages++;
+
+    if (nimages >= cells.size() && NULL != on_event) {
+      on_event(this, SIMPLE_EVENT_FULL);
+    }
 
     return 0;
   }
 
   int SimpleLayer::shutdown() {
+    
+    if (0 == cells.size()) {
+      RX_WARNING("Not initialized, ignoring shutdown request.");
+      return 0;
+    }
+
+    if (0 != tex) {
+      glDeleteTextures(1, &tex);
+      tex = 0;
+    }
+
+    cells.clear();
+
+    state = SIMPLE_STATE_NONE;
+    cell_dx = 0;
+    nimages = 0;
+    timeout = 0;
+
     return 0;
   }
 
-  void SimpleLayer::update(float dt) {
-    float now = rx_millis();
+  /* update physics */
+  void SimpleLayer::updatePhysics(float dt) {
 
-    for (size_t i = 0; i < cells.size(); ++i) {
-      SimpleCell& cell = cells[i];
-      if (false == cell.in_use) {
-        continue;
-      }
-      cell.tween_size.update(now);
+    if (SIMPLE_STATE_NONE == state) {
+      return;
     }
 
+    /* when showing or visible update physics*/
+    if (SIMPLE_STATE_SHOWING == state || SIMPLE_STATE_VISIBLE == state) {
+      float now = rx_millis();
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+        cell.tween_size.update(now);
+      }
+    }
+    else if (SIMPLE_STATE_HIDING == state) {
+      float now = rx_millis();
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+        cell.tween_size.update(now);
+        cell.tween_x.update(now);
+      }
+    }
   }
 
-  void SimpleLayer::draw() {
+  /* handles state changes. */
+  void SimpleLayer::update() {
+
+    /* layer is not initialized yet. */
+    if (SIMPLE_STATE_NONE == state) {
+      return;
+    }
+
+    /* check if we need to change state .*/
+    uint64_t now = rx_hrtime();
+    if (SIMPLE_STATE_SHOWING == state) {
+      if (now > timeout) {
+        state = SIMPLE_STATE_VISIBLE;
+        if (on_event) {
+          on_event(this, SIMPLE_EVENT_SHOWN);
+        }
+      }
+      return;
+    }
+    else if (SIMPLE_STATE_HIDING == state) {
+      /* reset when we're hidden, so we can be reused again. */
+      if (now > timeout) {
+        state = SIMPLE_STATE_HIDDEN;
+        reset(); 
+        if (on_event) {
+          on_event(this, SIMPLE_EVENT_HIDDEN);
+        }
+      }
+    }
   }
 
-  int SimpleLayer::prepare() {
+  /* prepare before the cell is shown */
+  int SimpleLayer::prepareShow() {
+
     if (0 == cells.size()) {
       RX_ERROR("Not initialized");
       return -1;
     }
 
-    for (size_t i = 0; i < cells.size(); ++i) {
-
-      SimpleCell& cell = cells[i];
-      if (false == cell.in_use) {
-        continue;
+    if (SIMPLE_GRID_DIRECTION_RIGHT == settings.direction) {
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+        cell.tween_size.value.set(0.0f, 0.0f);
+        cell.tween_size.set(1.5f, rx_random(0.0f, 2.0f), vec2(0.0f, 0.0f), vec2(settings.img_width, settings.img_height));
+        cell.tween_x.value = cell.x;
       }
-
-      /* prepare before the cell is shown */
-      cell.tween_size.value.set(0.0, 0.0f);
-      cell.tween_size.set(1.5f, rx_random(0.0, 2.0f), vec2(0.0, 0.0), vec2(settings.img_width, settings.img_height));
+    }
+    else if (SIMPLE_GRID_DIRECTION_LEFT == settings.direction) {
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+        cell.tween_size.value.set(0.0f, 0.0f);
+        cell.tween_size.set(1.5f, rx_random(0.0f, 2.0f), vec2(0.0f, 0.0f), vec2(settings.img_width, settings.img_height));
+        cell.tween_x.value = cell.x;
+      }
+    }
+    else {
+      RX_ERROR("unhandled grid direction: %d", settings.direction);
     }
 
     return 0;
   }
 
-  bool SimpleLayer::isFull() {
-    /* @todo we can use a counter in addImage, but that's not really necessary (may be a bit faster) .*/
-    size_t num_full = 0;
-    for (size_t i = 0; i < cells.size(); ++i) {
-      if (cells[i].in_use) {
-        num_full++;
+  /* prepare before the cell is hidden */
+  int SimpleLayer::prepareHide() {
+
+
+    if (0 == cells.size()) {
+      RX_ERROR("Not initialized");
+      return -1;
+    }
+
+    if (SIMPLE_GRID_DIRECTION_RIGHT == settings.direction) {
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+
+        float delay = ((settings.cols - cell.col) - 1) * 0.2 + rx_random(0.0, 0.7f);
+        cell.tween_size.set(2.5f, delay, vec2(settings.img_width, settings.img_height), vec2(-settings.img_width, -settings.img_height));
+        cell.tween_x.set(2.5f, delay, cell.tween_x.value, 1920 + settings.img_width + rx_random(500,1000));
       }
     }
-    return num_full == cells.size();
+    else if (SIMPLE_GRID_DIRECTION_LEFT == settings.direction) {
+      for (size_t i = 0; i < cells.size(); ++i) {
+        SimpleCell& cell = cells[i];
+        if (false == cell.in_use) {
+          continue;
+        }
+
+        float delay = (cell.col - 1) * 0.2 + rx_random(0.0, 0.7f);
+        cell.tween_size.set(2.5f, delay, vec2(settings.img_width, settings.img_height), vec2(-settings.img_width, -settings.img_height));
+        cell.tween_x.set(2.5f, delay, cell.tween_x.value, -(1920 + settings.img_width + rx_random(500,1000)));
+      }
+    }
+    else {
+      RX_ERROR("unhandled grid direction: %d", settings.direction);
+    }
+
+    return 0;
   }
 
   void SimpleLayer::reset() {
     for (size_t i = 0; i < cells.size(); ++i) {
       cells[i].in_use = false;
     }
+
+    nimages = 0;
+  }
+
+  void SimpleLayer::hide() {
+
+    /* already hidden ? */
+    if (SIMPLE_STATE_HIDDEN == state) {
+      RX_ERROR("Trying to hide a layer which is already hidden.");
+      return;
+    }
+    
+    /* already trying to hide */
+    if (SIMPLE_STATE_HIDING == state) {
+      RX_ERROR("We're now busy with hiding.");
+      return;
+    }
+
+    /* no state yet. */
+    if (SIMPLE_STATE_NONE == state) {
+      state = SIMPLE_STATE_HIDING;
+      timeout = rx_hrtime();
+      prepareHide();
+      return;
+    }
+
+    /* start hiding. */
+    timeout = rx_hrtime() + 3e9; 
+    state = SIMPLE_STATE_HIDING;
+    prepareHide();
+  }
+
+  void SimpleLayer::show() {
+    /* already shown. */
+    if (SIMPLE_STATE_VISIBLE == state) {
+      RX_ERROR("Trying to show a layer which is already visible.");
+      return;
+    }
+
+    /* in progress. */
+    if (SIMPLE_STATE_SHOWING == state) {
+      RX_ERROR("We're already in progress to show the layer");
+      return;
+    }
+
+    /* when we have no state yet, we can directly show the layer. */
+    if (SIMPLE_STATE_NONE == state) {
+      state = SIMPLE_STATE_SHOWING;
+      timeout = rx_hrtime();
+      prepareShow();
+      return;
+    }
+
+    /* start showing */
+    timeout = rx_hrtime() + 3e9;
+    state = SIMPLE_STATE_SHOWING;
+    prepareShow();
   }
 
 } /* namespace grid */

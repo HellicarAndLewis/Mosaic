@@ -2,7 +2,13 @@
 
 namespace grid {
 
-  SimpleGrid::SimpleGrid() 
+  /* --------------------------------------------------------------------------------- */
+
+  static void on_layer_event(SimpleLayer* layer, int event);
+
+  /* --------------------------------------------------------------------------------- */
+
+  SimpleGrid::SimpleGrid()
     :front_layer(NULL)
     ,back_layer(NULL)
     ,vao(0)
@@ -12,10 +18,15 @@ namespace grid {
     ,prog(0)
     ,vbo_allocated(0)
     ,num_cells(0)
+    ,on_event(NULL)
+    ,user(NULL)
   {
   }
 
   SimpleGrid::~SimpleGrid() {
+    if (vao != 0) {
+      shutdown();
+    }
   }
 
   int SimpleGrid::init(SimpleSettings cfg) {
@@ -34,6 +45,12 @@ namespace grid {
     }
 
     back_layer = &layer_a;
+    front_layer = &layer_b;
+
+    layer_a.on_event = on_layer_event;
+    layer_a.user = this;
+    layer_b.on_event = on_layer_event;
+    layer_b.user = this;
 
     settings = cfg;    
 
@@ -83,39 +100,42 @@ namespace grid {
     }
     glUniform1i(u_tex, 0);
 
+    /* just checking ... */
+    if (settings.offset_x > (vp[2] / 2)) {
+      RX_ERROR("It seems that x-offset of the SimpleGrid is a bit too much? Offset is: %d", settings.offset_x);
+    }
+
     return 0;
   }
 
   int SimpleGrid::shutdown() {
+    RX_ERROR("Cleanup simple grid!");
+    layer_a.shutdown();
+    layer_b.shutdown();
     return 0;
   }
 
-  void SimpleGrid::update(float dt) {
+  void SimpleGrid::updatePhysics(float dt) {
+    if (NULL != front_layer) {
+      front_layer->updatePhysics(dt);
+    }
+    if (NULL != back_layer) {
+      back_layer->updatePhysics(dt);
+    }
+  }
 
-    if (NULL == front_layer) { 
-#if !defined(NDEBUG)
-      RX_ERROR("Front layer not set"); 
-#endif
-      return; 
-    } 
+  void SimpleGrid::update() {
 
-    /* update physics */
-    front_layer->update(dt);
+    if (NULL != front_layer) {
+      front_layer->update();
+    }
+    if (NULL != back_layer) {
+      back_layer->update();
+    }
 
     std::vector<SimpleVertex> vertices;
-    for (size_t i = 0; i < front_layer->cells.size(); ++i) {
-      SimpleCell& cell = front_layer->cells[i];
-      if (false == cell.in_use) {
-        continue;
-      }
-
-      SimpleVertex v;
-      v.position.set(cell.x, cell.y);
-      v.size = cell.tween_size.value;
-      v.layer = cell.layer;
-
-      vertices.push_back(v);
-    }
+    updateVertices(front_layer, vertices);
+    updateVertices(back_layer, vertices);
 
     size_t needed = vertices.size() * sizeof(SimpleVertex);
     if (needed == 0) {
@@ -137,6 +157,28 @@ namespace grid {
     num_cells = vertices.size();
   }
 
+  void SimpleGrid::updateVertices(SimpleLayer* from, std::vector<SimpleVertex>& vertices) {
+
+    if (NULL == from) { 
+      return;
+    } 
+
+    for (size_t i = 0; i < from->cells.size(); ++i) {
+      SimpleCell& cell = from->cells[i];
+      if (false == cell.in_use) {
+        continue;
+      }
+
+      SimpleVertex v;
+      v.position.x = cell.tween_x.value;
+      v.position.y = cell.y;
+      v.size = cell.tween_size.value;
+      v.layer = cell.layer;
+
+      vertices.push_back(v);
+    }
+  }
+
   void SimpleGrid::draw() {
 
     if (NULL == front_layer) { 
@@ -149,6 +191,8 @@ namespace grid {
     if (0 == num_cells) {
       return;
     }
+
+    // RX_VERBOSE("Drawing: %lu cells", num_cells);
 
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -185,5 +229,44 @@ namespace grid {
     return back_layer->addImage(img);
 
   }
+
+  /* --------------------------------------------------------------------------------- */
+
+  static void on_layer_event(SimpleLayer* layer, int event) {
+
+    if (NULL == layer) { 
+      RX_ERROR("Layer is NULL"); 
+      return; 
+    }
+    
+    SimpleGrid* grid = static_cast<SimpleGrid*>(layer->user);
+    if (NULL == grid) {
+      RX_ERROR("Cannot get grid handle.");
+      return;
+    }
+
+    if (SIMPLE_EVENT_FULL == event) {
+      grid->front_layer->hide();
+    }
+    else if (SIMPLE_EVENT_SHOWN == event) {
+      /* we don't need this one. */
+    }
+    else if (SIMPLE_EVENT_HIDDEN == event) {
+      SimpleLayer* tmp = grid->back_layer;
+      grid->back_layer = grid->front_layer;
+      grid->front_layer = tmp;
+      grid->front_layer->show();
+    }
+    else {
+      RX_ERROR("Unhandled event");
+    }
+
+    /* pass along the event. */
+    if (grid->on_event) {
+      grid->on_event(grid, layer, event);
+    }
+  } 
+
+  /* --------------------------------------------------------------------------------- */
 
 } /* namespace grid */
