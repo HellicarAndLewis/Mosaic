@@ -286,7 +286,7 @@ namespace vid {
     /* timeout after X seconds */
     /* @todo make video timeout configurable */
     uint64_t dt = rx_hrtime() - s->timestamp;
-    if (dt > (3e9)) {
+    if (dt > (6e9)) {
       if (NULL != s->on_event) {
         s->on_event(VID_EVENT_TIMEOUT, s->user);
       }
