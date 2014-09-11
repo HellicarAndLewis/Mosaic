@@ -244,6 +244,10 @@ add_executable(AppPolaroid ${bd}/projects/polaroid/main.cpp)
 target_link_libraries(AppPolaroid ${app_libs})
 install(TARGETS AppPolaroid DESTINATION bin)
 
+# The json generator that can be used to generate fake json meta data for a complete directory
+add_executable(AppMetaData ${bd}/projects/metadata/main.cpp)
+target_link_libraries(AppMetaData ${app_libs})
+install(TARGETS AppMetaData DESTINATION bin)
 
 
 # The tests used during development
@@ -256,7 +260,7 @@ install(TARGETS AppPolaroid DESTINATION bin)
 #create_test(async_upload)
 #create_test(image_loader)
 #create_test(grid)
-create_test(simple_grid)
+#create_test(simple_grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
 #create_test(tracker)
