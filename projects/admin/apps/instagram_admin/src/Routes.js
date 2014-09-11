@@ -230,7 +230,7 @@ var Admin = new Class({
     });
     
     // Settings route
-    this.router.post('/settings/update', this.validate.bind(this), BodyParser.json(), function(req, res) {
+    this.router.post('/settings/update', BodyParser.json(), function(req, res) {
       
       if(req.body.show_mosaic) {
         
