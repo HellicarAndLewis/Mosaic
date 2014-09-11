@@ -490,7 +490,7 @@ var Images = new Class({
     
     
     // Create post route (update)
-    this.router.post('/images/update', this.validate.bind(this), function(req, res) {
+    this.router.post('/images/update', function(req, res) {
       
       // Check for id
       if(req.body.id) {
