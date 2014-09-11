@@ -1,11 +1,11 @@
 #!/bin/sh
 
 # Interactive version
-././AppPolaroid \
+./../AppPolaroid \
     -x 130 -y 115 -f infile.png \
     -r 0.0 -g 0.0 -b 0.0 \
-    -n "USERNAME" -s 36 -t 42 -w 10 \
-    -h "#TOPSHOPWINDOW" -i 36 -j 221 \
+    -n "USERNAME" -s 66 -t 37 -w 13 \
+    -h "#TOPSHOPWINDOW" -i 63 -j 226 \
     -a 180 -c ./../data/assets/polaroid_overlay_small_for_interaction.png \
     -o out.png
 

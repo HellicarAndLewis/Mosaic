@@ -188,8 +188,7 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  int r = 0;
-  std::string watch_dir;
+
 
 #if defined(APP_GRID_LEFT)   /* left screen, scrolls to the right */
 
@@ -205,14 +204,26 @@ int main() {
   cfg.direction = grid::SIMPLE_GRID_DIRECTION_RIGHT;
   cfg.watch_dir = top::config.raw_left_grid_filepath;
   cfg.image_dir = top::config.left_grid_filepath;
-  
-  RX_VERBOSE("%d %d", cfg.img_width, cfg.img_height);
-  RX_VERBOSE("cols: %d, %d", cfg.cols, cfg.rows);
-  top::GridAppSimple app;
 
 #elif defined(APP_GRID_RIGHT)
 
+  grid::SimpleSettings cfg;
+  cfg.img_width = top::config.grid_file_width;
+  cfg.img_height = top::config.grid_file_height;
+  cfg.rows = top::config.grid_rows;
+  cfg.cols = top::config.grid_cols;
+  cfg.padding_x = top::config.grid_padding_x;
+  cfg.padding_y = top::config.grid_padding_y;
+  cfg.offset_x = top::config.left_grid_x;
+  cfg.offset_y = top::config.left_grid_y;
+  cfg.direction = grid::SIMPLE_GRID_DIRECTION_LEFT;
+  cfg.watch_dir = top::config.raw_right_grid_filepath;
+  cfg.image_dir = top::config.right_grid_filepath;
+
 #endif
+
+  int r = 0;
+  top::GridAppSimple app;
 
   r = app.init(cfg);
   if (0 != r) {

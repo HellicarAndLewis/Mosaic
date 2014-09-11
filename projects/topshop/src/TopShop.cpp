@@ -44,8 +44,8 @@ namespace top {
     cfg.tile_height = 568;
     cfg.tile_nlayers = 10;
 #else
-    cfg.tile_width = 190; 
-    cfg.tile_height = 223; 
+    cfg.tile_width = 255; 
+    cfg.tile_height = 255; 
     cfg.tile_nlayers = 150;
 #endif
 

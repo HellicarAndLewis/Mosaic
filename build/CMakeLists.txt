@@ -5,6 +5,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/../extern/video_capture/build/CMakeLists.txt)
 include(${CMAKE_CURRENT_LIST_DIR}/Triplet.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../extern/tracker/build/CMakeLists.txt)
 
+option(USE_SIMPLE_GRID "Use simple grid animation" ON)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
@@ -202,17 +204,35 @@ add_executable(AppMosaic ${ts_sd}/app_mosaic.cpp  ${extern_source_dir}/glad.c)
 target_link_libraries(AppMosaic ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
 install(TARGETS AppMosaic DESTINATION bin)
 
-# The left grid application
-add_executable(AppGridLeft ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
-set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
-target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppGridLeft DESTINATION bin)
+if(USE_SIMPLE_GRID)
 
-# The right grid application
-add_executable(AppGridRight ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
-set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
-target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppGridRight DESTINATION bin)
+  # The "simple" left grid application
+  add_executable(AppGridLeft ${ts_sd}/app_simple_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
+  target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridLeft DESTINATION bin)
+
+  # The "simple" right grid application
+  add_executable(AppGridRight ${ts_sd}/app_simple_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
+  target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridRight DESTINATION bin)
+
+else()
+
+  # The left grid application
+  add_executable(AppGridLeft ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
+  target_link_libraries(AppGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridLeft DESTINATION bin)
+
+  # The right grid application
+  add_executable(AppGridRight ${ts_sd}/app_grid.cpp  ${extern_source_dir}/glad.c)
+  set_target_properties (AppGridRight PROPERTIES COMPILE_DEFINITIONS "APP_GRID_RIGHT")
+  target_link_libraries(AppGridRight ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
+  install(TARGETS AppGridRight DESTINATION bin)
+
+endif()
 
 # The image processor (can be used when left/right apps are not used)
 add_executable(AppImageProcessor ${ts_sd}/app_image_processor.cpp)
@@ -224,11 +244,10 @@ add_executable(AppPolaroid ${bd}/projects/polaroid/main.cpp)
 target_link_libraries(AppPolaroid ${app_libs})
 install(TARGETS AppPolaroid DESTINATION bin)
 
-# The "simple" left grid application
-add_executable(AppSimpleGridLeft ${ts_sd}/app_simple_grid.cpp  ${extern_source_dir}/glad.c)
-set_target_properties (AppSimpleGridLeft PROPERTIES COMPILE_DEFINITIONS "APP_GRID_LEFT")
-target_link_libraries(AppSimpleGridLeft ${app_libs} gfx fex vid mosaic grid videocapture shop tracking tracker)
-install(TARGETS AppSimpleGridLeft DESTINATION bin)
+# The json generator that can be used to generate fake json meta data for a complete directory
+add_executable(AppMetaData ${bd}/projects/metadata/main.cpp)
+target_link_libraries(AppMetaData ${app_libs})
+install(TARGETS AppMetaData DESTINATION bin)
 
 
 # The tests used during development
@@ -241,7 +260,7 @@ install(TARGETS AppSimpleGridLeft DESTINATION bin)
 #create_test(async_upload)
 #create_test(image_loader)
 #create_test(grid)
-create_test(simple_grid)
+#create_test(simple_grid)
 #create_test(png_rgba)
 #create_test(ogg_player)
 #create_test(tracker)
