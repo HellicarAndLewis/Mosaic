@@ -125,9 +125,10 @@ namespace top {
     remote_state.getRemoteSettings(remote_settings);
     top::config.is_debug_draw = (0 == remote_settings.show_mosaic) ? 1 : 0;
 
-
-    /* TEMPORARY SETTING DEBUG DRAW SO WE CAN TOGGLE BETWEEN MOSAIC OR VIDEO */
-    //top::config.is_debug_draw = 1; /* 0 = mosaic, 1 = video */
+    /* TEMPORARY WHEN BACKUP VIDEO IS PLAYING DO NOT SHOW MOSAIC */
+    if (MOS_VID_STATE_PLAYING != mosaic.video_input.getState()) {
+      top::config.is_debug_draw = 1; /* 0 = mosaic, 1 = video */
+    }
 
     /* only track when we're not showing the video. */
     if (0 == top::config.is_debug_draw) {

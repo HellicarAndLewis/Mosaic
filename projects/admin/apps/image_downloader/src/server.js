@@ -254,7 +254,7 @@ var ImageDownloader = new Class({
               // Valid size
               } else {
                 
-                Fs.outputJson(self.settings.image_json_path + img.media_id + '.json', {user:img.user,tags:img.tags}, function(err) {
+                Fs.outputJson(self.settings.image_json_path + img.media_id + '.json', {user:{username:img.user.username.substr(0,13)}}, function(err) {
                   
                   // Error
                   if(err || !Fs.existsSync(tmp_file)) {

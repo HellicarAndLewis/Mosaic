@@ -3,6 +3,10 @@
 
 #include <mosaic/Config.h>
 
+#define MOS_VID_STATE_NONE 0x00
+#define MOS_VID_STATE_CONNECTING 0x01
+#define MOS_VID_STATE_PLAYING 0x02
+
 #if USE_WEBCAM_AS_INPUT
 
 /* --------------------------------------------------------------------------------- */
@@ -13,6 +17,8 @@
 #include <gfx/FBO.h>
 
 namespace mos {
+
+
 
   class VideoInput {
 
@@ -81,6 +87,7 @@ namespace mos {
     
     void lock();
     void unlock();
+    int getState();
     
   public:
     int state;                                  /* used to keep track of the current state; and based on the state we show either a pre-recorded video or the live stream */
@@ -98,6 +105,14 @@ namespace mos {
     pthread_mutex_t mutex;
   };
   
+  inline int VideoInput::getState() {
+    int statecopy;
+    lock();
+      statecopy = state;
+    unlock();
+    return statecopy;
+  }
+
   inline GLuint VideoInput::texid() {
     return video_tex;
   }
