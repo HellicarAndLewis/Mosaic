@@ -157,6 +157,8 @@ int main() {
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
 
+  glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
   /* make sure the created window has the resolution we want it to be */
   glfwGetWindowSize(win, &used_w, &used_h);
   if (used_w != w || used_h != h) {
@@ -208,14 +210,10 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
       top::config.is_debug_draw = (1 == top::config.is_debug_draw) ? 0 : 1;
       break;
     }
-    case GLFW_KEY_L: {
-      break;
-    }
-    case GLFW_KEY_T: {
-      break;
-    }
-
-    case GLFW_KEY_3: {
+    case GLFW_KEY_M: {
+      static bool show = false;
+      glfwSetInputMode(win, GLFW_CURSOR, (show) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+      show = !show;
       break;
     }
     case GLFW_KEY_ESCAPE: {

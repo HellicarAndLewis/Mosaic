@@ -173,6 +173,8 @@ int main() {
   // THIS IS WHERE YOU START CALLING OPENGL FUNCTIONS, NOT EARLIER!!
   // ----------------------------------------------------------------
 
+  glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
   const GLubyte* renderer = glGetString(GL_RENDERER);
   if (NULL == renderer) {
     RX_ERROR("Cannot get the renderer type: %s", renderer);
@@ -287,6 +289,12 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods) 
   }
  
   switch(key) {
+    case GLFW_KEY_M: {
+      static bool show = false;
+      glfwSetInputMode(win, GLFW_CURSOR, (show) ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+      show = !show;
+      break;
+    }
     case GLFW_KEY_ESCAPE: {
       glfwSetWindowShouldClose(win, GL_TRUE);
       break;
