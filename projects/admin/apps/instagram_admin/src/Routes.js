@@ -179,7 +179,7 @@ var Admin = new Class({
         if(req.body.username == self.app.options.admin.username 
            && req.body.password == self.app.options.admin.password) {
 
-          self.app.iaid = ObjectID();
+          self.app.iaid = ObjectID().toString();
           res.redirect('/admin/tags'); 
 
         } else {
